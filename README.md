@@ -30,6 +30,7 @@ Return Stage
 	Python-Twilio (Optional, for mobile.)
 
 ## Quickstart
+
 1. Add Django Rest Framework’s Token Authentication to your Django Rest Framework project.
 
 	REST_FRAMEWORK = {
@@ -85,6 +86,7 @@ A 6 digit callback token will be sent to the contact point.
 		> {"token":"76be2d9ecfaf5fa4226d722bzdd8a4fff207ed0e”}
 
 ### Configuring Emails
+
 Specify the email address you’d like to send the callback token from with the `PASSWORDLESS_EMAIL_NOREPLY_ADDRESS` setting.
 
 You’ll also need to set up an SMTP server to send emails ([See Django Docs](https://docs.djangoproject.com/en/1.10/topics/email/)), but for development you can set up a dummy development smtp server to test emails. Sent emails will print to the console. [Read more here.](https://docs.djangoproject.com/en/1.10/topics/email/#configuring-email-for-development)
