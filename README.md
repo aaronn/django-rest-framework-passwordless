@@ -66,9 +66,9 @@ And run `manage.py migrate`.
 
 4. Add an email or mobile number field to your User model. By default drfpasswordless looks for fields named `email` or `mobile` on the User model. If an alias provided doesn’t belong to any given user, a new user is created.
 
-  4a. If you’re using `email`, see the Configuring Email section below.
+    4a. If you’re using `email`, see the Configuring Email section below.
 
-  4b. If you’re using `mobile`, see the Configuring Email section below.
+    4b. If you’re using `mobile`, see the Configuring Email section below.
 
 5. You can now POST to either of the endpoints:
 
