@@ -24,10 +24,10 @@ Return Stage
 
 ## Requirements
 
-		Python 3
-    Django
-		Django Rest Framework + AuthToken
-		Python-Twilio (Optional, for mobile.)
+	Python 3
+	Django
+	Django Rest Framework + AuthToken
+	Python-Twilio (Optional, for mobile.)
 
 ## Quickstart
 Add Django Rest Framework’s Token Authentication to your Django Rest Framework project.
