@@ -33,35 +33,33 @@ Return Stage
 
 1. Add Django Rest Framework’s Token Authentication to your Django Rest Framework project.
 
-	REST_FRAMEWORK = {
-			'DEFAULT_AUTHENTICATION_CLASSES': (
-			//…
-	   'rest_framework.authentication.TokenAuthentication',
-	    ),
-	}
+		REST_FRAMEWORK = {
+			'DEFAULT_AUTHENTICATION_CLASSES': 		
+           ('rest_framework.authentication.TokenAuthentication',
+        )}
 
-	INSTALLED_APPS = [
-    …
-    'rest_framework.authtoken',
-    …
-	]
+		INSTALLED_APPS = [
+	   		// …
+            'rest_framework',
+            'rest_framework.authtoken',
+		]
 
 And run `manage.py migrate`.
 
 2. Set which types of contact points are allowed for auth in your Settings.py. The available options are `EMAIL` and `MOBILE`.
 
 		PASSWORDLESS_AUTH = {
-	    //…
-	    ‘PASSWORDLESS_AUTH_TYPES’: [‘EMAIL’, ‘MOBILE’],
-	    //…
+		    //…
+		    ‘PASSWORDLESS_AUTH_TYPES’: [‘EMAIL’, ‘MOBILE’],
+		    //…
 		}
 
 3. Add `drfpasswordless.urls` to your urls.py
 
 		urlpatterns = [
-		//..
-		url(r'^', include('drfpasswordless.urls')),
-		//..
+			//..
+			url(r'^', include('drfpasswordless.urls')),
+			//..
 		]
 
 4. Add an email or mobile number field to your User model. By default drfpasswordless looks for fields named `email` or `mobile` on the User model. If an alias provided doesn’t belong to any given user, a new user is created.
@@ -133,46 +131,46 @@ This can be turned off with the `PASSWORDLESS_REGISTER_NEW_USERS` setting.
 Here’s a full list of the configurable defaults.
 
 	DEFAULTS = {
-    # Allowed auth types, can be EMAIL, MOBILE, or both.
-    'PASSWORDLESS_AUTH_TYPES': ['EMAIL'],
+      # Allowed auth types, can be EMAIL, MOBILE, or both.
+      'PASSWORDLESS_AUTH_TYPES': ['EMAIL'],
 
-    # Amount of time that tokens last, in seconds
-    'PASSWORDLESS_TOKEN_EXPIRE_TIME': 15 * 60,
+      # Amount of time that tokens last, in seconds
+      'PASSWORDLESS_TOKEN_EXPIRE_TIME': 15 * 60,
 
-    # The user's email field name
-    'PASSWORDLESS_USER_EMAIL_FIELD_NAME': 'email',
+      # The user's email field name
+      'PASSWORDLESS_USER_EMAIL_FIELD_NAME': 'email',
 
-    # The user's mobile field name
-    'PASSWORDLESS_USER_MOBILE_FIELD_NAME': 'mobile',
+      # The user's mobile field name
+      'PASSWORDLESS_USER_MOBILE_FIELD_NAME': 'mobile',
 
-    # Marks itself as verified the first time a user completes auth via token.
-    # Automatically unmarks itself if email is changed.
-    'PASSWORDLESS_USER_MARK_VERIFIED_EMAIL': False,
-    'PASSWORDLESS_USER_EMAIL_VERIFIED_FIELD_NAME': 'email_verified',
+      # Marks itself as verified the first time a user completes auth via token.
+      # Automatically unmarks itself if email is changed.
+      'PASSWORDLESS_USER_MARK_VERIFIED_EMAIL': False,
+      'PASSWORDLESS_USER_EMAIL_VERIFIED_FIELD_NAME': 'email_verified',
 
-    # Marks itself as verified the first time a user completes auth via token.
-    # Automatically unmarks itself if mobile number is changed.
-    'PASSWORDLESS_USER_MARK_VERIFIED_MOBILE': False,
-    'PASSWORDLESS_USER_MOBILE_VERIFIED_FIELD_NAME': 'mobile_verified',
+      # Marks itself as verified the first time a user completes auth via token.
+      # Automatically unmarks itself if mobile number is changed.
+      'PASSWORDLESS_USER_MARK_VERIFIED_MOBILE': False,
+      'PASSWORDLESS_USER_MOBILE_VERIFIED_FIELD_NAME': 'mobile_verified',
 
-    # The email the callback token is sent from
-    'PASSWORDLESS_EMAIL_NOREPLY_ADDRESS': None,
+      # The email the callback token is sent from
+      'PASSWORDLESS_EMAIL_NOREPLY_ADDRESS': None,
 
-    # The email subject
-    'PASSWORDLESS_EMAIL_SUBJECT': "Your Login Token",
+      # The email subject
+      'PASSWORDLESS_EMAIL_SUBJECT': "Your Login Token",
 
-    # A plaintext email message overridden by the html message. Takes one string.
-    'PASSWORDLESS_EMAIL_PLAINTEXT_MESSAGE': "Enter this token to sign in: %s",
+      # A plaintext email message overridden by the html message. Takes one string.
+      'PASSWORDLESS_EMAIL_PLAINTEXT_MESSAGE': "Enter this token to sign in: %s",
 
-    # The email template name.
-    'PASSWORDLESS_EMAIL_TOKEN_HTML_TEMPLATE_NAME': "passwordless_default_token_email.html",
+      # The email template name.
+      'PASSWORDLESS_EMAIL_TOKEN_HTML_TEMPLATE_NAME': "passwordless_default_token_email.html",
 
-    # The SMS sent to mobile users logging in. Takes one string.
-    'PASSWORDLESS_MOBILE_MESSAGE': "Use this code to log in: %s"
+      # The SMS sent to mobile users logging in. Takes one string.
+      'PASSWORDLESS_MOBILE_MESSAGE': "Use this code to log in: %s"
 
-    # Registers previously unseen aliases as new users.
-    'PASSWORDLESS_REGISTER_NEW_USERS': True
-		}
+      # Registers previously unseen aliases as new users.
+      'PASSWORDLESS_REGISTER_NEW_USERS': True
+	}
 
 
 ### Todo
