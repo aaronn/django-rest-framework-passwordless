@@ -23,12 +23,13 @@ def authenticate_by_token(callback_token):
             # If our token is invalid, take away our token.
             token = None
 
-        if token != None:
+        if token is not None:
             # Our token becomes used now that it's passing through the authentication pipeline.
             token.is_active = False
             token.save()
 
-            if api_settings.PASSWORDLESS_USER_MARK_VERIFIED_EMAIL or api_settings.PASSWORDLESS_USER_MARK_VERIFIED_MOBILE:
+            if api_settings.PASSWORDLESS_USER_MARK_VERIFIED_EMAIL \
+                    or api_settings.PASSWORDLESS_USER_MARK_VERIFIED_MOBILE:
                 # Mark this alias as verified
                 user = User.objects.get(pk=token.user.pk)
                 verify_user_alias(user, token)
@@ -50,12 +51,16 @@ def create_callback_token_for_user(user, token_type):
     token_type = token_type.upper()
 
     if token_type == 'EMAIL':
-        token = CallbackToken.objects.create(user=user, to_alias_type=token_type, to_alias=getattr(user, api_settings.PASSWORDLESS_USER_EMAIL_FIELD_NAME))
+        token = CallbackToken.objects.create(user=user,
+                                             to_alias_type=token_type,
+                                             to_alias=getattr(user, api_settings.PASSWORDLESS_USER_EMAIL_FIELD_NAME))
 
     elif token_type == 'MOBILE':
-        token = CallbackToken.objects.create(user=user, to_alias_type=token_type, to_alias=getattr(user, api_settings.PASSWORDLESS_USER_MOBILE_FIELD_NAME))
+        token = CallbackToken.objects.create(user=user,
+                                             to_alias_type=token_type,
+                                             to_alias=getattr(user, api_settings.PASSWORDLESS_USER_MOBILE_FIELD_NAME))
 
-    if token != None:
+    if token is not None:
         return token
 
     return None
@@ -122,7 +127,8 @@ def send_email_with_callback_token(user, email_token):
 
     except Exception as e:
         log.debug("Failed to send login email to user: %d."
-                  "Possibly no email on user object. Email entered was %s" % (user.id, getattr(user, api_settings.PASSWORDLESS_USER_EMAIL_FIELD_NAME)))
+                  "Possibly no email on user object. Email entered was %s" %
+                  (user.id, getattr(user, api_settings.PASSWORDLESS_USER_EMAIL_FIELD_NAME)))
         log.debug(e)
         return False
 

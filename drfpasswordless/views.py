@@ -108,7 +108,7 @@ class AbstractBaseObtainAuthToken(APIView):
                 return Response({'token': token.key})
         else:
             log.error(
-                "Couldn't log in unknown user. Errors on serializer: %s" % (serializer.error_messages))
+                "Couldn't log in unknown user. Errors on serializer: %s" % (serializer.error_messages, ))
         return Response({'detail': 'Couldn\'t log you in. Try again later.'})
 
 

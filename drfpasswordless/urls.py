@@ -1,6 +1,5 @@
 from django.conf.urls import url
 from rest_framework.urlpatterns import format_suffix_patterns
-from .settings import api_settings
 from .views import ObtainEmailCallbackToken, ObtainMobileCallbackToken, ObtainAuthTokenFromCallbackToken
 
 # The URL a user posts a 6 digit token to to get their auth token.
