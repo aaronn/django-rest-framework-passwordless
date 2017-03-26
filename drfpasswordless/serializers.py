@@ -20,6 +20,7 @@ class TokenField(serializers.CharField):
                               'max_length': _('Tokens are {max_length} digits long.'),
                               'min_length': _('Tokens are {min_length} digits long.')}
 
+
 """
 Serializers
 """
@@ -43,7 +44,7 @@ class AbstractBaseAliasAuthenticationSerializer(serializers.Serializer):
             # Return a token for them to log in
             # Consider moving this into somewhere else. Serializer should only serialize.
 
-            if api_settings.PASSWORDLESS_REGISTER_NEW_USERS:
+            if api_settings.PASSWORDLESS_REGISTER_NEW_USERS is True:
                 # If new aliases should register new users.
                 user, created = User.objects.get_or_create(**{self.alias_type: alias})
             else:

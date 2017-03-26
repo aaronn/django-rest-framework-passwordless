@@ -5,4 +5,4 @@ class DrfpasswordlessConfig(AppConfig):
     name = 'drfpasswordless'
 
     def ready(self):
-        import drfpasswordless.signals
+        import drfpasswordless.signals  # NOQA

@@ -1,4 +1,3 @@
-import sys
 from django.conf import settings
 from rest_framework.settings import APISettings
 
@@ -20,12 +19,12 @@ DEFAULTS = {
 
     # Marks itself as verified the first time a user completes auth via token.
     # Automatically unmarks itself if email is changed.
-    'PASSWORDLESS_USER_MARK_VERIFIED_EMAIL': False,
+    'PASSWORDLESS_USER_MARK_EMAIL_VERIFIED': False,
     'PASSWORDLESS_USER_EMAIL_VERIFIED_FIELD_NAME': 'email_verified',
 
     # Marks itself as verified the first time a user completes auth via token.
     # Automatically unmarks itself if mobile number is changed.
-    'PASSWORDLESS_USER_MARK_VERIFIED_MOBILE': False,
+    'PASSWORDLESS_USER_MARK_MOBILE_VERIFIED': False,
     'PASSWORDLESS_USER_MOBILE_VERIFIED_FIELD_NAME': 'mobile_verified',
 
     # The email the callback token is sent from
@@ -47,7 +46,10 @@ DEFAULTS = {
     'PASSWORDLESS_MOBILE_MESSAGE': "Use this code to log in: %s",
 
     # Registers previously unseen aliases as new users.
-    'PASSWORDLESS_REGISTER_NEW_USERS': True
+    'PASSWORDLESS_REGISTER_NEW_USERS': True,
+
+    # Suppresses actual SMS for testing
+    'PASSWORDLESS_TEST_SUPPRESSION': False
 }
 
 # List of settings that may be in string import notation.

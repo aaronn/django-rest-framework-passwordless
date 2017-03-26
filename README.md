@@ -120,7 +120,7 @@ The template renders a single variable `{{ callback_token }}` which is the 6 dig
 ## Contact Point Validation
 Endpoints can automatically mark themselves as validated when a user logs in with a token sent to a specific endpoint. They can also automatically mark themselves as invalid when a user changes a contact point.
 
-This is off by default but can be turned on with `PASSWORDLESS_USER_MARK_VERIFIED_EMAIL` or `PASSWORDLESS_USER_MARK_VERIFIED_MOBILE`. By default when these are enabled they look for the User model fields `email_verified` or `mobile_verified`.
+This is off by default but can be turned on with `PASSWORDLESS_USER_MARK_EMAIL_VERIFIED` or `PASSWORDLESS_USER_MARK_MOBILE_VERIFIED`. By default when these are enabled they look for the User model fields `email_verified` or `mobile_verified`.
 
 ## Registration
 all unrecognized emails and mobile numbers create new accounts by default. New accounts are automatically set with `set_unusable_password()` but it’s recommended that admins have some type of password.
@@ -145,12 +145,12 @@ Here’s a full list of the configurable defaults.
 
       # Marks itself as verified the first time a user completes auth via token.
       # Automatically unmarks itself if email is changed.
-      'PASSWORDLESS_USER_MARK_VERIFIED_EMAIL': False,
+      'PASSWORDLESS_USER_MARK_EMAIL_VERIFIED': False,
       'PASSWORDLESS_USER_EMAIL_VERIFIED_FIELD_NAME': 'email_verified',
 
       # Marks itself as verified the first time a user completes auth via token.
       # Automatically unmarks itself if mobile number is changed.
-      'PASSWORDLESS_USER_MARK_VERIFIED_MOBILE': False,
+      'PASSWORDLESS_USER_MARK_MOBILE_VERIFIED': False,
       'PASSWORDLESS_USER_MOBILE_VERIFIED_FIELD_NAME': 'mobile_verified',
 
       # The email the callback token is sent from
@@ -166,10 +166,13 @@ Here’s a full list of the configurable defaults.
       'PASSWORDLESS_EMAIL_TOKEN_HTML_TEMPLATE_NAME': "passwordless_default_token_email.html",
 
       # The SMS sent to mobile users logging in. Takes one string.
-      'PASSWORDLESS_MOBILE_MESSAGE': "Use this code to log in: %s"
+      'PASSWORDLESS_MOBILE_MESSAGE': "Use this code to log in: %s",
 
       # Registers previously unseen aliases as new users.
-      'PASSWORDLESS_REGISTER_NEW_USERS': True
+      'PASSWORDLESS_REGISTER_NEW_USERS': True,
+
+      # Suppresses actual SMS for testing
+      'PASSWORDLESS_TEST_SUPPRESSION': False
 	}
 
 
@@ -177,3 +180,4 @@ Here’s a full list of the configurable defaults.
 - Support non-US mobile numbers
 - Tests
 - Custom URLs
+- Change bad settings to 500's

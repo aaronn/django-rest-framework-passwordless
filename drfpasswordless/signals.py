@@ -44,7 +44,7 @@ def update_alias_verification(sender, instance, **kwargs):
         if instance.id:
             user_old = User.objects.get(id=instance.id)  # Pre-save object
 
-            if api_settings.PASSWORDLESS_USER_MARK_VERIFIED_EMAIL:
+            if api_settings.PASSWORDLESS_USER_MARK_EMAIL_VERIFIED is True:
                 """
                 For marking email aliases as not verified when a user changes it.
                 """
@@ -65,7 +65,7 @@ def update_alias_verification(sender, instance, **kwargs):
                     # User probably is just initially being created
                     setattr(instance, email_verified_field, True)
 
-            if api_settings.PASSWORDLESS_USER_MARK_VERIFIED_MOBILE:
+            if api_settings.PASSWORDLESS_USER_MARK_MOBILE_VERIFIED is True:
                 """
                 For marking mobile aliases as not verified when a user changes it.
                 """

@@ -38,7 +38,7 @@ class AbstractBaseObtainCallbackToken(APIView):
         raise NotImplementedError
 
     def post(self, request, *args, **kwargs):
-        if self.alias_type not in api_settings.PASSWORDLESS_AUTH_TYPES:
+        if self.alias_type.upper() not in api_settings.PASSWORDLESS_AUTH_TYPES:
             # Only allow auth types allowed in settings.
             return Response(status=status.HTTP_404_NOT_FOUND)
 

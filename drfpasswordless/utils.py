@@ -1,7 +1,6 @@
 import logging
 import os
 from django.contrib.auth import get_user_model
-from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.core.mail import send_mail
 from django.template import loader
@@ -26,21 +25,23 @@ def authenticate_by_token(callback_token):
         if token is not None:
             # Our token becomes used now that it's passing through the authentication pipeline.
             token.is_active = False
-            token.save()
 
-            if api_settings.PASSWORDLESS_USER_MARK_VERIFIED_EMAIL \
-                    or api_settings.PASSWORDLESS_USER_MARK_VERIFIED_MOBILE:
+            if api_settings.PASSWORDLESS_USER_MARK_EMAIL_VERIFIED \
+                    or api_settings.PASSWORDLESS_USER_MARK_MOBILE_VERIFIED:
                 # Mark this alias as verified
-                user = User.objects.get(pk=token.user.pk)
-                verify_user_alias(user, token)
+                user = verify_user_alias(User.objects.get(pk=token.user.pk), token)
+                token.user = user
 
             # Returning a user designates a successful authentication.
+            token.save()
             return token.user
 
     except CallbackToken.DoesNotExist:
-        pass
+        log.debug("drfpasswordless: Challenged with a callback token that doesn't exist.")
+    except User.DoesNotExist:
+        log.debug("drfpasswordless: Authenticated user somehow doesn't exist.")
     except PermissionDenied:
-        pass
+        log.debug("drfpasswordless: Permission denied while authenticating.")
 
     return None
 
@@ -70,7 +71,7 @@ def validate_token_age(token):
     """
     Returns True if a given token is within the age expiration limit.
     """
-    seconds = (timezone.now()-token.created_at).total_seconds()
+    seconds = (timezone.now() - token.created_at).total_seconds()
     token_expiry_time = api_settings.PASSWORDLESS_TOKEN_EXPIRE_TIME
 
     if seconds <= token_expiry_time:
@@ -98,7 +99,7 @@ def verify_user_alias(user, token):
     return user
 
 
-def send_email_with_callback_token(user, email_token):
+def send_email_with_callback_token(self, user, email_token):
     """
     Sends a SMS to user.mobile.
 
@@ -107,6 +108,8 @@ def send_email_with_callback_token(user, email_token):
 
     try:
         if api_settings.PASSWORDLESS_EMAIL_NOREPLY_ADDRESS:
+            # Make sure we have a sending address before sending.
+
             html_message = loader.render_to_string(
                 api_settings.PASSWORDLESS_EMAIL_TOKEN_HTML_TEMPLATE_NAME,
                 {'callback_token': email_token.key, }
@@ -133,7 +136,7 @@ def send_email_with_callback_token(user, email_token):
         return False
 
 
-def send_sms_with_callback_token(user, mobile_token):
+def send_sms_with_callback_token(self, user, mobile_token):
     """
     Sends a SMS to user.mobile via Twilio.
 
@@ -142,19 +145,24 @@ def send_sms_with_callback_token(user, mobile_token):
     base_string = api_settings.PASSWORDLESS_MOBILE_MESSAGE
 
     try:
-        if hasattr(settings, 'TEST'):
-            # If TEST = True in settings, we assume success to prevent spamming SMS during testing.
-            if settings.TEST is True:
+
+        if api_settings.PASSWORDLESS_MOBILE_NOREPLY_NUMBER:
+            # We need a sending number to send properly
+            if api_settings.PASSWORDLESS_TEST_SUPPRESSION is True:
+                # we assume success to prevent spamming SMS during testing.
                 return True
 
-        from twilio.rest import TwilioRestClient
-        twilio_client = TwilioRestClient(os.environ['TWILIO_ACCOUNT_SID'], os.environ['TWILIO_AUTH_TOKEN'])
-        twilio_client.messages.create(
-            body=base_string % mobile_token.key,
-            to=getattr(user, api_settings.PASSWORDLESS_USER_MOBILE_FIELD_NAME),
-            from_=os.environ['PASSWORDLESS_MOBILE_NOREPLY_NUMBER']
-        )
-        return True
+            from twilio.rest import TwilioRestClient
+            twilio_client = TwilioRestClient(os.environ['TWILIO_ACCOUNT_SID'], os.environ['TWILIO_AUTH_TOKEN'])
+            twilio_client.messages.create(
+                body=base_string % mobile_token.key,
+                to=getattr(user, api_settings.PASSWORDLESS_USER_MOBILE_FIELD_NAME),
+                from_=api_settings.PASSWORDLESS_MOBILE_NOREPLY_NUMBER
+            )
+            return True
+        else:
+            log.debug("Failed to send login sms. Missing PASSWORDLESS_MOBILE_NOREPLY_NUMBER.")
+            return False
     except ImportError:
         log.debug("Couldn't import Twilio client. Is twilio installed?")
         return False
