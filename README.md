@@ -178,6 +178,5 @@ Here’s a full list of the configurable defaults.
 
 ### Todo
 - Support non-US mobile numbers
-- Tests
 - Custom URLs
 - Change bad settings to 500's
