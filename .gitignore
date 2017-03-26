@@ -3,6 +3,7 @@
 *~
 .*
 .idea/
+.cache/
 
 html/
 htmlcov/
