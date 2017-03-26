@@ -1,6 +1,7 @@
 .. image:: https://travis-ci.org/aaronn/django-rest-framework-passwordless.svg?branch=master
     :target: https://travis-ci.org/aaronn/django-rest-framework-passwordless
 
+
 drfpasswordless is a quick way to integrate ‘passwordless’ auth into
 your Django Rest Framework project using a user’s email address or
 mobile number only (herein referred to as an alias).
