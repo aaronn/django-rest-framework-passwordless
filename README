@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/aaronn/django-rest-framework-passwordless.svg?branch=master)](https://travis-ci.org/aaronn/django-rest-framework-passwordless)
+
 drfpasswordless is a quick way to integrate ‘passwordless’ auth into your Django Rest Framework project using a user’s email address or mobile number only (herein referred to as an alias).
 
 Built to work with DRF’s own TokenAuthentication system, it sends the user a 6-digit callback token to a given email address or a mobile number. The user sends it back correctly and they’re given an authentication token (again, provided by Django Rest Framework’s TokenAuthentication system).
