@@ -43,21 +43,22 @@ Requirements
 
 ::
 
-- Python 3 (2.7, 3.3, 3.4, 3.5, 3.6+)
+- Python (2.7, 3.4, 3.5, 3.6+)
 - Django (1.8, 1.9, 1.10+)
 - Django Rest Framework + AuthToken (3.1, 3.2, 3.3, 3.4, 3.5, 3.6+)
 - Python-Twilio (Optional, for mobile.)
 
-Installation
+Install
 ==========
+
 1. Install drfpasswordless
 
    ::
 
-      pip3 install drfpasswordless
+      pip install drfpasswordless
 
 
-2. Add drfpasswordless and Django Rest Framework’s Token Authentication app to your Django Rest
+2. Add Django Rest Framework’s Token Authentication to your Django Rest
    Framework project.
 
    ::
@@ -74,16 +75,10 @@ Installation
            'drfpasswordless',
        ]
 
-And run ``manage.py migrate``.
+   And run ``manage.py migrate``.
 
 3. Set which types of contact points are allowed for auth in your
    Settings.py. The available options are ``EMAIL`` and ``MOBILE``.
-
-   3a. If you’re using ``email``, see the Configuring Email section
-   below.
-
-   3b. If you’re using ``mobile``, see the Configuring Email section
-   below.
 
    ::
 
@@ -92,6 +87,16 @@ And run ``manage.py migrate``.
            ‘PASSWORDLESS_AUTH_TYPES’: [‘EMAIL’, ‘MOBILE’],
            //…
        }
+
+   By default drfpasswordless looks for fields named ``email`` or ``mobile``
+   on the User model. If an alias provided doesn’t belong to any given user,
+   a new user is created.
+
+   3a. If you’re using ``email``, see the Configuring Email section
+   below.
+
+   3b. If you’re using ``mobile``, see the Configuring Email section
+   below.
 
 4. Add ``drfpasswordless.urls`` to your urls.py
 
@@ -103,13 +108,8 @@ And run ``manage.py migrate``.
            //..
        ]
 
-5. Add an email or mobile number field to your User model. By default
-   drfpasswordless looks for fields named ``email`` or ``mobile`` on the
-   User model. If an alias provided doesn’t belong to any given user, a
-   new user is created.
 
-
-6. You can now POST to either of the endpoints:
+5. You can now POST to either of the endpoints:
 
    ::
 
@@ -117,9 +117,9 @@ And run ``manage.py migrate``.
 
        curl -X POST -d "mobile=+15552143912" localhost:8000/mobile/
 
-A 6 digit callback token will be sent to the contact point.
+   A 6 digit callback token will be sent to the contact point.
 
-7. The client has 15 minutes to use the 6 digit callback token
+6. The client has 15 minutes to use the 6 digit callback token
    correctly. If successful, they get an authorization token in exchange
    which the client can then use with Django Rest Framework’s
    TokenAuthentication scheme.
@@ -204,7 +204,7 @@ enabled they look for the User model fields ``email_verified`` or
 Registration
 ============
 
-all unrecognized emails and mobile numbers create new accounts by
+All unrecognized emails and mobile numbers create new accounts by
 default. New accounts are automatically set with
 ``set_unusable_password()`` but it’s recommended that admins have some
 type of password.
@@ -221,7 +221,7 @@ Here’s a full list of the configurable defaults.
 
     DEFAULTS = {
       # Allowed auth types, can be EMAIL, MOBILE, or both.
-      'PASSWORDLESS_AUTH_TYPES': ['EMAIL'],
+      'PASSWORDLESS_AUTH_TYPES': [],
 
       # Amount of time that tokens last, in seconds
       'PASSWORDLESS_TOKEN_EXPIRE_TIME': 15 * 60,
