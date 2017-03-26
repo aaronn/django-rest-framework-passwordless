@@ -1,5 +1,9 @@
 # Wheel for PyPI installs.
-wheel==0.24.0
+wheel==0.29.0
 
 # Twine for secured PyPI uploads.
 twine==1.8.1
+
+# For keeping markdown instead of rst
+pandoc==1.0.0b2
+setuptools-markdown==0.2
