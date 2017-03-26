@@ -91,6 +91,7 @@ setup(
     author_email=author_email,
     packages=get_packages(package),
     package_data=get_package_data(package),
+    include_package_data=True,
     install_requires=install_requires,
     classifiers=[
         'Development Status :: 5 - Production/Stable',
