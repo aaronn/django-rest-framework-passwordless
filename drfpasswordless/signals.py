@@ -41,8 +41,8 @@ def update_alias_verification(sender, instance, **kwargs):
     Flags a user's email as unverified if they change it.
     """
     if isinstance(instance, User):
+
         if instance.id:
-            user_old = User.objects.get(id=instance.id)  # Pre-save object
 
             if api_settings.PASSWORDLESS_USER_MARK_EMAIL_VERIFIED is True:
                 """
@@ -53,7 +53,7 @@ def update_alias_verification(sender, instance, **kwargs):
 
                 # Verify that this is an existing instance and not a new one.
                 try:
-
+                    user_old = User.objects.get(id=instance.id)  # Pre-save object
                     instance_email = getattr(instance, email_field)  # Incoming Email
                     old_email = getattr(user_old, email_field)  # Pre-save object email
 
@@ -74,6 +74,7 @@ def update_alias_verification(sender, instance, **kwargs):
 
                 # Verify that this is an existing instance and not a new one.
                 try:
+                    user_old = User.objects.get(id=instance.id)  # Pre-save object
                     instance_mobile = getattr(instance, mobile_field)  # Incoming mobile
                     old_mobile = getattr(user_old, mobile_field)  # Pre-save object mobile
 
