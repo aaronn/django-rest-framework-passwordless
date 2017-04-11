@@ -101,7 +101,7 @@ def verify_user_alias(user, token):
 
 def send_email_with_callback_token(self, user, email_token):
     """
-    Sends a SMS to user.mobile.
+    Sends a Email to user.email.
 
     Passes silently without sending in test environment
     """
