@@ -49,12 +49,16 @@ DEFAULTS = {
     'PASSWORDLESS_REGISTER_NEW_USERS': True,
 
     # Suppresses actual SMS for testing
-    'PASSWORDLESS_TEST_SUPPRESSION': False
+    'PASSWORDLESS_TEST_SUPPRESSION': False,
+
+    # Context Processors for Email Template
+    'PASSWORDLESS_CONTEXT_PROCESSORS': [],
 }
 
 # List of settings that may be in string import notation.
 IMPORT_STRINGS = (
     'PASSWORDLESS_EMAIL_TOKEN_HTML_TEMPLATE',
+    'PASSWORDLESS_CONTEXT_PROCESSORS',
 )
 
 api_settings = APISettings(USER_SETTINGS, DEFAULTS, IMPORT_STRINGS)

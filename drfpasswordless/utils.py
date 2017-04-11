@@ -99,6 +99,15 @@ def verify_user_alias(user, token):
     return user
 
 
+def inject_template_context(context):
+    """
+    Injects additional context into email template.
+    """
+    for processor in api_settings.PASSWORDLESS_CONTEXT_PROCESSORS:
+        context.update(processor())
+    return context
+
+
 def send_email_with_callback_token(self, user, email_token):
     """
     Sends a SMS to user.mobile.
@@ -110,9 +119,12 @@ def send_email_with_callback_token(self, user, email_token):
         if api_settings.PASSWORDLESS_EMAIL_NOREPLY_ADDRESS:
             # Make sure we have a sending address before sending.
 
+            # Inject context if user specifies.
+            context = inject_template_context({'callback_token': email_token.key, })
+
             html_message = loader.render_to_string(
                 api_settings.PASSWORDLESS_EMAIL_TOKEN_HTML_TEMPLATE_NAME,
-                {'callback_token': email_token.key, }
+                context,
             )
             send_mail(
                 api_settings.PASSWORDLESS_EMAIL_SUBJECT,
