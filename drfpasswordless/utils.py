@@ -164,8 +164,8 @@ def send_sms_with_callback_token(self, user, mobile_token):
                 # we assume success to prevent spamming SMS during testing.
                 return True
 
-            from twilio.rest import TwilioRestClient
-            twilio_client = TwilioRestClient(os.environ['TWILIO_ACCOUNT_SID'], os.environ['TWILIO_AUTH_TOKEN'])
+            from twilio.rest import Client
+            twilio_client = Client(os.environ['TWILIO_ACCOUNT_SID'], os.environ['TWILIO_AUTH_TOKEN'])
             twilio_client.messages.create(
                 body=base_string % mobile_token.key,
                 to=getattr(user, api_settings.PASSWORDLESS_USER_MOBILE_FIELD_NAME),
