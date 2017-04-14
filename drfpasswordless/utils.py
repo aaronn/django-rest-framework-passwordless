@@ -183,7 +183,7 @@ def send_sms_with_callback_token(self, user, mobile_token):
                   "Did you set your Twilio account tokens and specify a PASSWORDLESS_MOBILE_NOREPLY_NUMBER?")
     except Exception as e:
         log.debug("Failed to send login SMS to user: %d. "
-                  "Possibly no mobile number on user object or django_twilio isn't set up yet. "
+                  "Possibly no mobile number on user object or the twilio package isn't set up yet. "
                   "Number entered was %s" % (user.id, getattr(user, api_settings.PASSWORDLESS_USER_MOBILE_FIELD_NAME)))
         log.debug(e)
         return False
