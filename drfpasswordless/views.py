@@ -163,7 +163,7 @@ class ObtainAuthTokenFromCallbackToken(AbstractBaseObtainAuthToken):
 
 class VerifyAliasFromCallbackToken(APIView):
     """
-    This verifies an alias on correct callback token entry using the same logic as auth. 
+    This verifies an alias on correct callback token entry using the same logic as auth.
     Should be refactored at some point.
     """
     throttle_classes = ()

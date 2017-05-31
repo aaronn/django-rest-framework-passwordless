@@ -166,7 +166,7 @@ class CallbackTokenVerificationSerializer(AbstractBaseCallbackTokenSerializer):
                 success = verify_user_alias(user, token)
                 if success is False:
                     log.debug("drfpasswordless: Error verifying alias.")
-                    
+
                 attrs['user'] = user
                 return attrs
             else:
