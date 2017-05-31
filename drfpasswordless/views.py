@@ -51,7 +51,7 @@ class AbstractBaseObtainCallbackToken(APIView):
             # Create callback token for sending alias type
             token = create_callback_token_for_user(user, self.alias_type)
             # Send to alias
-            success = self.send_action(user, token, self.message_payload)
+            success = self.send_action(user, token, **self.message_payload)
 
             # Respond With Success Or Failure of Sent
             if success:
