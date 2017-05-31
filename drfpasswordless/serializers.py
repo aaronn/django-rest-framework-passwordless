@@ -116,7 +116,7 @@ class CallbackTokenAuthSerializer(AbstractBaseCallbackTokenSerializer):
 
     def validate(self, attrs):
         callback_token = attrs.get('token', None)
-        
+
         token = CallbackToken.objects.get(key=callback_token, is_active=True)
 
         if token:
