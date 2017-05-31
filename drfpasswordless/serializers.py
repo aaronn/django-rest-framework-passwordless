@@ -131,7 +131,8 @@ class CallbackTokenAuthSerializer(AbstractBaseCallbackTokenSerializer):
                 if api_settings.PASSWORDLESS_USER_MARK_EMAIL_VERIFIED \
                         or api_settings.PASSWORDLESS_USER_MARK_MOBILE_VERIFIED:
                     # Mark this alias as verified
-                    success = verify_user_alias(User.objects.get(pk=token.user.pk), token)
+                    user = User.objects.get(pk=token.user.pk)
+                    success = verify_user_alias(user, token)
 
                     if success is False:
                         msg = _('Error validating user alias.')
