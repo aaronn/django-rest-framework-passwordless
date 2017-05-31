@@ -53,6 +53,19 @@ DEFAULTS = {
 
     # Context Processors for Email Template
     'PASSWORDLESS_CONTEXT_PROCESSORS': [],
+
+    # The verification email subject
+    'PASSWORDLESS_EMAIL_VERIFICATION_SUBJECT': "Your Verification Token",
+
+    # A plaintext verification email message overridden by the html message. Takes one string.
+    'PASSWORDLESS_EMAIL_VERIFICATION__PLAINTEXT_MESSAGE': "Enter this verification code: %s",
+
+    # The verification email template name.
+    'PASSWORDLESS_EMAIL_VERIFICATION_TOKEN_HTML_TEMPLATE_NAME': "passwordless_default_verification_token_email.html",
+
+    # The message sent to mobile users logging in. Takes one string.
+    'PASSWORDLESS_MOBILE_VERIFICATION_MESSAGE': "Enter this verification code: %s",
+
 }
 
 # List of settings that may be in string import notation.

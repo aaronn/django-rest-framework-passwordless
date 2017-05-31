@@ -17,24 +17,12 @@ def authenticate_by_token(callback_token):
     try:
         token = CallbackToken.objects.get(key=callback_token, is_active=True)
 
-        # Check Token Age
-        if validate_token_age(token) is False:
-            # If our token is invalid, take away our token.
-            token = None
+        # Returning a user designates a successful authentication.
+        token.user = User.objects.get(pk=token.user.pk)
+        token.is_active = False  # Mark this token as used.
+        token.save()
 
-        if token is not None:
-            # Our token becomes used now that it's passing through the authentication pipeline.
-            token.is_active = False
-
-            if api_settings.PASSWORDLESS_USER_MARK_EMAIL_VERIFIED \
-                    or api_settings.PASSWORDLESS_USER_MARK_MOBILE_VERIFIED:
-                # Mark this alias as verified
-                user = verify_user_alias(User.objects.get(pk=token.user.pk), token)
-                token.user = user
-
-            # Returning a user designates a successful authentication.
-            token.save()
-            return token.user
+        return token.user
 
     except CallbackToken.DoesNotExist:
         log.debug("drfpasswordless: Challenged with a callback token that doesn't exist.")
@@ -67,10 +55,11 @@ def create_callback_token_for_user(user, token_type):
     return None
 
 
-def validate_token_age(token):
+def validate_token_age(callback_token):
     """
     Returns True if a given token is within the age expiration limit.
     """
+    token = CallbackToken.objects.get(key=callback_token, is_active=True)
     seconds = (timezone.now() - token.created_at).total_seconds()
     token_expiry_time = api_settings.PASSWORDLESS_TOKEN_EXPIRE_TIME
 
@@ -94,9 +83,9 @@ def verify_user_alias(user, token):
         if token.to_alias == getattr(user, api_settings.PASSWORDLESS_USER_MOBILE_FIELD_NAME):
             setattr(user, api_settings.PASSWORDLESS_USER_MOBILE_VERIFIED_FIELD_NAME, True)
     else:
-        return None
+        return False
     user.save()
-    return user
+    return True
 
 
 def inject_template_context(context):
@@ -108,7 +97,7 @@ def inject_template_context(context):
     return context
 
 
-def send_email_with_callback_token(self, user, email_token):
+def send_email_with_callback_token(self, user, email_token, **kwargs):
     """
     Sends a Email to user.email.
 
@@ -119,22 +108,25 @@ def send_email_with_callback_token(self, user, email_token):
         if api_settings.PASSWORDLESS_EMAIL_NOREPLY_ADDRESS:
             # Make sure we have a sending address before sending.
 
+            # Get email subject and message
+            email_subject = kwargs.get('email_subject',
+                                       api_settings.PASSWORDLESS_EMAIL_SUBJECT)
+            email_plaintext = kwargs.get('email_plaintext',
+                                         api_settings.PASSWORDLESS_EMAIL_PLAINTEXT_MESSAGE)
+            email_html = kwargs.get('email_html',
+                                    api_settings.PASSWORDLESS_EMAIL_TOKEN_HTML_TEMPLATE_NAME)
+
             # Inject context if user specifies.
             context = inject_template_context({'callback_token': email_token.key, })
-
-            html_message = loader.render_to_string(
-                api_settings.PASSWORDLESS_EMAIL_TOKEN_HTML_TEMPLATE_NAME,
-                context,
-            )
+            html_message = loader.render_to_string(email_html, context,)
             send_mail(
-                api_settings.PASSWORDLESS_EMAIL_SUBJECT,
-                api_settings.PASSWORDLESS_EMAIL_PLAINTEXT_MESSAGE %
-                email_token.key,
+                email_subject,
+                email_plaintext % email_token.key,
                 api_settings.PASSWORDLESS_EMAIL_NOREPLY_ADDRESS,
                 [getattr(user, api_settings.PASSWORDLESS_USER_EMAIL_FIELD_NAME)],
                 fail_silently=False,
-                html_message=html_message,
-            )
+                html_message=html_message,)
+
         else:
             log.debug("Failed to send login email. Missing PASSWORDLESS_EMAIL_NOREPLY_ADDRESS.")
             return False
@@ -148,13 +140,13 @@ def send_email_with_callback_token(self, user, email_token):
         return False
 
 
-def send_sms_with_callback_token(self, user, mobile_token):
+def send_sms_with_callback_token(self, user, mobile_token, **kwargs):
     """
     Sends a SMS to user.mobile via Twilio.
 
     Passes silently without sending in test environment.
     """
-    base_string = api_settings.PASSWORDLESS_MOBILE_MESSAGE
+    base_string = kwargs.get('mobile_message', api_settings.PASSWORDLESS_MOBILE_MESSAGE)
 
     try:
 

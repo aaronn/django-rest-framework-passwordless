@@ -1,11 +1,14 @@
+import logging
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth import get_user_model
+from django.core.exceptions import PermissionDenied
 from django.core.validators import RegexValidator
 from rest_framework import serializers
+from .models import CallbackToken
 from .settings import api_settings
-from .utils import authenticate_by_token
+from .utils import authenticate_by_token, verify_user_alias, validate_token_age
 
-
+log = logging.getLogger(__name__)
 User = get_user_model()
 
 """
@@ -22,7 +25,7 @@ class TokenField(serializers.CharField):
 
 
 """
-Serializers
+Auth Token
 """
 
 
@@ -85,17 +88,36 @@ class MobileAuthSerializer(AbstractBaseAliasAuthenticationSerializer):
     mobile = serializers.CharField(validators=[phone_regex], max_length=15)
 
 
+"""
+Callback Token
+"""
+
+
+def token_age_validator(value):
+    """
+    Check token age
+    Makes sure a token is within the proper expiration datetime window.
+    """
+    valid_token = validate_token_age(value)
+    if not valid_token:
+        raise serializers.ValidationError("The token you entered isn't valid.")
+    return value
+
+
 class AbstractBaseCallbackTokenSerializer(serializers.Serializer):
     """
     Abstract class inspired by DRF's own token serializer.
     Returns a user if valid, None or a message if not.
     """
+    token = TokenField(min_length=6, max_length=6, validators=[token_age_validator])
+
+
+class CallbackTokenAuthSerializer(AbstractBaseCallbackTokenSerializer):
 
     def validate(self, attrs):
-        token = attrs.get('token')
+        token = attrs.get('token', None)
 
         if token:
-
             # Check the token type for our uni-auth method.
             # authenticates and checks the expiry of the callback token.
             user = authenticate_by_token(token)
@@ -103,6 +125,15 @@ class AbstractBaseCallbackTokenSerializer(serializers.Serializer):
                 if not user.is_active:
                     msg = _('User account is disabled.')
                     raise serializers.ValidationError(msg)
+
+                if api_settings.PASSWORDLESS_USER_MARK_EMAIL_VERIFIED \
+                        or api_settings.PASSWORDLESS_USER_MARK_MOBILE_VERIFIED:
+                    # Mark this alias as verified
+                    success = verify_user_alias(User.objects.get(pk=token.user.pk), token)
+
+                    if success is False:
+                        msg = _('Error validating user alias.')
+                        raise serializers.ValidationError(msg)
 
                 attrs['user'] = user
                 return attrs
@@ -115,5 +146,44 @@ class AbstractBaseCallbackTokenSerializer(serializers.Serializer):
             raise serializers.ValidationError(msg)
 
 
-class CallbackTokenSerializer(AbstractBaseCallbackTokenSerializer):
-    token = TokenField(min_length=6, max_length=6)
+class CallbackTokenVerificationSerializer(AbstractBaseCallbackTokenSerializer):
+    """
+    Takes a user and a token, verifies the token belongs to the user and
+    validates the alias that the token was sent from.
+    """
+
+    def validate(self, attrs):
+        try:
+            callback_token = attrs.get('token', None)
+
+            token = CallbackToken.objects.get(key=callback_token, is_active=True)
+            user = User.objects.get(pk=self.context.get("user_id"))
+
+            if token.user == user:
+                # Check that the token.user is the request.user
+
+                # Mark this alias as verified
+                success = verify_user_alias(user, token)
+                if success is False:
+                    log.debug("drfpasswordless: Error verifying alias.")
+                    
+                attrs['user'] = user
+                return attrs
+            else:
+                msg = _('This token is invalid. Try again later.')
+                log.debug("drfpasswordless: User token mismatch when verifying alias.")
+
+        except CallbackToken.DoesNotExist:
+            msg = _('Missing authentication token.')
+            log.debug("drfpasswordless: Tried to validate alias with bad token.")
+            pass
+        except User.DoesNotExist:
+            msg = _('Missing user.')
+            log.debug("drfpasswordless: Tried to validate alias with bad user.")
+            pass
+        except PermissionDenied:
+            msg = _('Insufficient permissions.')
+            log.debug("drfpasswordless: Permission denied while validating alias.")
+            pass
+
+        raise serializers.ValidationError(msg)
