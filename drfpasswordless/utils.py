@@ -97,7 +97,7 @@ def inject_template_context(context):
     return context
 
 
-def send_email_with_callback_token(self, user, email_token, **kwargs):
+def send_email_with_callback_token(user, email_token, **kwargs):
     """
     Sends a Email to user.email.
 
@@ -140,7 +140,7 @@ def send_email_with_callback_token(self, user, email_token, **kwargs):
         return False
 
 
-def send_sms_with_callback_token(self, user, mobile_token, **kwargs):
+def send_sms_with_callback_token(user, mobile_token, **kwargs):
     """
     Sends a SMS to user.mobile via Twilio.
 
