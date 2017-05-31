@@ -115,7 +115,9 @@ class AbstractBaseCallbackTokenSerializer(serializers.Serializer):
 class CallbackTokenAuthSerializer(AbstractBaseCallbackTokenSerializer):
 
     def validate(self, attrs):
-        token = attrs.get('token', None)
+        callback_token = attrs.get('token', None)
+        
+        token = CallbackToken.objects.get(key=callback_token, is_active=True)
 
         if token:
             # Check the token type for our uni-auth method.
