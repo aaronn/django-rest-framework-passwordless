@@ -133,12 +133,12 @@ def send_email_with_callback_token(self, user, email_token, **kwargs):
                 html_message=html_message,)
 
         else:
-            log.debug("Failed to send login email. Missing PASSWORDLESS_EMAIL_NOREPLY_ADDRESS.")
+            log.debug("Failed to send token email. Missing PASSWORDLESS_EMAIL_NOREPLY_ADDRESS.")
             return False
         return True
 
     except Exception as e:
-        log.debug("Failed to send login email to user: %d."
+        log.debug("Failed to send token email to user: %d."
                   "Possibly no email on user object. Email entered was %s" %
                   (user.id, getattr(user, api_settings.PASSWORDLESS_USER_EMAIL_FIELD_NAME)))
         log.debug(e)
@@ -170,7 +170,7 @@ def send_sms_with_callback_token(self, user, mobile_token, **kwargs):
             )
             return True
         else:
-            log.debug("Failed to send login sms. Missing PASSWORDLESS_MOBILE_NOREPLY_NUMBER.")
+            log.debug("Failed to send token sms. Missing PASSWORDLESS_MOBILE_NOREPLY_NUMBER.")
             return False
     except ImportError:
         log.debug("Couldn't import Twilio client. Is twilio installed?")
@@ -179,7 +179,7 @@ def send_sms_with_callback_token(self, user, mobile_token, **kwargs):
         log.debug("Couldn't send SMS."
                   "Did you set your Twilio account tokens and specify a PASSWORDLESS_MOBILE_NOREPLY_NUMBER?")
     except Exception as e:
-        log.debug("Failed to send login SMS to user: %d. "
+        log.debug("Failed to send token SMS to user: %d. "
                   "Possibly no mobile number on user object or the twilio package isn't set up yet. "
                   "Number entered was %s" % (user.id, getattr(user, api_settings.PASSWORDLESS_USER_MOBILE_FIELD_NAME)))
         log.debug(e)

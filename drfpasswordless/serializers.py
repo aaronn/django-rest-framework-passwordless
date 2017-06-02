@@ -44,8 +44,7 @@ class AbstractBaseAliasAuthenticationSerializer(serializers.Serializer):
 
         if alias:
             # Create or authenticate a user
-            # Return a token for them to log in
-            # Consider moving this into somewhere else. Serializer should only serialize.
+            # Return THem
 
             if api_settings.PASSWORDLESS_REGISTER_NEW_USERS is True:
                 # If new aliases should register new users.
@@ -86,6 +85,68 @@ class MobileAuthSerializer(AbstractBaseAliasAuthenticationSerializer):
                                  message="Mobile number must be entered in the format:"
                                          " '+999999999'. Up to 15 digits allowed.")
     mobile = serializers.CharField(validators=[phone_regex], max_length=15)
+
+
+"""
+Verification
+"""
+
+
+class AbstractBaseAliasVerificationSerializer(serializers.Serializer):
+    """
+    Abstract class that returns a callback token based on the field given
+    Returns a token if valid, None or a message if not.
+    """
+    @property
+    def alias_type(self):
+        # The alias type, either email or mobile
+        raise NotImplementedError
+
+    def validate(self, attrs):
+        alias = attrs.get(self.alias_type)
+
+        if alias:
+            # Get request.user
+            # Get their specified valid endpoint
+            # Validate
+
+            request = self.context.get("request")
+            if request and hasattr(request, "user"):
+                user = request.user
+                user = user.refresh_from_db()
+
+                if user:
+                    if not user.is_active:
+                        # If valid, return attrs so we can create a token in our logic controller
+                        msg = _('User account is disabled.')
+
+                    else:
+                        if hasattr(user, self.alias_type):
+                            # Has the appropriate alias type
+                            alias = getattr(user, self.alias_type)
+
+                            if alias:
+                                attrs['user'] = user
+                                return attrs
+                            else:
+                                msg = _('This user doesn\'t have an %s.' % self.alias_type)
+                                raise serializers.ValidationError(msg)
+            else:
+                msg = _('There was a problem with your request.')
+            raise serializers.ValidationError(msg)
+        else:
+            msg = _('Missing %s.') % self.alias_type
+            raise serializers.ValidationError(msg)
+
+
+class EmailVerificationSerializer(AbstractBaseAliasAuthenticationSerializer):
+
+    alias_type = 'email'
+
+
+class MobileVerificationSerializer(AbstractBaseAliasAuthenticationSerializer):
+
+    alias_type = 'mobile'
 
 
 """

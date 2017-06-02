@@ -4,7 +4,12 @@ from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .settings import api_settings
-from .serializers import EmailAuthSerializer, MobileAuthSerializer, CallbackTokenAuthSerializer, CallbackTokenVerificationSerializer
+from .serializers import (EmailAuthSerializer,
+                          MobileAuthSerializer,
+                          CallbackTokenAuthSerializer,
+                          CallbackTokenVerificationSerializer,
+                          EmailVerificationSerializer,
+                          MobileVerificationSerializer,)
 from .utils import send_sms_with_callback_token, send_email_with_callback_token, create_callback_token_for_user
 
 log = logging.getLogger(__name__)
@@ -44,7 +49,7 @@ class AbstractBaseObtainCallbackToken(APIView):
             # Only allow auth types allowed in settings.
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-        serializer = self.serializer_class(data=request.data)
+        serializer = self.serializer_class(data=request.data, context={'request': request})
         if serializer.is_valid(raise_exception=True):
             # Validate -
             user = serializer.validated_data['user']
@@ -94,7 +99,7 @@ class ObtainMobileCallbackToken(AbstractBaseObtainCallbackToken):
 
 
 class ObtainEmailVerificationCallbackToken(AbstractBaseObtainCallbackToken):
-    serializer_class = EmailAuthSerializer
+    serializer_class = EmailVerificationSerializer
     send_action = send_email_with_callback_token
     success_response = "A verification token has been sent to your email."
     failure_response = "Unable to email you a verification code. Try again later."
@@ -110,7 +115,7 @@ class ObtainEmailVerificationCallbackToken(AbstractBaseObtainCallbackToken):
 
 
 class ObtainMobileVerificationCallbackToken(AbstractBaseObtainCallbackToken):
-    serializer_class = MobileAuthSerializer
+    serializer_class = MobileVerificationSerializer
     send_action = send_sms_with_callback_token
     success_response = "We texted you a verification code."
     failure_response = "Unable to send you a verification code. Try again later."
