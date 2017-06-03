@@ -15,4 +15,3 @@ urlpatterns = [url(r'^callback/auth/$', ObtainAuthTokenFromCallbackToken.as_view
                url(r'^verify/email/$', ObtainEmailVerificationCallbackToken.as_view(), name='verify_email'),
                url(r'^verify/mobile/$', ObtainMobileVerificationCallbackToken.as_view(), name='verify_mobile')]
 
-format_suffix_patterns(urlpatterns)
