@@ -73,14 +73,18 @@ class AbstractBaseAliasAuthenticationSerializer(serializers.Serializer):
 
 
 class EmailAuthSerializer(AbstractBaseAliasAuthenticationSerializer):
-
-    alias_type = 'email'
+    @property
+    def alias_type(self):
+        return 'email'
+    
     email = serializers.EmailField()
 
 
 class MobileAuthSerializer(AbstractBaseAliasAuthenticationSerializer):
+    @property
+    def alias_type(self):
+        return 'mobile'
 
-    alias_type = 'mobile'
     phone_regex = RegexValidator(regex=r'^\+?1?\d{9,15}$',
                                  message="Mobile number must be entered in the format:"
                                          " '+999999999'. Up to 15 digits allowed.")
@@ -140,13 +144,15 @@ class AbstractBaseAliasVerificationSerializer(serializers.Serializer):
 
 
 class EmailVerificationSerializer(AbstractBaseAliasAuthenticationSerializer):
-
-    alias_type = 'email'
+    @property
+    def alias_type(self):
+        return 'email'
 
 
 class MobileVerificationSerializer(AbstractBaseAliasAuthenticationSerializer):
-
-    alias_type = 'mobile'
+    @property
+    def alias_type(self):
+        return 'mobile'
 
 
 """
