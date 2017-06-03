@@ -1,5 +1,4 @@
 from django.conf.urls import url
-from rest_framework.urlpatterns import format_suffix_patterns
 from .views import (ObtainEmailCallbackToken,
                     ObtainMobileCallbackToken,
                     ObtainAuthTokenFromCallbackToken,
@@ -14,4 +13,3 @@ urlpatterns = [url(r'^callback/auth/$', ObtainAuthTokenFromCallbackToken.as_view
                url(r'^callback/verify/$', VerifyAliasFromCallbackToken.as_view(), name='verify_callback'),
                url(r'^verify/email/$', ObtainEmailVerificationCallbackToken.as_view(), name='verify_email'),
                url(r'^verify/mobile/$', ObtainMobileVerificationCallbackToken.as_view(), name='verify_mobile')]
-
