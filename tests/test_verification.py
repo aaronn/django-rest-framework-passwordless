@@ -55,7 +55,7 @@ class AliasEmailVerificationTests(APITestCase):
         self.assertEqual(getattr(user, self.email_verified_field_name), False)
 
         # Verify
-        callback_response = self.client.post(self.verify_url)
+        callback_response = self.client.post(self.verify_url, {})
         self.assertEqual(callback_response.status_code, status.HTTP_200_OK)
 
         # Refresh User
@@ -128,7 +128,7 @@ class AliasMobileVerificationTests(APITestCase):
         self.assertEqual(getattr(user, self.mobile_verified_field_name), False)
 
         # Verify
-        callback_response = self.client.post(self.verify_url)
+        callback_response = self.client.post(self.verify_url, {})
         self.assertEqual(callback_response.status_code, status.HTTP_200_OK)
 
         # Refresh User
