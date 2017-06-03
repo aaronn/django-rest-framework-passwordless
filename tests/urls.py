@@ -1,12 +1,11 @@
 from django.conf.urls import url
 from rest_framework.urlpatterns import format_suffix_patterns
 from drfpasswordless.views import (ObtainEmailCallbackToken,
-                    ObtainMobileCallbackToken,
-                    ObtainAuthTokenFromCallbackToken,
-                    VerifyAliasFromCallbackToken,
-                    ObtainEmailVerificationCallbackToken,
-                    ObtainMobileVerificationCallbackToken,
-                    )
+                                   ObtainMobileCallbackToken,
+                                   ObtainAuthTokenFromCallbackToken,
+                                   VerifyAliasFromCallbackToken,
+                                   ObtainEmailVerificationCallbackToken,
+                                   ObtainMobileVerificationCallbackToken, )
 
 urlpatterns = [url(r'^callback/auth/$', ObtainAuthTokenFromCallbackToken.as_view(), name='auth_callback'),
                url(r'^auth/email/$', ObtainEmailCallbackToken.as_view(), name='auth_email'),
