@@ -43,13 +43,14 @@ Requirements
 
 ::
 
-- Python (2.7, 3.4, 3.5, 3.6+)
-- Django (1.8, 1.9, 1.10+)
-- Django Rest Framework + AuthToken (3.1, 3.2, 3.3, 3.4, 3.5, 3.6+)
-- Python-Twilio (Optional, for mobile.)
+    - Python (2.7, 3.4, 3.5, 3.6+)
+    - Django (1.8, 1.9, 1.10, 1.11+)
+    - Django Rest Framework + AuthToken (3.4, 3.5, 3.6+)
+    - Python-Twilio (Optional, for mobile.)
+
 
 Install
-==========
+=======
 
 1. Install drfpasswordless
 
