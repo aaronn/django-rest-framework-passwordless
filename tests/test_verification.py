@@ -1,6 +1,6 @@
 from rest_framework import status
 from rest_framework.authtoken.models import Token
-from rest_framework.test import APITestCase
+from rest_framework.test import APITestCase, force_authenticate
 from django.contrib.auth import get_user_model
 from drfpasswordless.settings import api_settings, DEFAULTS
 from drfpasswordless.utils import CallbackToken
@@ -55,7 +55,7 @@ class AliasEmailVerificationTests(APITestCase):
         self.assertEqual(getattr(user, self.email_verified_field_name), False)
 
         # Verify
-        self.client.force_login(user)
+        self.client.force_authenticate(user)
         verify_response = self.client.post(self.verify_url)
         self.assertEqual(verify_response.status_code, status.HTTP_200_OK)
 
@@ -130,7 +130,7 @@ class AliasMobileVerificationTests(APITestCase):
         self.assertEqual(getattr(user, self.mobile_verified_field_name), False)
 
         # Verify
-        self.client.force_login(user)
+        self.client.force_authenticate(user)
         verify_response = self.client.post(self.verify_url)
         self.assertEqual(verify_response.status_code, status.HTTP_200_OK)
 
