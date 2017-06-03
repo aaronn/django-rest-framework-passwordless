@@ -2,6 +2,7 @@ import logging
 from rest_framework import parsers, renderers, status
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from .settings import api_settings
 from .serializers import (EmailAuthSerializer,
@@ -65,10 +66,8 @@ class AbstractBaseObtainCallbackToken(APIView):
             else:
                 status_code = status.HTTP_400_BAD_REQUEST
                 response_detail = self.failure_response
-                log.debug("FAIL")
             return Response({'detail': response_detail}, status=status_code)
         else:
-            log.debug(serializer.error_messages)
             return Response(serializer.error_messages, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -101,6 +100,7 @@ class ObtainMobileCallbackToken(AbstractBaseObtainCallbackToken):
 
 
 class ObtainEmailVerificationCallbackToken(AbstractBaseObtainCallbackToken):
+    permission_classes = (IsAuthenticated,)
     serializer_class = EmailVerificationSerializer
     send_action = send_email_with_callback_token
     success_response = "A verification token has been sent to your email."
@@ -117,6 +117,7 @@ class ObtainEmailVerificationCallbackToken(AbstractBaseObtainCallbackToken):
 
 
 class ObtainMobileVerificationCallbackToken(AbstractBaseObtainCallbackToken):
+    permission_classes = (IsAuthenticated,)
     serializer_class = MobileVerificationSerializer
     send_action = send_sms_with_callback_token
     success_response = "We texted you a verification code."
@@ -180,7 +181,7 @@ class VerifyAliasFromCallbackToken(APIView):
     serializer_class = CallbackTokenVerificationSerializer
 
     def post(self, request, *args, **kwargs):
-        serializer = self.serializer_class(data=request.data, context={'user_id', self.request.user.id})
+        serializer = self.serializer_class(data=request.data, context={'user_id': self.request.user.id})
         if serializer.is_valid(raise_exception=True):
 
             return Response({'detail': 'Alias verified.'}, status=status.HTTP_200_OK)

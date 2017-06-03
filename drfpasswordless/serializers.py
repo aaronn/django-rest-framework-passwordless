@@ -107,24 +107,21 @@ class AbstractBaseAliasVerificationSerializer(serializers.Serializer):
         raise NotImplementedError
 
     def validate(self, attrs):
-        alias = attrs.get(self.alias_type)
 
-        if alias:
+        msg = _('There was a problem with your request.')
+
+        if self.alias_type:
             # Get request.user
             # Get their specified valid endpoint
             # Validate
 
-            request = self.context.get("request")
+            request = self.context["request"]
             if request and hasattr(request, "user"):
                 user = request.user
-                user = user.refresh_from_db()
-
                 if user:
                     if not user.is_active:
                         # If valid, return attrs so we can create a token in our logic controller
                         msg = _('User account is disabled.')
-                        print(msg)
-                        log.debug(msg)
 
                     else:
                         if hasattr(user, self.alias_type):
@@ -136,28 +133,20 @@ class AbstractBaseAliasVerificationSerializer(serializers.Serializer):
                                 return attrs
                             else:
                                 msg = _('This user doesn\'t have an %s.' % self.alias_type)
-                                print(msg)
-                                log.debug(msg)
                                 raise serializers.ValidationError(msg)
-            else:
-                msg = _('There was a problem with your request.')
-                print(msg)
-                log.debug(msg)
             raise serializers.ValidationError(msg)
         else:
             msg = _('Missing %s.') % self.alias_type
-            print(msg)
-            log.debug(msg)
             raise serializers.ValidationError(msg)
 
 
-class EmailVerificationSerializer(AbstractBaseAliasAuthenticationSerializer):
+class EmailVerificationSerializer(AbstractBaseAliasVerificationSerializer):
     @property
     def alias_type(self):
         return 'email'
 
 
-class MobileVerificationSerializer(AbstractBaseAliasAuthenticationSerializer):
+class MobileVerificationSerializer(AbstractBaseAliasVerificationSerializer):
     @property
     def alias_type(self):
         return 'mobile'
@@ -232,10 +221,12 @@ class CallbackTokenVerificationSerializer(AbstractBaseCallbackTokenSerializer):
 
     def validate(self, attrs):
         try:
+            print(self.context)
+            user_id = self.context.get("user_id")
             callback_token = attrs.get('token', None)
 
             token = CallbackToken.objects.get(key=callback_token, is_active=True)
-            user = User.objects.get(pk=self.context.get("user_id"))
+            user = User.objects.get(pk=user_id)
 
             if token.user == user:
                 # Check that the token.user is the request.user

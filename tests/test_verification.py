@@ -1,7 +1,6 @@
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase
-
 from django.contrib.auth import get_user_model
 from drfpasswordless.settings import api_settings, DEFAULTS
 from drfpasswordless.utils import CallbackToken
@@ -25,6 +24,7 @@ class AliasEmailVerificationTests(APITestCase):
 
     def test_email_unverified_to_verified_and_back(self):
         email = 'aaron@example.com'
+        email2 = 'aaron2@example.com'
         data = {'email': email}
 
         # create a new user
@@ -49,17 +49,18 @@ class AliasEmailVerificationTests(APITestCase):
         self.assertEqual(getattr(user, self.email_verified_field_name), True)
 
         # Change email, should result in flag changing to false
-        setattr(user, self.email_field_name, 'aaron2@example.com')
+        setattr(user, self.email_field_name, email2)
         user.save()
         user.refresh_from_db()
         self.assertEqual(getattr(user, self.email_verified_field_name), False)
 
         # Verify
-        callback_response = self.client.post(self.verify_url)
-        self.assertEqual(callback_response.status_code, status.HTTP_200_OK)
+        self.client.force_login(user)
+        verify_response = self.client.post(self.verify_url)
+        self.assertEqual(verify_response.status_code, status.HTTP_200_OK)
 
         # Refresh User
-        user = User.objects.get(**{self.email_field_name: email})
+        user = User.objects.get(**{self.email_field_name: email2})
         self.assertNotEqual(user, None)
         self.assertNotEqual(getattr(user, self.email_field_name), None)
         self.assertEqual(getattr(user, self.email_verified_field_name), False)
@@ -70,7 +71,7 @@ class AliasEmailVerificationTests(APITestCase):
         self.assertEqual(verify_callback_response.status_code, status.HTTP_200_OK)
 
         # Refresh User
-        user = User.objects.get(**{self.email_field_name: email})
+        user = User.objects.get(**{self.email_field_name: email2})
         self.assertNotEqual(user, None)
         self.assertNotEqual(getattr(user, self.email_field_name), None)
         self.assertEqual(getattr(user, self.email_verified_field_name), True)
@@ -98,6 +99,7 @@ class AliasMobileVerificationTests(APITestCase):
 
     def test_mobile_unverified_to_verified_and_back(self):
         mobile = '+15551234567'
+        mobile2 = '+15557654321'
         data = {'mobile': mobile}
 
         # create a new user
@@ -128,11 +130,12 @@ class AliasMobileVerificationTests(APITestCase):
         self.assertEqual(getattr(user, self.mobile_verified_field_name), False)
 
         # Verify
-        callback_response = self.client.post(self.verify_url)
-        self.assertEqual(callback_response.status_code, status.HTTP_200_OK)
+        self.client.force_login(user)
+        verify_response = self.client.post(self.verify_url)
+        self.assertEqual(verify_response.status_code, status.HTTP_200_OK)
 
         # Refresh User
-        user = User.objects.get(**{self.mobile_field_name: mobile})
+        user = User.objects.get(**{self.mobile_field_name: mobile2})
         self.assertNotEqual(user, None)
         self.assertNotEqual(getattr(user, self.mobile_field_name), None)
         self.assertEqual(getattr(user, self.mobile_verified_field_name), False)
@@ -143,7 +146,7 @@ class AliasMobileVerificationTests(APITestCase):
         self.assertEqual(verify_callback_response.status_code, status.HTTP_200_OK)
 
         # Refresh User
-        user = User.objects.get(**{self.mobile_field_name: mobile})
+        user = User.objects.get(**{self.mobile_field_name: mobile2})
         self.assertNotEqual(user, None)
         self.assertNotEqual(getattr(user, self.mobile_field_name), None)
         self.assertEqual(getattr(user, self.mobile_verified_field_name), True)
