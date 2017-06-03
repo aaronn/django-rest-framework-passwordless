@@ -65,8 +65,10 @@ class AbstractBaseObtainCallbackToken(APIView):
             else:
                 status_code = status.HTTP_400_BAD_REQUEST
                 response_detail = self.failure_response
+                log.debug("FAIL")
             return Response({'detail': response_detail}, status=status_code)
         else:
+            log.debug(serializer.error_messages)
             return Response(serializer.error_messages, status=status.HTTP_400_BAD_REQUEST)
 
 

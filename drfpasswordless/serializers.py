@@ -123,6 +123,8 @@ class AbstractBaseAliasVerificationSerializer(serializers.Serializer):
                     if not user.is_active:
                         # If valid, return attrs so we can create a token in our logic controller
                         msg = _('User account is disabled.')
+                        print(msg)
+                        log.debug(msg)
 
                     else:
                         if hasattr(user, self.alias_type):
@@ -134,12 +136,18 @@ class AbstractBaseAliasVerificationSerializer(serializers.Serializer):
                                 return attrs
                             else:
                                 msg = _('This user doesn\'t have an %s.' % self.alias_type)
+                                print(msg)
+                                log.debug(msg)
                                 raise serializers.ValidationError(msg)
             else:
                 msg = _('There was a problem with your request.')
+                print(msg)
+                log.debug(msg)
             raise serializers.ValidationError(msg)
         else:
             msg = _('Missing %s.') % self.alias_type
+            print(msg)
+            log.debug(msg)
             raise serializers.ValidationError(msg)
 
 
