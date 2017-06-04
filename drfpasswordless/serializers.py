@@ -221,7 +221,6 @@ class CallbackTokenVerificationSerializer(AbstractBaseCallbackTokenSerializer):
 
     def validate(self, attrs):
         try:
-            print(self.context)
             user_id = self.context.get("user_id")
             callback_token = attrs.get('token', None)
 
