@@ -202,6 +202,13 @@ This is off by default but can be turned on with
 enabled they look for the User model fields ``email_verified`` or
 ``mobile_verified``.
 
+You can also use ``/validate/email/`` or ``/validate/mobile/`` which will
+automatically send a token to the endpoint attached to the current
+``request.user``'s email or mobile if available.
+
+You can then send that token to ``/callback/verify/`` which will double-check
+that the endpoint belongs to the request.user and mark the alias as verified.
+
 Registration
 ============
 
