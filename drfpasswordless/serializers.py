@@ -126,14 +126,10 @@ class AbstractBaseAliasVerificationSerializer(serializers.Serializer):
                     else:
                         if hasattr(user, self.alias_type):
                             # Has the appropriate alias type
-                            alias = getattr(user, self.alias_type)
-
-                            if alias:
-                                attrs['user'] = user
-                                return attrs
-                            else:
-                                msg = _('This user doesn\'t have an %s.' % self.alias_type)
-                                raise serializers.ValidationError(msg)
+                            attrs['user'] = user
+                            return attrs
+                        else:
+                            msg = _('This user doesn\'t have an %s.' % self.alias_type)
             raise serializers.ValidationError(msg)
         else:
             msg = _('Missing %s.') % self.alias_type
