@@ -1,9 +1,13 @@
+import logging
 from django.contrib.auth import get_user_model
 from django.dispatch import receiver
 from django.db.models import signals
 from .models import CallbackToken
 from .models import generate_numeric_token
 from .settings import api_settings
+from .services import TokenService
+
+logger = logging.getLogger(__name__)
 
 
 @receiver(signals.pre_save, sender=CallbackToken)
@@ -39,6 +43,7 @@ User = get_user_model()
 def update_alias_verification(sender, instance, **kwargs):
     """
     Flags a user's email as unverified if they change it.
+    Optionally sends a verification token to the new endpoint.
     """
     if isinstance(instance, User):
 
@@ -60,6 +65,21 @@ def update_alias_verification(sender, instance, **kwargs):
                     if instance_email != old_email and instance_email != "":
                         # Email changed, verification should be flagged
                         setattr(instance, email_verified_field, False)
+                        if api_settings.PASSWORDLESS_AUTO_SEND_VERIFICATION_TOKEN is True:
+                            email_subject = api_settings.PASSWORDLESS_EMAIL_VERIFICATION_SUBJECT
+                            email_plaintext = api_settings.PASSWORDLESS_EMAIL_VERIFICATION_PLAINTEXT_MESSAGE
+                            email_html = api_settings.PASSWORDLESS_EMAIL_VERIFICATION_TOKEN_HTML_TEMPLATE_NAME
+                            message_payload = {'email_subject': email_subject,
+                                               'email_plaintext': email_plaintext,
+                                               'email_html': email_html}
+                            success = TokenService.send_token(instance, 'email', **message_payload)
+
+                            if success:
+                                logger.info('drfpasswordless: Successfully sent email on updated address: %s'
+                                            % instance_email)
+                            else:
+                                logger.info('drfpasswordless: Failed to send email to updated address: %s'
+                                            % instance_email)
 
                 except User.DoesNotExist:
                     # User probably is just initially being created
@@ -81,6 +101,17 @@ def update_alias_verification(sender, instance, **kwargs):
                     if instance_mobile != old_mobile and instance_mobile != "":
                         # Mobile changed, verification should be flagged
                         setattr(instance, mobile_verified_field, False)
+                        if api_settings.PASSWORDLESS_AUTO_SEND_VERIFICATION_TOKEN is True:
+                            mobile_message = api_settings.PASSWORDLESS_MOBILE_MESSAGE
+                            message_payload = {'mobile_message': mobile_message}
+                            success = TokenService.send_token(instance, 'mobile', **message_payload)
+
+                            if success:
+                                logger.info('drfpasswordless: Successfully sent SMS on updated mobile: %s'
+                                            % instance_mobile)
+                            else:
+                                logger.info('drfpasswordless: Failed to send SMS to updated mobile: %s'
+                                            % instance_mobile)
 
                 except User.DoesNotExist:
                     # User probably is just initially being created

@@ -11,7 +11,7 @@ from .serializers import (EmailAuthSerializer,
                           CallbackTokenVerificationSerializer,
                           EmailVerificationSerializer,
                           MobileVerificationSerializer,)
-from .utils import send_sms_with_callback_token, send_email_with_callback_token, create_callback_token_for_user
+from .services import TokenService
 
 log = logging.getLogger(__name__)
 
@@ -40,11 +40,6 @@ class AbstractBaseObtainCallbackToken(APIView):
         # Alias Type
         raise NotImplementedError
 
-    @property
-    def send_action(self):
-        # Our send function depending on type
-        raise NotImplementedError
-
     def post(self, request, *args, **kwargs):
         if self.alias_type.upper() not in api_settings.PASSWORDLESS_AUTH_TYPES:
             # Only allow auth types allowed in settings.
@@ -54,10 +49,8 @@ class AbstractBaseObtainCallbackToken(APIView):
         if serializer.is_valid(raise_exception=True):
             # Validate -
             user = serializer.validated_data['user']
-            # Create callback token for sending alias type
-            token = create_callback_token_for_user(user, self.alias_type)
-            # Send to alias
-            success = self.send_action(user, token, **self.message_payload)
+            # Create and send callback token
+            success = TokenService.send_token(user, self.alias_type, **self.message_payload)
 
             # Respond With Success Or Failure of Sent
             if success:
@@ -73,7 +66,6 @@ class AbstractBaseObtainCallbackToken(APIView):
 
 class ObtainEmailCallbackToken(AbstractBaseObtainCallbackToken):
     serializer_class = EmailAuthSerializer
-    send_action = send_email_with_callback_token
     success_response = "A login token has been sent to your email."
     failure_response = "Unable to email you a login code. Try again later."
 
@@ -89,7 +81,6 @@ class ObtainEmailCallbackToken(AbstractBaseObtainCallbackToken):
 
 class ObtainMobileCallbackToken(AbstractBaseObtainCallbackToken):
     serializer_class = MobileAuthSerializer
-    send_action = send_sms_with_callback_token
     success_response = "We texted you a login code."
     failure_response = "Unable to send you a login code. Try again later."
 
@@ -102,7 +93,6 @@ class ObtainMobileCallbackToken(AbstractBaseObtainCallbackToken):
 class ObtainEmailVerificationCallbackToken(AbstractBaseObtainCallbackToken):
     permission_classes = (IsAuthenticated,)
     serializer_class = EmailVerificationSerializer
-    send_action = send_email_with_callback_token
     success_response = "A verification token has been sent to your email."
     failure_response = "Unable to email you a verification code. Try again later."
 
@@ -119,7 +109,6 @@ class ObtainEmailVerificationCallbackToken(AbstractBaseObtainCallbackToken):
 class ObtainMobileVerificationCallbackToken(AbstractBaseObtainCallbackToken):
     permission_classes = (IsAuthenticated,)
     serializer_class = MobileVerificationSerializer
-    send_action = send_sms_with_callback_token
     success_response = "We texted you a verification code."
     failure_response = "Unable to send you a verification code. Try again later."
 

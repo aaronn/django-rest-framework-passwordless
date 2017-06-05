@@ -66,6 +66,9 @@ DEFAULTS = {
     # The message sent to mobile users logging in. Takes one string.
     'PASSWORDLESS_MOBILE_VERIFICATION_MESSAGE': "Enter this verification code: %s",
 
+    # Automatically send verification email or sms when a user changes their alias.
+    'PASSWORDLESS_AUTO_SEND_VERIFICATION_TOKEN': False,
+
 }
 
 # List of settings that may be in string import notation.
