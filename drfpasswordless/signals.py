@@ -62,7 +62,7 @@ def update_alias_verification(sender, instance, **kwargs):
                     instance_email = getattr(instance, email_field)  # Incoming Email
                     old_email = getattr(user_old, email_field)  # Pre-save object email
 
-                    if instance_email != old_email and instance_email != "":
+                    if instance_email != old_email and instance_email != "" and instance_email is not None:
                         # Email changed, verification should be flagged
                         setattr(instance, email_verified_field, False)
                         if api_settings.PASSWORDLESS_AUTO_SEND_VERIFICATION_TOKEN is True:
@@ -98,7 +98,7 @@ def update_alias_verification(sender, instance, **kwargs):
                     instance_mobile = getattr(instance, mobile_field)  # Incoming mobile
                     old_mobile = getattr(user_old, mobile_field)  # Pre-save object mobile
 
-                    if instance_mobile != old_mobile and instance_mobile != "":
+                    if instance_mobile != old_mobile and instance_mobile != "" and instance_mobile is not None:
                         # Mobile changed, verification should be flagged
                         setattr(instance, mobile_verified_field, False)
                         if api_settings.PASSWORDLESS_AUTO_SEND_VERIFICATION_TOKEN is True:
