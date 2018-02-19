@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.core import urlresolvers
+from django.urls import reverse
 from .models import CallbackToken
 
 
@@ -10,7 +10,7 @@ class UserLinkMixin(object):
     LINK_TO_USER_FIELD = 'link_to_user'
 
     def link_to_user(self, obj):
-        link = urlresolvers.reverse('admin:users_user_change', args=[obj.user.id])
+        link = reverse('admin:users_user_change', args=[obj.user.id])
         return u'<a href=%s>%s</a>' % (link, obj.user.username)
     link_to_user.allow_tags = True
     link_to_user.short_description = 'User'
