@@ -1,7 +1,7 @@
 import logging
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth import get_user_model
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
 from django.core.validators import RegexValidator
 from rest_framework import serializers
 from .models import CallbackToken
@@ -48,7 +48,10 @@ class AbstractBaseAliasAuthenticationSerializer(serializers.Serializer):
 
             if api_settings.PASSWORDLESS_REGISTER_NEW_USERS is True:
                 # If new aliases should register new users.
-                user, created = User.objects.get_or_create(**{self.alias_type: alias})
+                try:
+                    user = User.objects.get(**{self.alias_type: alias})
+                except ObjectDoesNotExist:
+                    user = User.objects.create(**{self.alias_type: alias, 'username': alias})
             else:
                 # If new aliases should not register new users.
                 try:
