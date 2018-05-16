@@ -179,8 +179,8 @@ def send_sms_with_callback_token(user, mobile_token, **kwargs):
         logger.debug("Couldn't send SMS."
                   "Did you set your Twilio account tokens and specify a PASSWORDLESS_MOBILE_NOREPLY_NUMBER?")
     except Exception as e:
-        logger.debug("Failed to send token SMS to user: %d. "
+        logger.debug("Failed to send token SMS to user: {}. "
                   "Possibly no mobile number on user object or the twilio package isn't set up yet. "
-                  "Number entered was %s" % (user.id, getattr(user, api_settings.PASSWORDLESS_USER_MOBILE_FIELD_NAME)))
+                  "Number entered was {}".format(user.id, getattr(user, api_settings.PASSWORDLESS_USER_MOBILE_FIELD_NAME)))
         logger.debug(e)
         return False

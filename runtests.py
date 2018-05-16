@@ -32,7 +32,7 @@ def flake8_main(args):
 
 def split_class_and_function(string):
     class_string, function_string = string.split('.', 1)
-    return "%s and %s" % (class_string, function_string)
+    return "{} and {}".format(class_string, function_string)
 
 def is_function(string):
     # `True` if it looks like a test function is included in the string.
