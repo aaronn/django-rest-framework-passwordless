@@ -15,7 +15,7 @@ from drfpasswordless.serializers import (
 )
 from drfpasswordless.services import TokenService
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class AbstractBaseObtainCallbackToken(APIView):
@@ -146,7 +146,7 @@ class AbstractBaseObtainAuthToken(APIView):
                 # Return our key for consumption.
                 return Response({'token': token.key}, status=status.HTTP_200_OK)
         else:
-            log.error(
+            logger.error(
                 "Couldn't log in unknown user. Errors on serializer: %s" % (serializer.error_messages, ))
         return Response({'detail': 'Couldn\'t log you in. Try again later.'},
                         status=status.HTTP_400_BAD_REQUEST)
@@ -177,7 +177,7 @@ class VerifyAliasFromCallbackToken(APIView):
 
             return Response({'detail': 'Alias verified.'}, status=status.HTTP_200_OK)
         else:
-            log.error(
+            logger.error(
                 "Couldn't verify unknown user. Errors on serializer: %s" % (serializer.error_messages, ))
 
         return Response({'detail': 'We couldn\'t verify this alias. Try again later.'}, status.HTTP_400_BAD_REQUEST)

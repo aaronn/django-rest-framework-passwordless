@@ -1,4 +1,8 @@
-from .utils import create_callback_token_for_user, send_email_with_callback_token, send_sms_with_callback_token
+from drfpasswordless.utils import (
+    create_callback_token_for_user,
+    send_email_with_callback_token,
+    send_sms_with_callback_token
+)
 
 
 class TokenService(object):
