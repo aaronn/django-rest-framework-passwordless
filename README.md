@@ -1,6 +1,4 @@
-.. image:: https://travis-ci.org/aaronn/django-rest-framework-passwordless.svg?branch=master
-    :target: https://travis-ci.org/aaronn/django-rest-framework-passwordless
-
+![ci-image]
 
 drfpasswordless is a quick way to integrate ‘passwordless’ auth into
 your Django Rest Framework project using a user’s email address or
@@ -17,77 +15,79 @@ Callback tokens by default expire after 15 minutes.
 Example Usage:
 ==============
 
-::
-
+```bash
     curl -X POST -d “email=aaron@email.com” localhost:8000/auth/email/
+```
 
 Email to aaron@email.com:
 
-::
-
-    …
+```
+    ...
     <h1>Your login token is 815381.</h1>
-    …
+    ...
+```
 
 Return Stage
 
-::
-
+```bash
     curl -X POST -d "token=815381" localhost:8000/callback/auth/
 
     > HTTP/1.0 200 OK
     > {"token":"76be2d9ecfaf5fa4226d722bzdd8a4fff207ed0e”}
+```
 
 Requirements
 ============
 
-::
-
-    - Python (2.7, 3.4, 3.5, 3.6+)
-    - Django (1.8, 1.9, 1.10, 1.11+)
-    - Django Rest Framework + AuthToken (3.4, 3.5, 3.6+)
-    - Python-Twilio (Optional, for mobile.)
-
+```
+- Python (3.6+)
+- Django (2.0+)
+- Django Rest Framework + AuthToken (3.6+)
+- Python-Twilio (Optional, for mobile.)
+```
 
 Install
 =======
 
 1. Install drfpasswordless
 
-   ::
-
-      pip install drfpasswordless
-
-
+   ```
+   pipenv install drfpasswordless
+   ```
+      
 2. Add Django Rest Framework’s Token Authentication to your Django Rest
    Framework project.
 
-   ::
-
+```python
        REST_FRAMEWORK = {
            'DEFAULT_AUTHENTICATION_CLASSES':
           ('rest_framework.authentication.TokenAuthentication',
        )}
 
        INSTALLED_APPS = [
-           // …
+           ...
            'rest_framework',
            'rest_framework.authtoken',
            'drfpasswordless',
+            ...
        ]
+```
 
-   And run ``manage.py migrate``.
+And run
+```bash
+python manage.py migrate
+```
 
 3. Set which types of contact points are allowed for auth in your
    Settings.py. The available options are ``EMAIL`` and ``MOBILE``.
 
-   ::
-
-       PASSWORDLESS_AUTH = {
-           //…
-           ‘PASSWORDLESS_AUTH_TYPES’: [‘EMAIL’, ‘MOBILE’],
-           //…
-       }
+```python
+PASSWORDLESS_AUTH = {
+   ..
+   'PASSWORDLESS_AUTH_TYPES': ['EMAIL', 'MOBILE'],
+   ..
+}
+```
 
    By default drfpasswordless looks for fields named ``email`` or ``mobile``
    on the User model. If an alias provided doesn’t belong to any given user,
@@ -101,23 +101,24 @@ Install
 
 4. Add ``drfpasswordless.urls`` to your urls.py
 
-   ::
-
+```python
        urlpatterns = [
-           //..
-           url(r'^', include('drfpasswordless.urls')),
-           //..
+           ..
+           path('', include('drfpasswordless.urls')),
+           ..
        ]
-
+```
 
 5. You can now POST to either of the endpoints:
 
-   ::
+```bash
 
-       curl -X POST -d "email=aaron@email.com" localhost:8000/auth/email/
+curl -X POST -d "email=aaron@email.com" localhost:8000/auth/email/
 
-       curl -X POST -d "mobile=+15552143912" localhost:8000/mobile/
+// OR
 
+curl -X POST -d "mobile=+15552143912" localhost:8000/mobile/
+```
    A 6 digit callback token will be sent to the contact point.
 
 6. The client has 15 minutes to use the 6 digit callback token
@@ -125,12 +126,12 @@ Install
    which the client can then use with Django Rest Framework’s
    TokenAuthentication scheme.
 
-   ::
+```bash
+curl -X POST -d "token=815381" localhost:8000/callback/auth/
 
-       curl -X POST -d "token=815381" localhost:8000/callback/auth/
-
-       > HTTP/1.0 200 OK
-       > {"token":"76be2d9ecfaf5fa4226d722bzdd8a4fff207ed0e”}
+> HTTP/1.0 200 OK
+> {"token":"76be2d9ecfaf5fa4226d722bzdd8a4fff207ed0e”}
+```
 
 Configuring Emails
 ------------------
@@ -144,27 +145,27 @@ development you can set up a dummy development smtp server to test
 emails. Sent emails will print to the console. `Read more
 here. <https://docs.djangoproject.com/en/1.10/topics/email/#configuring-email-for-development>`__
 
-::
-
+```python
     # Settings.py
     …
     EMAIL_HOST = 'localhost'
     EMAIL_PORT = 1025
+```
 
 Then run the following:
 
-::
-
+```bash
     python -m smtpd -n -c DebuggingServer localhost:1025
+```
 
 Configuring Mobile
 ------------------
 
 You’ll need to have the python twilio module installed
 
-::
-
-    pip install twilio
+```bash
+    pipenv install twilio
+```
 
 and set the ``TWILIO_ACCOUNT_SID`` and ``TWILIO_AUTH_TOKEN`` environment
 variables.
@@ -178,12 +179,12 @@ Templates
 If you’d like to use a custom email template for your email callback
 token, specify your template name with this setting:
 
-::
-
+```bash
     PASSWORDLESS_AUTH = {
-        //…
-        'PASSWORDLESS_EMAIL_TOKEN_HTML_TEMPLATE_NAME': "mytemplate.html"
+       ...
+      'PASSWORDLESS_EMAIL_TOKEN_HTML_TEMPLATE_NAME': "mytemplate.html"
     }
+```
 
 The template renders a single variable ``{{ callback_token }}`` which is
 the 6 digit callback token being sent.
@@ -225,8 +226,7 @@ Other Settings
 
 Here’s a full list of the configurable defaults.
 
-::
-
+```python
     DEFAULTS = {
 
         # Allowed auth types, can be EMAIL, MOBILE, or both.
@@ -293,10 +293,42 @@ Here’s a full list of the configurable defaults.
         # Automatically send verification email or sms when a user changes their alias.
         'PASSWORDLESS_AUTO_SEND_VERIFICATION_TOKEN': False,
     }
+```
 
-Todo
+To Do
 ----
 
+-  github.io project page
+-  Add MkDocs - http://www.mkdocs.org/
 -  Support non-US mobile numbers
 -  Custom URLs
 -  Change bad settings to 500's
+
+Pull requests are encouraged!
+
+License
+-------
+
+The MIT License (MIT)
+
+Copyright (c) 2017 Aaron Ng
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+[ci-image]: https://travis-ci.org/aaronn/django-rest-framework-passwordless.svg?branch=master

@@ -4,8 +4,6 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-Django = "*"
-djangorestframework = "*"
 twilio = "*"
 
 [dev-packages]
