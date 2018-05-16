@@ -12,7 +12,6 @@ from drfpasswordless.serializers import (
     CallbackTokenVerificationSerializer,
     EmailVerificationSerializer,
     MobileVerificationSerializer,
-    UserSerializer,
 )
 from drfpasswordless.services import TokenService
 
