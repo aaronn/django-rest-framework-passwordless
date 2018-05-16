@@ -16,35 +16,34 @@ Example Usage:
 ==============
 
 ```bash
-    curl -X POST -d “email=aaron@email.com” localhost:8000/auth/email/
+curl -X POST -d “email=aaron@email.com” localhost:8000/auth/email/
 ```
 
 Email to aaron@email.com:
 
 ```
-    ...
-    <h1>Your login token is 815381.</h1>
-    ...
+...
+<h1>Your login token is 815381.</h1>
+...
 ```
 
 Return Stage
 
 ```bash
-    curl -X POST -d "token=815381" localhost:8000/callback/auth/
+curl -X POST -d "token=815381" localhost:8000/callback/auth/
 
-    > HTTP/1.0 200 OK
-    > {"token":"76be2d9ecfaf5fa4226d722bzdd8a4fff207ed0e”}
+> HTTP/1.0 200 OK
+> {"token":"76be2d9ecfaf5fa4226d722bzdd8a4fff207ed0e”}
 ```
 
 Requirements
 ============
 
-```
 - Python (3.6+)
 - Django (2.0+)
 - Django Rest Framework + AuthToken (3.6+)
 - Python-Twilio (Optional, for mobile.)
-```
+
 
 Install
 =======
@@ -59,18 +58,18 @@ Install
    Framework project.
 
 ```python
-       REST_FRAMEWORK = {
-           'DEFAULT_AUTHENTICATION_CLASSES':
-          ('rest_framework.authentication.TokenAuthentication',
-       )}
+ REST_FRAMEWORK = {
+     'DEFAULT_AUTHENTICATION_CLASSES':
+    ('rest_framework.authentication.TokenAuthentication',
+ )}
 
-       INSTALLED_APPS = [
-           ...
-           'rest_framework',
-           'rest_framework.authtoken',
-           'drfpasswordless',
-            ...
-       ]
+ INSTALLED_APPS = [
+     ...
+     'rest_framework',
+     'rest_framework.authtoken',
+     'drfpasswordless',
+      ...
+ ]
 ```
 
 And run
@@ -102,17 +101,16 @@ PASSWORDLESS_AUTH = {
 4. Add ``drfpasswordless.urls`` to your urls.py
 
 ```python
-       urlpatterns = [
-           ..
-           path('', include('drfpasswordless.urls')),
-           ..
-       ]
+ urlpatterns = [
+     ..
+     path('', include('drfpasswordless.urls')),
+     ..
+ ]
 ```
 
 5. You can now POST to either of the endpoints:
 
 ```bash
-
 curl -X POST -d "email=aaron@email.com" localhost:8000/auth/email/
 
 // OR
@@ -146,16 +144,16 @@ emails. Sent emails will print to the console. `Read more
 here. <https://docs.djangoproject.com/en/1.10/topics/email/#configuring-email-for-development>`__
 
 ```python
-    # Settings.py
-    …
-    EMAIL_HOST = 'localhost'
-    EMAIL_PORT = 1025
+# Settings.py
+…
+EMAIL_HOST = 'localhost'
+EMAIL_PORT = 1025
 ```
 
 Then run the following:
 
 ```bash
-    python -m smtpd -n -c DebuggingServer localhost:1025
+python -m smtpd -n -c DebuggingServer localhost:1025
 ```
 
 Configuring Mobile
@@ -164,7 +162,7 @@ Configuring Mobile
 You’ll need to have the python twilio module installed
 
 ```bash
-    pipenv install twilio
+pipenv install twilio
 ```
 
 and set the ``TWILIO_ACCOUNT_SID`` and ``TWILIO_AUTH_TOKEN`` environment
@@ -180,10 +178,10 @@ If you’d like to use a custom email template for your email callback
 token, specify your template name with this setting:
 
 ```bash
-    PASSWORDLESS_AUTH = {
-       ...
-      'PASSWORDLESS_EMAIL_TOKEN_HTML_TEMPLATE_NAME': "mytemplate.html"
-    }
+PASSWORDLESS_AUTH = {
+   ...
+  'PASSWORDLESS_EMAIL_TOKEN_HTML_TEMPLATE_NAME': "mytemplate.html"
+}
 ```
 
 The template renders a single variable ``{{ callback_token }}`` which is
@@ -227,72 +225,72 @@ Other Settings
 Here’s a full list of the configurable defaults.
 
 ```python
-    DEFAULTS = {
+DEFAULTS = {
 
-        # Allowed auth types, can be EMAIL, MOBILE, or both.
-        'PASSWORDLESS_AUTH_TYPES': ['EMAIL'],
+    # Allowed auth types, can be EMAIL, MOBILE, or both.
+    'PASSWORDLESS_AUTH_TYPES': ['EMAIL'],
 
-        # Amount of time that tokens last, in seconds
-        'PASSWORDLESS_TOKEN_EXPIRE_TIME': 15 * 60,
+    # Amount of time that tokens last, in seconds
+    'PASSWORDLESS_TOKEN_EXPIRE_TIME': 15 * 60,
 
-        # The user's email field name
-        'PASSWORDLESS_USER_EMAIL_FIELD_NAME': 'email',
+    # The user's email field name
+    'PASSWORDLESS_USER_EMAIL_FIELD_NAME': 'email',
 
-        # The user's mobile field name
-        'PASSWORDLESS_USER_MOBILE_FIELD_NAME': 'mobile',
+    # The user's mobile field name
+    'PASSWORDLESS_USER_MOBILE_FIELD_NAME': 'mobile',
 
-        # Marks itself as verified the first time a user completes auth via token.
-        # Automatically unmarks itself if email is changed.
-        'PASSWORDLESS_USER_MARK_EMAIL_VERIFIED': False,
-        'PASSWORDLESS_USER_EMAIL_VERIFIED_FIELD_NAME': 'email_verified',
+    # Marks itself as verified the first time a user completes auth via token.
+    # Automatically unmarks itself if email is changed.
+    'PASSWORDLESS_USER_MARK_EMAIL_VERIFIED': False,
+    'PASSWORDLESS_USER_EMAIL_VERIFIED_FIELD_NAME': 'email_verified',
 
-        # Marks itself as verified the first time a user completes auth via token.
-        # Automatically unmarks itself if mobile number is changed.
-        'PASSWORDLESS_USER_MARK_MOBILE_VERIFIED': False,
-        'PASSWORDLESS_USER_MOBILE_VERIFIED_FIELD_NAME': 'mobile_verified',
+    # Marks itself as verified the first time a user completes auth via token.
+    # Automatically unmarks itself if mobile number is changed.
+    'PASSWORDLESS_USER_MARK_MOBILE_VERIFIED': False,
+    'PASSWORDLESS_USER_MOBILE_VERIFIED_FIELD_NAME': 'mobile_verified',
 
-        # The email the callback token is sent from
-        'PASSWORDLESS_EMAIL_NOREPLY_ADDRESS': None,
+    # The email the callback token is sent from
+    'PASSWORDLESS_EMAIL_NOREPLY_ADDRESS': None,
 
-        # The email subject
-        'PASSWORDLESS_EMAIL_SUBJECT': "Your Login Token",
+    # The email subject
+    'PASSWORDLESS_EMAIL_SUBJECT': "Your Login Token",
 
-        # A plaintext email message overridden by the html message. Takes one string.
-        'PASSWORDLESS_EMAIL_PLAINTEXT_MESSAGE': "Enter this token to sign in: %s",
+    # A plaintext email message overridden by the html message. Takes one string.
+    'PASSWORDLESS_EMAIL_PLAINTEXT_MESSAGE': "Enter this token to sign in: %s",
 
-        # The email template name.
-        'PASSWORDLESS_EMAIL_TOKEN_HTML_TEMPLATE_NAME': "passwordless_default_token_email.html",
+    # The email template name.
+    'PASSWORDLESS_EMAIL_TOKEN_HTML_TEMPLATE_NAME': "passwordless_default_token_email.html",
 
-        # Your twilio number that sends the callback tokens.
-        'PASSWORDLESS_MOBILE_NOREPLY_NUMBER': None,
+    # Your twilio number that sends the callback tokens.
+    'PASSWORDLESS_MOBILE_NOREPLY_NUMBER': None,
 
-        # The message sent to mobile users logging in. Takes one string.
-        'PASSWORDLESS_MOBILE_MESSAGE': "Use this code to log in: %s",
+    # The message sent to mobile users logging in. Takes one string.
+    'PASSWORDLESS_MOBILE_MESSAGE': "Use this code to log in: %s",
 
-        # Registers previously unseen aliases as new users.
-        'PASSWORDLESS_REGISTER_NEW_USERS': True,
+    # Registers previously unseen aliases as new users.
+    'PASSWORDLESS_REGISTER_NEW_USERS': True,
 
-        # Suppresses actual SMS for testing
-        'PASSWORDLESS_TEST_SUPPRESSION': False,
+    # Suppresses actual SMS for testing
+    'PASSWORDLESS_TEST_SUPPRESSION': False,
 
-        # Context Processors for Email Template
-        'PASSWORDLESS_CONTEXT_PROCESSORS': [],
+    # Context Processors for Email Template
+    'PASSWORDLESS_CONTEXT_PROCESSORS': [],
 
-        # The verification email subject
-        'PASSWORDLESS_EMAIL_VERIFICATION_SUBJECT': "Your Verification Token",
+    # The verification email subject
+    'PASSWORDLESS_EMAIL_VERIFICATION_SUBJECT': "Your Verification Token",
 
-        # A plaintext verification email message overridden by the html message. Takes one string.
-        'PASSWORDLESS_EMAIL_VERIFICATION_PLAINTEXT_MESSAGE': "Enter this verification code: %s",
+    # A plaintext verification email message overridden by the html message. Takes one string.
+    'PASSWORDLESS_EMAIL_VERIFICATION_PLAINTEXT_MESSAGE': "Enter this verification code: %s",
 
-        # The verification email template name.
-        'PASSWORDLESS_EMAIL_VERIFICATION_TOKEN_HTML_TEMPLATE_NAME': "passwordless_default_verification_token_email.html",
+    # The verification email template name.
+    'PASSWORDLESS_EMAIL_VERIFICATION_TOKEN_HTML_TEMPLATE_NAME': "passwordless_default_verification_token_email.html",
 
-        # The message sent to mobile users logging in. Takes one string.
-        'PASSWORDLESS_MOBILE_VERIFICATION_MESSAGE': "Enter this verification code: %s",
+    # The message sent to mobile users logging in. Takes one string.
+    'PASSWORDLESS_MOBILE_VERIFICATION_MESSAGE': "Enter this verification code: %s",
 
-        # Automatically send verification email or sms when a user changes their alias.
-        'PASSWORDLESS_AUTO_SEND_VERIFICATION_TOKEN': False,
-    }
+    # Automatically send verification email or sms when a user changes their alias.
+    'PASSWORDLESS_AUTO_SEND_VERIFICATION_TOKEN': False,
+}
 ```
 
 To Do
