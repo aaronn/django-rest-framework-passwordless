@@ -53,7 +53,7 @@ Install
    ```
    pipenv install drfpasswordless
    ```
-      
+
 2. Add Django Rest Framework’s Token Authentication to your Django Rest
    Framework project.
 
@@ -304,12 +304,25 @@ To Do
 
 Pull requests are encouraged!
 
+Donations & Support
+----
+If you found drfpasswordless useful, consider giving me a follow
+[@aaronykng](https://www.twitter.com/aaronykng) on Twitter and
+[@hi.aaron](https://www.instagram.com/hi.aaron) on Instagram.
+
+If you'd like to go a step further and are using drfpasswordless in your startup
+or business, consider a donation:
+
+- BTC: `3FzSFeKVABL5Adh9Egoxh77gHbtg2kcTPk`
+- ETH: `0x13412a79F06A83B107A8833dB209BECbcb700f24`
+- Square Cash: `$aaron`
+
 License
 -------
 
 The MIT License (MIT)
 
-Copyright (c) 2017 Aaron Ng
+Copyright (c) 2018 Aaron Ng
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
