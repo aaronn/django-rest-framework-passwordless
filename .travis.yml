@@ -7,8 +7,5 @@ python:
 matrix:
   fast_finish: true
 
-install: 
-  - pip install tox-travis
-  - pip install tox-pipenv
-
+install: pip install tox-travis
 script: tox
