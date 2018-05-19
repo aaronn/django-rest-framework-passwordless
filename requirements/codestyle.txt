@@ -1,3 +1,0 @@
-# PEP8 code linting, which we run on all commits.
-flake8==3.3.0
-pep8==1.7.0

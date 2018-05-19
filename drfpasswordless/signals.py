@@ -2,10 +2,10 @@ import logging
 from django.contrib.auth import get_user_model
 from django.dispatch import receiver
 from django.db.models import signals
-from .models import CallbackToken
-from .models import generate_numeric_token
-from .settings import api_settings
-from .services import TokenService
+from drfpasswordless.models import CallbackToken
+from drfpasswordless.models import generate_numeric_token
+from drfpasswordless.settings import api_settings
+from drfpasswordless.services import TokenService
 
 logger = logging.getLogger(__name__)
 

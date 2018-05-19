@@ -1,112 +1,125 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+# Keep up to date with https://github.com/kennethreitz/setup.py/blob/master/setup.py
+
+# Note: To use the 'upload' functionality of this file, you must:
+#   $ pip install twine
+
+import io
 import os
-import re
-import shutil
 import sys
+from shutil import rmtree
 
-from setuptools import setup
+from setuptools import find_packages, setup, Command
 
-
-def get_version(package):
-    """
-    Return package version as listed in `__version__` in `init.py`.
-    """
-    with open(os.path.join(package, '__init__.py'), 'rb') as init_py:
-        src = init_py.read().decode('utf-8')
-        return re.search("__version__ = ['\"]([^'\"]+)['\"]", src).group(1)
-
-
+# Package meta-data.
 name = 'drfpasswordless'
-version = get_version('drfpasswordless')
-package = 'drfpasswordless'
-description = 'Passwordless auth for Django Rest Framework Token Authentication.'
-url = 'https://github.com/aaronn/django-rest-framework-passwordless'
-author = 'Aaron Ng'
-author_email = 'hi@aaron.ng'
-license = 'MIT'
-install_requires = []
+
+NAME = 'drfpasswordless'
+DESCRIPTION = 'Passwordless auth for Django Rest Framework Token Authentication.'
+URL = 'https://github.com/aaronn/django-rest-framework-passwordless'
+EMAIL = 'hi@aaron.ng'
+AUTHOR = 'Aaron Ng'
+REQUIRES_PYTHON = '>=3'
+VERSION = None
+
+# What packages are required for this module to be executed?
+REQUIRED = [
+    'Django', 'djangorestframework'
+]
+
+# The rest you shouldn't have to touch too much :)
+# ------------------------------------------------
+# Except, perhaps the License and Trove Classifiers!
+# If you do change the License, remember to change the Trove Classifier for that!
+
+here = os.path.abspath(os.path.dirname(__file__))
+
+# Import the README and use it as the long-description.
+# Note: this will only work if 'README.md' is present in your MANIFEST.in file!
+with io.open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
+    long_description = '\n' + f.read()
+
+# Load the package's __version__.py module as a dictionary.
+about = {}
+if not VERSION:
+    with open(os.path.join(here, NAME, '__version__.py')) as f:
+        exec(f.read(), about)
+else:
+    about['__version__'] = VERSION
 
 
-def read(*paths):
-    """
-    Build a file path from paths and return the contents.
-    """
-    with open(os.path.join(*paths), 'r') as f:
-        return f.read()
+class UploadCommand(Command):
+    """Support setup.py upload."""
 
+    description = 'Build and publish the package.'
+    user_options = []
 
-def get_packages(package):
-    """
-    Return root package and all sub-packages.
-    """
-    return [dirpath
-            for dirpath, dirnames, filenames in os.walk(package)
-            if os.path.exists(os.path.join(dirpath, '__init__.py'))]
+    @staticmethod
+    def status(s):
+        """Prints things in bold."""
+        print('\033[1m{0}\033[0m'.format(s))
 
+    def initialize_options(self):
+        pass
 
-def get_package_data(package):
-    """
-    Return all files under the root package, that are not in a
-    package themselves.
-    """
-    walk = [(dirpath.replace(package + os.sep, '', 1), filenames)
-            for dirpath, dirnames, filenames in os.walk(package)
-            if not os.path.exists(os.path.join(dirpath, '__init__.py'))]
+    def finalize_options(self):
+        pass
 
-    filepaths = []
-    for base, filenames in walk:
-        filepaths.extend([os.path.join(base, filename)
-                          for filename in filenames])
-    return {package: filepaths}
+    def run(self):
+        try:
+            self.status('Removing previous builds…')
+            rmtree(os.path.join(here, 'dist'))
+        except OSError:
+            pass
 
+        self.status('Building Source and Wheel (universal) distribution…')
+        os.system('{0} setup.py sdist bdist_wheel --universal'.format(sys.executable))
 
-if sys.argv[-1] == 'publish':
-    if os.system('pip freeze | grep wheel'):
-        print('wheel not installed.\nUse `pip install wheel`.\nExiting.')
+        self.status('Uploading the package to PyPi via Twine…')
+        os.system('twine upload dist/*')
+
+        self.status('Pushing git tags…')
+        os.system('git tag v{0}'.format(about['__version__']))
+        os.system('git push --tags')
+        
         sys.exit()
-    if os.system('pip freeze | grep twine'):
-        print('twine not installed.\nUse `pip install twine`.\nExiting.')
-        sys.exit()
-    os.system('python setup.py sdist bdist_wheel')
-    os.system('twine upload dist/*')
-    shutil.rmtree('dist')
-    shutil.rmtree('build')
-    shutil.rmtree('drfpasswordless.egg-info')
-    print('You probably want to also tag the version now:')
-    print("  git tag -a {0} -m 'version {0}'".format(version))
-    print('  git push --tags')
-    sys.exit()
 
-
+# Where the magic happens:
 setup(
-    name=name,
-    version=version,
-    url=url,
-    license=license,
-    description=description,
-    long_description=read('README.rst'),
-    author=author,
-    author_email=author_email,
-    packages=get_packages(package),
-    package_data=get_package_data(package),
+    name=NAME,
+    version=about['__version__'],
+    description=DESCRIPTION,
+    long_description=long_description,
+    long_description_content_type='text/markdown',
+    author=AUTHOR,
+    author_email=EMAIL,
+    python_requires=REQUIRES_PYTHON,
+    url=URL,
+    packages=find_packages(exclude=('tests',)),
+    install_requires=REQUIRED,
     include_package_data=True,
-    install_requires=install_requires,
+    license='MIT',
     classifiers=[
+        # Trove classifiers
+        # Full list: https://pypi.python.org/pypi?%3Aaction=list_classifiers
+        'License :: OSI Approved :: MIT License',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: Implementation :: CPython',
+        'Programming Language :: Python :: Implementation :: PyPy',
         'Development Status :: 5 - Production/Stable',
         'Environment :: Web Environment',
         'Framework :: Django',
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
         'Topic :: Internet :: WWW/HTTP',
-    ]
+    ],
+    # $ setup.py publish support.
+    cmdclass={
+        'upload': UploadCommand,
+    },
 )

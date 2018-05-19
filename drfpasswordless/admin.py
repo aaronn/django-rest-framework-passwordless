@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import reverse
-from .models import CallbackToken
+from drfpasswordless.models import CallbackToken
 
 
 class UserLinkMixin(object):
@@ -11,7 +11,7 @@ class UserLinkMixin(object):
 
     def link_to_user(self, obj):
         link = reverse('admin:users_user_change', args=[obj.user.id])
-        return u'<a href=%s>%s</a>' % (link, obj.user.username)
+        return u'<a href={}>{}</a>'.format(link, obj.user.username)
     link_to_user.allow_tags = True
     link_to_user.short_description = 'User'
 

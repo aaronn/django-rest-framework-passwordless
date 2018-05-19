@@ -4,29 +4,22 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied
 from django.core.validators import RegexValidator
 from rest_framework import serializers
-from .models import CallbackToken
-from .settings import api_settings
-from .utils import authenticate_by_token, verify_user_alias, validate_token_age
+from drfpasswordless.models import CallbackToken
+from drfpasswordless.settings import api_settings
+from drfpasswordless.utils import authenticate_by_token, verify_user_alias, validate_token_age
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 User = get_user_model()
-
-"""
-Fields
-"""
 
 
 class TokenField(serializers.CharField):
-    default_error_messages = {'required': _('Invalid Token'),
-                              'invalid': _('Invalid Token'),
-                              'blank': _('Invalid Token'),
-                              'max_length': _('Tokens are {max_length} digits long.'),
-                              'min_length': _('Tokens are {min_length} digits long.')}
-
-
-"""
-Auth Token
-"""
+    default_error_messages = {
+        'required': _('Invalid Token'),
+        'invalid': _('Invalid Token'),
+        'blank': _('Invalid Token'),
+        'max_length': _('Tokens are {max_length} digits long.'),
+        'min_length': _('Tokens are {min_length} digits long.')
+    }
 
 
 class AbstractBaseAliasAuthenticationSerializer(serializers.Serializer):
@@ -229,25 +222,25 @@ class CallbackTokenVerificationSerializer(AbstractBaseCallbackTokenSerializer):
                 # Mark this alias as verified
                 success = verify_user_alias(user, token)
                 if success is False:
-                    log.debug("drfpasswordless: Error verifying alias.")
+                    logger.debug("drfpasswordless: Error verifying alias.")
 
                 attrs['user'] = user
                 return attrs
             else:
                 msg = _('This token is invalid. Try again later.')
-                log.debug("drfpasswordless: User token mismatch when verifying alias.")
+                logger.debug("drfpasswordless: User token mismatch when verifying alias.")
 
         except CallbackToken.DoesNotExist:
             msg = _('Missing authentication token.')
-            log.debug("drfpasswordless: Tried to validate alias with bad token.")
+            logger.debug("drfpasswordless: Tried to validate alias with bad token.")
             pass
         except User.DoesNotExist:
             msg = _('Missing user.')
-            log.debug("drfpasswordless: Tried to validate alias with bad user.")
+            logger.debug("drfpasswordless: Tried to validate alias with bad user.")
             pass
         except PermissionDenied:
             msg = _('Insufficient permissions.')
-            log.debug("drfpasswordless: Permission denied while validating alias.")
+            logger.debug("drfpasswordless: Permission denied while validating alias.")
             pass
 
         raise serializers.ValidationError(msg)

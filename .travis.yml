@@ -1,58 +1,11 @@
-python: '3.5'
-
 language: python
 
-sudo: false
-
-env:
-    - TOX_ENV=py35-flake8
-
-    - TOX_ENV=py27-django1.8-drf3.4
-    - TOX_ENV=py27-django1.8-drf3.5
-    - TOX_ENV=py27-django1.8-drf3.6
-
-    - TOX_ENV=py27-django1.9-drf3.4
-    - TOX_ENV=py27-django1.9-drf3.5
-    - TOX_ENV=py27-django1.9-drf3.6
-
-    - TOX_ENV=py27-django1.10-drf3.4
-    - TOX_ENV=py27-django1.10-drf3.5
-    - TOX_ENV=py27-django1.10-drf3.6
-
-    - TOX_ENV=py34-django1.8-drf3.4
-    - TOX_ENV=py34-django1.8-drf3.5
-    - TOX_ENV=py34-django1.8-drf3.6
-
-    - TOX_ENV=py34-django1.9-drf3.4
-    - TOX_ENV=py34-django1.9-drf3.5
-    - TOX_ENV=py34-django1.9-drf3.6
-
-    - TOX_ENV=py34-django1.10-drf3.4
-    - TOX_ENV=py34-django1.10-drf3.5
-    - TOX_ENV=py34-django1.10-drf3.6
-
-    - TOX_ENV=py35-django1.8-drf3.4
-    - TOX_ENV=py35-django1.8-drf3.5
-    - TOX_ENV=py35-django1.8-drf3.6
-
-    - TOX_ENV=py35-django1.9-drf3.4
-    - TOX_ENV=py35-django1.9-drf3.5
-    - TOX_ENV=py35-django1.9-drf3.6
-
-    - TOX_ENV=py35-django1.10-drf3.4
-    - TOX_ENV=py35-django1.10-drf3.5
-    - TOX_ENV=py35-django1.10-drf3.6
-
-    - TOX_ENV=py35-django1.11-drf3.4
-    - TOX_ENV=py35-django1.11-drf3.5
-    - TOX_ENV=py35-django1.11-drf3.6
-
+python:
+  - "3.6"
+  - "3.7-dev"
 
 matrix:
   fast_finish: true
 
-install:
-    - pip install tox
-
-script:
-    - tox -e $TOX_ENV
+install: pip install tox-travis
+script: tox

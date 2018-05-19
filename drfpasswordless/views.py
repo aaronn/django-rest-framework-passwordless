@@ -4,27 +4,24 @@ from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
-from .settings import api_settings
-from .serializers import (EmailAuthSerializer,
-                          MobileAuthSerializer,
-                          CallbackTokenAuthSerializer,
-                          CallbackTokenVerificationSerializer,
-                          EmailVerificationSerializer,
-                          MobileVerificationSerializer,)
-from .services import TokenService
+from drfpasswordless.settings import api_settings
+from drfpasswordless.serializers import (
+    EmailAuthSerializer,
+    MobileAuthSerializer,
+    CallbackTokenAuthSerializer,
+    CallbackTokenVerificationSerializer,
+    EmailVerificationSerializer,
+    MobileVerificationSerializer,
+)
+from drfpasswordless.services import TokenService
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class AbstractBaseObtainCallbackToken(APIView):
     """
     This returns a 6-digit callback token we can trade for a user's Auth Token.
     """
-    throttle_classes = ()
-    permission_classes = ()
-    parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.JSONParser,)
-    renderer_classes = (renderers.JSONRenderer,)
-
     success_response = "A login token has been sent to you."
     failure_response = "Unable to send you a login code. Try again later."
 
@@ -101,9 +98,11 @@ class ObtainEmailVerificationCallbackToken(AbstractBaseObtainCallbackToken):
     email_subject = api_settings.PASSWORDLESS_EMAIL_VERIFICATION_SUBJECT
     email_plaintext = api_settings.PASSWORDLESS_EMAIL_VERIFICATION_PLAINTEXT_MESSAGE
     email_html = api_settings.PASSWORDLESS_EMAIL_VERIFICATION_TOKEN_HTML_TEMPLATE_NAME
-    message_payload = {'email_subject': email_subject,
-                       'email_plaintext': email_plaintext,
-                       'email_html': email_html}
+    message_payload = {
+        'email_subject': email_subject,
+        'email_plaintext': email_plaintext,
+        'email_html': email_html
+    }
 
 
 class ObtainMobileVerificationCallbackToken(AbstractBaseObtainCallbackToken):
@@ -123,10 +122,6 @@ class AbstractBaseObtainAuthToken(APIView):
     This is a duplicate of rest_framework's own ObtainAuthToken method.
     Instead, this returns an Auth Token based on our 6 digit callback token and source.
     """
-    throttle_classes = ()
-    permission_classes = ()
-    parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.JSONParser,)
-    renderer_classes = (renderers.JSONRenderer,)
     serializer_class = None
 
     def post(self, request, *args, **kwargs):
@@ -144,10 +139,8 @@ class AbstractBaseObtainAuthToken(APIView):
                 # Return our key for consumption.
                 return Response({'token': token.key}, status=status.HTTP_200_OK)
         else:
-            log.error(
-                "Couldn't log in unknown user. Errors on serializer: %s" % (serializer.error_messages, ))
-        return Response({'detail': 'Couldn\'t log you in. Try again later.'},
-                        status=status.HTTP_400_BAD_REQUEST)
+            logger.error("Couldn't log in unknown user. Errors on serializer: {}".format(serializer.error_messages))
+        return Response({'detail': 'Couldn\'t log you in. Try again later.'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ObtainAuthTokenFromCallbackToken(AbstractBaseObtainAuthToken):
@@ -163,19 +156,13 @@ class VerifyAliasFromCallbackToken(APIView):
     This verifies an alias on correct callback token entry using the same logic as auth.
     Should be refactored at some point.
     """
-    throttle_classes = ()
-    permission_classes = ()
-    parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.JSONParser,)
-    renderer_classes = (renderers.JSONRenderer,)
     serializer_class = CallbackTokenVerificationSerializer
 
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data, context={'user_id': self.request.user.id})
         if serializer.is_valid(raise_exception=True):
-
             return Response({'detail': 'Alias verified.'}, status=status.HTTP_200_OK)
         else:
-            log.error(
-                "Couldn't verify unknown user. Errors on serializer: %s" % (serializer.error_messages, ))
+            logger.error("Couldn't verify unknown user. Errors on serializer: {}".format(serializer.error_messages))
 
         return Response({'detail': 'We couldn\'t verify this alias. Try again later.'}, status.HTTP_400_BAD_REQUEST)

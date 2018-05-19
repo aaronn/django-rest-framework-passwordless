@@ -1,15 +1,18 @@
-from django.conf.urls import url
-from .views import (ObtainEmailCallbackToken,
-                    ObtainMobileCallbackToken,
-                    ObtainAuthTokenFromCallbackToken,
-                    VerifyAliasFromCallbackToken,
-                    ObtainEmailVerificationCallbackToken,
-                    ObtainMobileVerificationCallbackToken,
-                    )
+from django.urls import path
+from drfpasswordless.views import (
+     ObtainEmailCallbackToken,
+     ObtainMobileCallbackToken,
+     ObtainAuthTokenFromCallbackToken,
+     VerifyAliasFromCallbackToken,
+     ObtainEmailVerificationCallbackToken,
+     ObtainMobileVerificationCallbackToken,
+)
 
-urlpatterns = [url(r'^callback/auth/$', ObtainAuthTokenFromCallbackToken.as_view(), name='auth_callback'),
-               url(r'^auth/email/$', ObtainEmailCallbackToken.as_view(), name='auth_email'),
-               url(r'^auth/mobile/$', ObtainMobileCallbackToken.as_view(), name='auth_mobile'),
-               url(r'^callback/verify/$', VerifyAliasFromCallbackToken.as_view(), name='verify_callback'),
-               url(r'^verify/email/$', ObtainEmailVerificationCallbackToken.as_view(), name='verify_email'),
-               url(r'^verify/mobile/$', ObtainMobileVerificationCallbackToken.as_view(), name='verify_mobile')]
+urlpatterns = [
+     path('callback/auth/', ObtainAuthTokenFromCallbackToken.as_view(), name='auth_callback'),
+     path('auth/email/', ObtainEmailCallbackToken.as_view(), name='auth_email'),
+     path('auth/mobile/', ObtainMobileCallbackToken.as_view(), name='auth_mobile'),
+     path('callback/verify/', VerifyAliasFromCallbackToken.as_view(), name='verify_callback'),
+     path('verify/email/', ObtainEmailVerificationCallbackToken.as_view(), name='verify_email'),
+     path('verify/mobile/', ObtainMobileVerificationCallbackToken.as_view(), name='verify_mobile'),
+]

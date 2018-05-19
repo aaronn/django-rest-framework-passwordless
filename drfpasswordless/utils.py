@@ -5,11 +5,11 @@ from django.core.exceptions import PermissionDenied
 from django.core.mail import send_mail
 from django.template import loader
 from django.utils import timezone
-from .models import CallbackToken
-from .settings import api_settings
+from drfpasswordless.models import CallbackToken
+from drfpasswordless.settings import api_settings
 
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 User = get_user_model()
 
 
@@ -25,11 +25,11 @@ def authenticate_by_token(callback_token):
         return token.user
 
     except CallbackToken.DoesNotExist:
-        log.debug("drfpasswordless: Challenged with a callback token that doesn't exist.")
+        logger.debug("drfpasswordless: Challenged with a callback token that doesn't exist.")
     except User.DoesNotExist:
-        log.debug("drfpasswordless: Authenticated user somehow doesn't exist.")
+        logger.debug("drfpasswordless: Authenticated user somehow doesn't exist.")
     except PermissionDenied:
-        log.debug("drfpasswordless: Permission denied while authenticating.")
+        logger.debug("drfpasswordless: Permission denied while authenticating.")
 
     return None
 
@@ -133,15 +133,15 @@ def send_email_with_callback_token(user, email_token, **kwargs):
                 html_message=html_message,)
 
         else:
-            log.debug("Failed to send token email. Missing PASSWORDLESS_EMAIL_NOREPLY_ADDRESS.")
+            logger.debug("Failed to send token email. Missing PASSWORDLESS_EMAIL_NOREPLY_ADDRESS.")
             return False
         return True
 
     except Exception as e:
-        log.debug("Failed to send token email to user: %d."
+        logger.debug("Failed to send token email to user: %d."
                   "Possibly no email on user object. Email entered was %s" %
                   (user.id, getattr(user, api_settings.PASSWORDLESS_USER_EMAIL_FIELD_NAME)))
-        log.debug(e)
+        logger.debug(e)
         return False
 
 
@@ -170,17 +170,17 @@ def send_sms_with_callback_token(user, mobile_token, **kwargs):
             )
             return True
         else:
-            log.debug("Failed to send token sms. Missing PASSWORDLESS_MOBILE_NOREPLY_NUMBER.")
+            logger.debug("Failed to send token sms. Missing PASSWORDLESS_MOBILE_NOREPLY_NUMBER.")
             return False
     except ImportError:
-        log.debug("Couldn't import Twilio client. Is twilio installed?")
+        logger.debug("Couldn't import Twilio client. Is twilio installed?")
         return False
     except KeyError:
-        log.debug("Couldn't send SMS."
+        logger.debug("Couldn't send SMS."
                   "Did you set your Twilio account tokens and specify a PASSWORDLESS_MOBILE_NOREPLY_NUMBER?")
     except Exception as e:
-        log.debug("Failed to send token SMS to user: %d. "
+        logger.debug("Failed to send token SMS to user: {}. "
                   "Possibly no mobile number on user object or the twilio package isn't set up yet. "
-                  "Number entered was %s" % (user.id, getattr(user, api_settings.PASSWORDLESS_USER_MOBILE_FIELD_NAME)))
-        log.debug(e)
+                  "Number entered was {}".format(user.id, getattr(user, api_settings.PASSWORDLESS_USER_MOBILE_FIELD_NAME)))
+        logger.debug(e)
         return False
