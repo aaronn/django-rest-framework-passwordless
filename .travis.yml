@@ -11,4 +11,4 @@ matrix:
 
 install: pip install tox-travis
 
-script: tox -e $(echo py$TRAVIS_PYTHON_VERSION | tr -d .)
+script: tox
