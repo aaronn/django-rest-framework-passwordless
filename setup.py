@@ -21,7 +21,7 @@ DESCRIPTION = 'Passwordless auth for Django Rest Framework Token Authentication.
 URL = 'https://github.com/aaronn/django-rest-framework-passwordless'
 EMAIL = 'hi@aaron.ng'
 AUTHOR = 'Aaron Ng'
-REQUIRES_PYTHON = '>=3.6.0'
+REQUIRES_PYTHON = '>=3'
 VERSION = None
 
 # What packages are required for this module to be executed?
