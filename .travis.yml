@@ -1,11 +1,14 @@
 language: python
+
 python:
-    - "3.6"
-    - "3.7-dev"
+  - "3.6"
+  - "3.7-dev"
 
 matrix:
   fast_finish: true
 
-install: pip install tox
+install: 
+  - pip install tox-travis
+  - pip install tox-pipenv
 
 script: tox
