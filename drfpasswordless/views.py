@@ -130,12 +130,7 @@ class AbstractBaseObtainAuthToken(APIView):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid(raise_exception=True):
             user = serializer.validated_data['user']
-            token, created = Token.objects.get_or_create(user=user)
-
-            if created:
-                # Initially set an unusable password if a user is created through this.
-                user.set_unusable_password()
-                user.save()
+            token = Token.objects.get_or_create(user=user)[0]
 
             if token:
                 # Return our key for consumption.
