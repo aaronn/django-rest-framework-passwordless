@@ -115,7 +115,7 @@ curl -X POST -d "email=aaron@email.com" localhost:8000/auth/email/
 
 // OR
 
-curl -X POST -d "mobile=+15552143912" localhost:8000/mobile/
+curl -X POST -d "mobile=+15552143912" localhost:8000/auth/mobile/
 ```
    A 6 digit callback token will be sent to the contact point.
 
