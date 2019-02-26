@@ -4,7 +4,10 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+django = {version=">=2.0.10"}
+djangorestframework = "*"
 twilio = "*"
+
 
 [dev-packages]
 flake8 = "*"
@@ -13,8 +16,10 @@ pep8 = "*"
 pytest= "*"
 pytest-cov= "*"
 pytest-django= "*"
+requests = {version=">=2.20.0"}
 setuptools-markdown = "*"
 twine = "*"
+urllib3 = {version=">=1.23"}
 wheel = "*"
 
 [requires]
