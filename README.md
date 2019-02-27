@@ -291,6 +291,13 @@ DEFAULTS = {
 
     # Automatically send verification email or sms when a user changes their alias.
     'PASSWORDLESS_AUTO_SEND_VERIFICATION_TOKEN': False,
+
+    # What function is called to construct an authentication tokens when
+    # exchanging a passwordless token for a real user auth token. This function
+    # should take a user and return a tuple of two values. The first value is
+    # the token itself, the second is a boolean value representating whether
+    # the token was newly created.
+    'PASSWORDLESS_AUTH_TOKEN_CREATOR': 'drfpasswordless.utils.create_authentication_token'
 }
 ```
 

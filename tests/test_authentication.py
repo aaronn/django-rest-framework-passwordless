@@ -213,6 +213,53 @@ class MobileSignUpCallbackTokenTests(APITestCase):
         api_settings.PASSWORDLESS_MOBILE_NOREPLY_NUMBER = DEFAULTS['PASSWORDLESS_MOBILE_NOREPLY_NUMBER']
 
 
+def dummy_token_creator(user):
+    token = Token.objects.create(key="dummy", user=user)
+    return (token, True)
+
+
+class OverrideTokenCreationTests(APITestCase):
+    def setUp(self):
+        super().setUp()
+
+        api_settings.PASSWORDLESS_AUTH_TOKEN_CREATOR = 'tests.test_authentication.dummy_token_creator'
+        api_settings.PASSWORDLESS_AUTH_TYPES = ['EMAIL']
+        api_settings.PASSWORDLESS_EMAIL_NOREPLY_ADDRESS = 'noreply@example.com'
+
+        self.email = 'aaron@example.com'
+        self.url = '/auth/email/'
+        self.challenge_url = '/callback/auth/'
+
+        self.email_field_name = api_settings.PASSWORDLESS_USER_EMAIL_FIELD_NAME
+        self.user = User.objects.create(**{self.email_field_name: self.email})
+
+    def test_token_creation_gets_overridden(self):
+        """Ensure that if we change the token creation function, the overridden one gets called"""
+        data = {'email': self.email}
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Token sent to alias
+        callback_token = CallbackToken.objects.filter(user=self.user, is_active=True).first()
+        challenge_data = {'token': callback_token}
+
+        # Try to auth with the callback token
+        challenge_response = self.client.post(self.challenge_url, challenge_data)
+        self.assertEqual(challenge_response.status_code, status.HTTP_200_OK)
+
+        # Verify Auth Token
+        auth_token = challenge_response.data['token']
+        self.assertEqual(auth_token, Token.objects.filter(key=auth_token).first().key)
+        self.assertEqual('dummy', Token.objects.filter(key=auth_token).first().key)
+
+    def tearDown(self):
+        api_settings.PASSWORDLESS_AUTH_TOKEN_CREATOR = DEFAULTS['PASSWORDLESS_AUTH_TOKEN_CREATOR']
+        api_settings.PASSWORDLESS_AUTH_TYPES = DEFAULTS['PASSWORDLESS_AUTH_TYPES']
+        api_settings.PASSWORDLESS_EMAIL_NOREPLY_ADDRESS = DEFAULTS['PASSWORDLESS_EMAIL_NOREPLY_ADDRESS']
+        self.user.delete()
+        super().tearDown()
+
+
 class MobileLoginCallbackTokenTests(APITestCase):
 
     def setUp(self):
