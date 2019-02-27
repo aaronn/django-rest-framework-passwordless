@@ -2,7 +2,7 @@ import logging
 from rest_framework import parsers, renderers, status
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated 
 from rest_framework.views import APIView
 from drfpasswordless.settings import api_settings
 from drfpasswordless.serializers import (
@@ -62,6 +62,7 @@ class AbstractBaseObtainCallbackToken(APIView):
 
 
 class ObtainEmailCallbackToken(AbstractBaseObtainCallbackToken):
+    permission_classes = (AllowAny,)
     serializer_class = EmailAuthSerializer
     success_response = "A login token has been sent to your email."
     failure_response = "Unable to email you a login code. Try again later."
@@ -77,6 +78,7 @@ class ObtainEmailCallbackToken(AbstractBaseObtainCallbackToken):
 
 
 class ObtainMobileCallbackToken(AbstractBaseObtainCallbackToken):
+    permission_classes = (AllowAny,)
     serializer_class = MobileAuthSerializer
     success_response = "We texted you a login code."
     failure_response = "Unable to send you a login code. Try again later."
