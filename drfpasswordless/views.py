@@ -150,6 +150,7 @@ class ObtainAuthTokenFromCallbackToken(AbstractBaseObtainAuthToken):
     This is a duplicate of rest_framework's own ObtainAuthToken method.
     Instead, this returns an Auth Token based on our callback token and source.
     """
+    permission_classes = (AllowAny,)
     serializer_class = CallbackTokenAuthSerializer
 
 
