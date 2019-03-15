@@ -27,6 +27,7 @@ class AbstractBaseAliasAuthenticationSerializer(serializers.Serializer):
     Abstract class that returns a callback token based on the field given
     Returns a token if valid, None or a message if not.
     """
+
     @property
     def alias_type(self):
         # The alias type, either email or mobile
@@ -41,7 +42,12 @@ class AbstractBaseAliasAuthenticationSerializer(serializers.Serializer):
 
             if api_settings.PASSWORDLESS_REGISTER_NEW_USERS is True:
                 # If new aliases should register new users.
-                user, created = User.objects.get_or_create(**{self.alias_type: alias})
+                user, user_created = User.objects.get_or_create(
+                    **{self.alias_type: alias})
+
+                if user_created:
+                    user.set_unusable_password()
+                    user.save()
             else:
                 # If new aliases should not register new users.
                 try:
