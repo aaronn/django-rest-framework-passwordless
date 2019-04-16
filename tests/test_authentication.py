@@ -42,6 +42,29 @@ class EmailSignUpCallbackTokenTests(APITestCase):
         # Verify a token exists for the user
         self.assertEqual(CallbackToken.objects.filter(user=user, is_active=True).exists(), 1)
 
+    def test_long_email_signup_success(self):
+        # check that application will not fail for emails longer than 40 symbols
+        email = '1234567890'*23 + '@example.com'
+        data = {'email': email}
+
+        self.assertEqual(len(email), 242)
+
+        # Verify user doesn't exist yet
+        user = User.objects.filter(**{self.email_field_name: email}).first()
+        # Make sure our user isn't None, meaning the user was created.
+        self.assertEqual(user, None)
+
+        # verify a new user was created with serializer
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        user = User.objects.get(**{self.email_field_name: email})
+        self.assertNotEqual(user, None)
+
+        callback_token = CallbackToken.objects.filter(user=user, is_active=True).first()
+        # Verify a token exists for the user
+        self.assertIsNotNone(callback_token)
+        self.assertEqual(callback_token.to_alias, email)
+
     def test_email_signup_disabled(self):
         api_settings.PASSWORDLESS_REGISTER_NEW_USERS = False
 
