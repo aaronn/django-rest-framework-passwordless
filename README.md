@@ -166,7 +166,8 @@ pipenv install twilio
 ```
 
 and set the ``TWILIO_ACCOUNT_SID`` and ``TWILIO_AUTH_TOKEN`` environment
-variables.
+variables. These are read from `os.environ`, so make sure you don't put
+them in your settings file accidentally.
 
 You’ll also need to specify the number you send the token from with the
 ``PASSWORDLESS_MOBILE_NOREPLY_NUMBER`` setting.
