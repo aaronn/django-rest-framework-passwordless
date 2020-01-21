@@ -95,7 +95,7 @@ PASSWORDLESS_AUTH = {
    3a. If you’re using ``email``, see the Configuring Email section
    below.
 
-   3b. If you’re using ``mobile``, see the Configuring Email section
+   3b. If you’re using ``mobile``, see the Configuring Mobile section
    below.
 
 4. Add ``drfpasswordless.urls`` to your urls.py
