@@ -23,4 +23,4 @@ urllib3 = {version=">=1.23"}
 wheel = "*"
 
 [requires]
-python_version = "3.7"
+python_version = "3.6"
