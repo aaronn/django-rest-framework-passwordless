@@ -28,4 +28,11 @@ jobs:
     - name: Test with pytest
       run: |
         pipenv install pytest
+        pipenv install pytest-cov
+        pipenv install pytest-django
+        pipenv install django20: Django==2.0.*
+        pipenv install django21: Django==2.1.*
+        pipenv install drf37: djangorestframework==3.7.*
+        pipenv install drf38: djangorestframework==3.8.*
+        pipenv install drf39: djangorestframework==3.9.*
         pipenv run pytest tests
