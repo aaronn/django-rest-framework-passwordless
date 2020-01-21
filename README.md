@@ -136,6 +136,14 @@ Configuring Emails
 
 Specify the email address you’d like to send the callback token from
 with the ``PASSWORDLESS_EMAIL_NOREPLY_ADDRESS`` setting.
+```python
+PASSWORDLESS_AUTH = {
+   ..
+   'PASSWORDLESS_AUTH_TYPES': ['EMAIL',],
+   'PASSWORDLESS_EMAIL_NOREPLY_ADDRESS': 'noreply@example.com',
+   ..
+}
+```
 
 You’ll also need to set up an SMTP server to send emails (`See Django
 Docs <https://docs.djangoproject.com/en/1.10/topics/email/>`__), but for
