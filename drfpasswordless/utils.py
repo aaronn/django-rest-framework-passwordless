@@ -5,6 +5,7 @@ from django.core.exceptions import PermissionDenied
 from django.core.mail import send_mail
 from django.template import loader
 from django.utils import timezone
+from rest_framework.authtoken.models import Token
 from drfpasswordless.models import CallbackToken
 from drfpasswordless.settings import api_settings
 
@@ -189,3 +190,8 @@ def send_sms_with_callback_token(user, mobile_token, **kwargs):
                   "Number entered was {}".format(user.id, getattr(user, api_settings.PASSWORDLESS_USER_MOBILE_FIELD_NAME)))
         logger.debug(e)
         return False
+
+
+def create_authentication_token(user):
+    """ Default way to create an authentication token"""
+    return Token.objects.get_or_create(user=user)

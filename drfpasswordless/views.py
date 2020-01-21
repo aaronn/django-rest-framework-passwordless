@@ -1,6 +1,6 @@
 import logging
+from django.utils.module_loading import import_string
 from rest_framework import parsers, renderers, status
-from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated 
 from rest_framework.views import APIView
@@ -130,7 +130,8 @@ class AbstractBaseObtainAuthToken(APIView):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid(raise_exception=True):
             user = serializer.validated_data['user']
-            token = Token.objects.get_or_create(user=user)[0]
+            token_creator = import_string(api_settings.PASSWORDLESS_AUTH_TOKEN_CREATOR)
+            (token, _) = token_creator(user)
 
             if token:
                 # Return our key for consumption.
