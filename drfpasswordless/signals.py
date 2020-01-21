@@ -83,7 +83,7 @@ def update_alias_verification(sender, instance, **kwargs):
 
                 except User.DoesNotExist:
                     # User probably is just initially being created
-                    setattr(instance, email_verified_field, True)
+                    return
 
             if api_settings.PASSWORDLESS_USER_MARK_MOBILE_VERIFIED is True:
                 """
@@ -115,4 +115,4 @@ def update_alias_verification(sender, instance, **kwargs):
 
                 except User.DoesNotExist:
                     # User probably is just initially being created
-                    setattr(instance, mobile_verified_field, True)
+                    pass
