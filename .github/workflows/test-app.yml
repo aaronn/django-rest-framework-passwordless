@@ -19,6 +19,7 @@ jobs:
         pip install pipenv
         pipenv install
     - name: Open Python Shell
+      run: |
         pipenv shell
     - name: Lint with flake8
       run: |
