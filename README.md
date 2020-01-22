@@ -111,11 +111,11 @@ PASSWORDLESS_AUTH = {
 5. You can now POST to either of the endpoints:
 
 ```bash
-curl -X POST -d "email=aaron@email.com" localhost:8000/auth/alias/
+curl -X POST -d "email=aaron@email.com" localhost:8000/auth/email/
 
 // OR
 
-curl -X POST -d "mobile=+15552143912" localhost:8000/auth/alias/
+curl -X POST -d "mobile=+15552143912" localhost:8000/auth/mobile/
 ```
    A 6 digit callback token will be sent to the contact point.
 
@@ -202,11 +202,11 @@ This is off by default but can be turned on with
 enabled they look for the User model fields ``email_verified`` or
 ``mobile_verified``.
 
-You can also use ``/validate/email/`` or ``/validate/mobile/`` which will
+You can also use ``auth/verify/email/`` or ``/auth/verify/mobile/`` which will
 automatically send a token to the endpoint attached to the current
 ``request.user``'s email or mobile if available.
 
-You can then send that token to ``/callback/verify/`` which will double-check
+You can then send that token to ``/auth/verify/`` which will double-check
 that the endpoint belongs to the request.user and mark the alias as verified.
 
 Registration
