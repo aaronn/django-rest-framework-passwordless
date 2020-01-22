@@ -39,9 +39,9 @@ curl -X POST -d "token=815381" localhost:8000/callback/auth/
 Requirements
 ============
 
-- Python (3.6+)
-- Django (2.0+)
-- Django Rest Framework + AuthToken (3.6+)
+- Python (3.7+)
+- Django (2.2+)
+- Django Rest Framework + AuthToken (3.10+)
 - Python-Twilio (Optional, for mobile.)
 
 
