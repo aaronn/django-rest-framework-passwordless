@@ -10,20 +10,13 @@ from drfpasswordless.services import TokenService
 logger = logging.getLogger(__name__)
 
 
-@receiver(signals.pre_save, sender=CallbackToken)
-def invalidate_previous_tokens(sender, instance, **kwargs):
+@receiver(signals.post_save, sender=CallbackToken)
+def invalidate_previous_tokens(sender, instance, created, **kwargs):
     """
-    Invalidates all previously issued tokens as a post_save signal.
+    Invalidates all previously issued tokens of that type when a new one is created, used, or anything like that.
     """
-    active_tokens = None
     if isinstance(instance, CallbackToken):
-        active_tokens = CallbackToken.objects.active().filter(user=instance.user, type=instance.type).exclude(id=instance.id)
-
-    # Invalidate tokens
-    if active_tokens:
-        for token in active_tokens:
-            token.is_active = False
-            token.save()
+        CallbackToken.objects.active().filter(user=instance.user, type=instance.type).exclude(id=instance.id).update(is_active=False)
 
 
 @receiver(signals.pre_save, sender=CallbackToken)
