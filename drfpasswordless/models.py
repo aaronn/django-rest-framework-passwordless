@@ -37,7 +37,7 @@ class AbstractBaseCallbackToken(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name=None, on_delete=models.CASCADE)
     is_active = models.BooleanField(default=True)
-    to_alias = models.CharField(blank=True, max_length=40)
+    to_alias = models.CharField(blank=True, max_length=254)
     to_alias_type = models.CharField(blank=True, max_length=20)
 
     objects = CallbackTokenManger()
