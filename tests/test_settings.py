@@ -90,7 +90,7 @@ class AliasEmailVerificationTests(APITestCase):
         api_settings.PASSWORDLESS_USER_MARK_EMAIL_VERIFIED = True
 
         self.url = '/auth/email/'
-        self.callback_url = '/callback/auth/'
+        self.callback_url = '/auth/token/'
         self.email_field_name = api_settings.PASSWORDLESS_USER_EMAIL_FIELD_NAME
         self.email_verified_field_name = api_settings.PASSWORDLESS_USER_EMAIL_VERIFIED_FIELD_NAME
 
@@ -140,7 +140,7 @@ class AliasMobileVerificationTests(APITestCase):
         api_settings.PASSWORDLESS_USER_MARK_MOBILE_VERIFIED = True
 
         self.url = '/auth/mobile/'
-        self.callback_url = '/callback/auth/'
+        self.callback_url = '/auth/token/'
         self.mobile_field_name = api_settings.PASSWORDLESS_USER_MOBILE_FIELD_NAME
         self.mobile_verified_field_name = api_settings.PASSWORDLESS_USER_MOBILE_VERIFIED_FIELD_NAME
 

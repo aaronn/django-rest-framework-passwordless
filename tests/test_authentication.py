@@ -76,7 +76,7 @@ class EmailLoginCallbackTokenTests(APITestCase):
 
         self.email = 'aaron@example.com'
         self.url = '/auth/email/'
-        self.challenge_url = '/callback/auth/'
+        self.challenge_url = '/auth/token/'
 
         self.email_field_name = api_settings.PASSWORDLESS_USER_EMAIL_FIELD_NAME
         self.user = User.objects.create(**{self.email_field_name: self.email})
@@ -228,7 +228,7 @@ class OverrideTokenCreationTests(APITestCase):
 
         self.email = 'aaron@example.com'
         self.url = '/auth/email/'
-        self.challenge_url = '/callback/auth/'
+        self.challenge_url = '/auth/token/'
 
         self.email_field_name = api_settings.PASSWORDLESS_USER_EMAIL_FIELD_NAME
         self.user = User.objects.create(**{self.email_field_name: self.email})
@@ -269,7 +269,7 @@ class MobileLoginCallbackTokenTests(APITestCase):
 
         self.mobile = '+15551234567'
         self.url = '/auth/mobile/'
-        self.challenge_url = '/callback/auth/'
+        self.challenge_url = '/auth/token/'
 
         self.mobile_field_name = api_settings.PASSWORDLESS_USER_MOBILE_FIELD_NAME
 

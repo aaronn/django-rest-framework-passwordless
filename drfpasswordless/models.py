@@ -33,6 +33,7 @@ class AbstractBaseCallbackToken(models.Model):
     When a new token is created, older ones of the same type are invalidated
     via the pre_save signal in signals.py.
     """
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name=None, on_delete=models.CASCADE)
@@ -56,7 +57,12 @@ class CallbackToken(AbstractBaseCallbackToken):
     """
     Generates a random six digit number to be returned.
     """
+    TOKEN_TYPE_AUTH = 'AUTH'
+    TOKEN_TYPE_VERIFY = 'VERIFY'
+    TOKEN_TYPES = ((TOKEN_TYPE_AUTH, 'Auth'), (TOKEN_TYPE_VERIFY, 'Verify'))
+
     key = models.CharField(default=generate_numeric_token, max_length=6, unique=True)
+    type = models.CharField(max_length=20, choices=TOKEN_TYPES)
 
     class Meta(AbstractBaseCallbackToken.Meta):
         verbose_name = 'Callback Token'
