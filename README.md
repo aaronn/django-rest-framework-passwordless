@@ -30,7 +30,7 @@ Email to aaron@email.com:
 Return Stage
 
 ```bash
-curl -X POST -d "token=815381" localhost:8000/callback/auth/
+curl -X POST -d "email=aaron@example.com&token=815381" localhost:8000/callback/auth/
 
 > HTTP/1.0 200 OK
 > {"token":"76be2d9ecfaf5fa4226d722bzdd8a4fff207ed0e”}
@@ -145,8 +145,7 @@ PASSWORDLESS_AUTH = {
 }
 ```
 
-You’ll also need to set up an SMTP server to send emails (`See Django
-Docs <https://docs.djangoproject.com/en/1.10/topics/email/>`__), but for
+You’ll also need to set up an SMTP server to send emails but for
 development you can set up a dummy development smtp server to test
 emails. Sent emails will print to the console. `Read more
 here. <https://docs.djangoproject.com/en/3.0/topics/email/#console-backend>`__
@@ -232,10 +231,10 @@ DEFAULTS = {
     'PASSWORDLESS_AUTH_TYPES': ['EMAIL'],
 
     # URL Prefix for Authentication Endpoints
-    'PASSWORDLESS_AUTH_PREFIX': 'auth',
+    'PASSWORDLESS_AUTH_PREFIX': 'auth/',
     
     #  URL Prefix for Verification Endpoints
-    'PASSWORDLESS_VERIFY_PREFIX': 'auth',
+    'PASSWORDLESS_VERIFY_PREFIX': 'auth/verify/',
 
     # Amount of time that tokens last, in seconds
     'PASSWORDLESS_TOKEN_EXPIRE_TIME': 15 * 60,
