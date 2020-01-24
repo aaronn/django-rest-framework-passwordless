@@ -68,6 +68,7 @@ class AliasEmailVerificationTests(APITestCase):
 
         # Post callback token back.
         verify_token = CallbackToken.objects.filter(user=user, is_active=True).first()
+        self.assertNotEqual(verify_token, None)
         verify_callback_response = self.client.post(self.callback_verify, {'email': email2, 'token': verify_token.key})
         self.assertEqual(verify_callback_response.status_code, status.HTTP_200_OK)
 
