@@ -253,7 +253,6 @@ class CallbackTokenVerificationSerializer(AbstractBaseCallbackTokenSerializer):
             callback_token = attrs.get('token', None)
 
             token = CallbackToken.objects.get(**{'key': callback_token,
-                                                 'type': CallbackToken.TOKEN_TYPE_VERIFY,
                                                  'is_active': True})
 
             if token.user == user:
