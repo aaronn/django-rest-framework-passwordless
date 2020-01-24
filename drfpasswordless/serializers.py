@@ -252,8 +252,7 @@ class CallbackTokenVerificationSerializer(AbstractBaseCallbackTokenSerializer):
             user = User.objects.get(**{'id': user_id, alias_type: alias})
             callback_token = attrs.get('token', None)
 
-            token = CallbackToken.objects.get(**{'user_id': user.id,
-                                                 'key': callback_token,
+            token = CallbackToken.objects.get(**{'key': callback_token,
                                                  'type': CallbackToken.TOKEN_TYPE_VERIFY,
                                                  'is_active': True})
 
