@@ -262,15 +262,20 @@ class CallbackTokenVerificationSerializer(AbstractBaseCallbackTokenSerializer):
                                                  'type': CallbackToken.TOKEN_TYPE_VERIFY,
                                                  'is_active': True})
 
+            print("test", file=sys.stderr)
+
             if token:
+                print("test2", file=sys.stderr)
                 # Mark this alias as verified
                 success = verify_user_alias(user, token)
                 if success is False:
+                    print("test3", file=sys.stderr)
                     logger.debug("drfpasswordless: Error verifying alias.")
 
                 attrs['user'] = user
                 return attrs
             else:
+                print("test4", file=sys.stderr)
                 msg = _('This token is invalid. Try again later.')
                 logger.debug("drfpasswordless: User token mismatch when verifying alias.")
 
