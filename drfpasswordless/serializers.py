@@ -8,6 +8,7 @@ from rest_framework.exceptions import ValidationError
 from drfpasswordless.models import CallbackToken
 from drfpasswordless.settings import api_settings
 from drfpasswordless.utils import authenticate_by_token, verify_user_alias, validate_token_age
+import sys
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -249,8 +250,12 @@ class CallbackTokenVerificationSerializer(AbstractBaseCallbackTokenSerializer):
         try:
             alias_type, alias = self.validate_alias(attrs)
             user_id = self.context.get("user_id")
+
+            print(user_id, file=sys.stderr)
             user = User.objects.get(**{'id': user_id, alias_type: alias})
             callback_token = attrs.get('token', None)
+            print(alias_type, file=sys.stderr)
+            print(alias, file=sys.stderr)
 
             token = CallbackToken.objects.get(**{'user': user,
                                                  'key': callback_token,
