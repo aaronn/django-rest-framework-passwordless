@@ -249,7 +249,7 @@ class CallbackTokenVerificationSerializer(AbstractBaseCallbackTokenSerializer):
         try:
             alias_type, alias = self.validate_alias(attrs)
             user_id = self.context.get("user_id")
-            user = User.objects.get(**{'pk': user_id, alias_type: alias})
+            user = User.objects.get(**{'id': user_id, alias_type: alias})
             callback_token = attrs.get('token', None)
 
             token = CallbackToken.objects.get(**{'user': user,
@@ -270,7 +270,7 @@ class CallbackTokenVerificationSerializer(AbstractBaseCallbackTokenSerializer):
                 logger.debug("drfpasswordless: User token mismatch when verifying alias.")
 
         except CallbackToken.DoesNotExist:
-            msg = _('We could not verify this token.')
+            msg = _('We could not verify this alias.')
             logger.debug("drfpasswordless: Tried to validate alias with bad token.")
             pass
         except User.DoesNotExist:
