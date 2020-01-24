@@ -108,7 +108,7 @@ class AliasEmailVerificationTests(APITestCase):
 
         # Verify a token exists for the user, sign in and check verified again
         callback = CallbackToken.objects.filter(user=user, is_active=True).first()
-        callback_data = {'token': callback}
+        callback_data = {'email': email, 'token': callback}
         callback_response = self.client.post(self.callback_url, callback_data)
         self.assertEqual(callback_response.status_code, status.HTTP_200_OK)
 
@@ -158,7 +158,7 @@ class AliasMobileVerificationTests(APITestCase):
 
         # Verify a token exists for the user, sign in and check verified again
         callback = CallbackToken.objects.filter(user=user, is_active=True).first()
-        callback_data = {'token': callback}
+        callback_data = {'mobile': mobile, 'token': callback}
         callback_response = self.client.post(self.callback_url, callback_data)
         self.assertEqual(callback_response.status_code, status.HTTP_200_OK)
 
