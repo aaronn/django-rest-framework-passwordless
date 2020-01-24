@@ -70,7 +70,7 @@ class AliasEmailVerificationTests(APITestCase):
         verify_token = CallbackToken.objects.filter(user=user, is_active=True).first()
         self.assertNotEqual(verify_token, None)
         verify_callback_response = self.client.post(self.callback_verify, {'email': email2, 'token': verify_token.key})
-        self.assertEqual(verify_callback_response, status.HTTP_200_OK)
+        self.assertEqual(verify_callback_response.status_code, status.HTTP_200_OK)
 
         # Refresh User
         user = User.objects.get(**{self.email_field_name: email2})

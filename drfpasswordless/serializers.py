@@ -270,7 +270,7 @@ class CallbackTokenVerificationSerializer(AbstractBaseCallbackTokenSerializer):
                 logger.debug("drfpasswordless: User token mismatch when verifying alias.")
 
         except CallbackToken.DoesNotExist:
-            msg = _('We could not verify this alias.')
+            msg = _('We could not verify this token.')
             logger.debug("drfpasswordless: Tried to validate alias with bad token.")
             pass
         except User.DoesNotExist:
