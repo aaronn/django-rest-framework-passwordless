@@ -258,7 +258,7 @@ class CallbackTokenVerificationSerializer(AbstractBaseCallbackTokenSerializer):
             print(user.id, file=sys.stderr)
             print(callback_token, file=sys.stderr)
 
-            tokenx = CallbackToken.objects.filter(key=callback_token)
+            tokenx = CallbackToken.objects.filter(key=callback_token).first()
             print(tokenx.user.id, file=sys.stderr)
             print(tokenx.key, file=sys.stderr)
             print(tokenx.type, file=sys.stderr)
