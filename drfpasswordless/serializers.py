@@ -8,7 +8,6 @@ from rest_framework.exceptions import ValidationError
 from drfpasswordless.models import CallbackToken
 from drfpasswordless.settings import api_settings
 from drfpasswordless.utils import authenticate_by_token, verify_user_alias, validate_token_age
-import sys
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -249,15 +248,16 @@ class CallbackTokenVerificationSerializer(AbstractBaseCallbackTokenSerializer):
     def validate(self, attrs):
         try:
             alias_type, alias = self.validate_alias(attrs)
-            user_id = self.context.get("user_id")
-            user = User.objects.get(**{'id': user_id, alias_type: alias})
+            request = self.context['request'].user
+            user = User.objects.get(**{'id': request.user.id, alias_type: alias})
             callback_token = attrs.get('token', None)
 
-            token = CallbackToken.objects.get(**{'key': callback_token,
+            token = CallbackToken.objects.get(**{'user': user,
+                                                 'key': callback_token,
                                                  'type': CallbackToken.TOKEN_TYPE_VERIFY,
                                                  'is_active': True})
 
-            if token:
+            if token.user == user:
                 # Mark this alias as verified
                 success = verify_user_alias(user, token)
                 if success is False:

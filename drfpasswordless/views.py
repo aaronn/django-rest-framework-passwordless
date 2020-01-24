@@ -168,7 +168,7 @@ class VerifyAliasFromCallbackToken(APIView):
     serializer_class = CallbackTokenVerificationSerializer
 
     def post(self, request, *args, **kwargs):
-        serializer = self.serializer_class(data=request.data, context={'user_id': self.request.user.id})
+        serializer = self.serializer_class(data=request.data)
         if serializer.is_valid(raise_exception=True):
             return Response({'detail': 'Alias verified.'}, status=status.HTTP_200_OK)
         else:
