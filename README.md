@@ -231,6 +231,12 @@ DEFAULTS = {
     # Allowed auth types, can be EMAIL, MOBILE, or both.
     'PASSWORDLESS_AUTH_TYPES': ['EMAIL'],
 
+    # URL Prefix for Authentication Endpoints
+    'PASSWORDLESS_AUTH_PREFIX': 'auth',
+    
+    #  URL Prefix for Verification Endpoints
+    'PASSWORDLESS_VERIFY_PREFIX': 'auth',
+
     # Amount of time that tokens last, in seconds
     'PASSWORDLESS_TOKEN_EXPIRE_TIME': 15 * 60,
 
