@@ -201,11 +201,11 @@ class CallbackTokenAuthSerializer(AbstractBaseCallbackTokenSerializer):
         try:
             alias_type, alias = self.validate_alias(attrs)
             callback_token = attrs.get('token', None)
-            token = CallbackToken.objects.get(**{'key': callback_token,
+            user = User.objects.get(**{alias_type: alias})
+            token = CallbackToken.objects.get(**{'user': user,
+                                                 'key': callback_token,
                                                  'type': CallbackToken.TOKEN_TYPE_AUTH,
                                                  'is_active': True})
-
-            user = User.objects.get(**{alias_type: alias})
 
             if token.user == user:
                 # Check the token type for our uni-auth method.
@@ -230,6 +230,9 @@ class CallbackTokenAuthSerializer(AbstractBaseCallbackTokenSerializer):
             else:
                 msg = _('Invalid Token')
                 raise serializers.ValidationError(msg)
+        except User.DoesNotExist:
+            msg = _('Invalid alias parameters provided.')
+            raise serializers.ValidationError(msg)
         except serializers.ValidationError():
             msg = _('Invalid alias parameters provided.')
             raise serializers.ValidationError(msg)
@@ -270,7 +273,7 @@ class CallbackTokenVerificationSerializer(AbstractBaseCallbackTokenSerializer):
             logger.debug("drfpasswordless: Tried to validate alias with bad token.")
             pass
         except User.DoesNotExist:
-            msg = _('Missing user.')
+            msg = _('We could not verify this alias.')
             logger.debug("drfpasswordless: Tried to validate alias with bad user.")
             pass
         except PermissionDenied:
