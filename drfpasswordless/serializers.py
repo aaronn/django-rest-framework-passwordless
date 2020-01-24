@@ -248,7 +248,7 @@ class CallbackTokenVerificationSerializer(AbstractBaseCallbackTokenSerializer):
     def validate(self, attrs):
         try:
             alias_type, alias = self.validate_alias(attrs)
-            request = self.context['request'].user
+            request = self.context['request']
             user = User.objects.get(**{'id': request.user.id, alias_type: alias})
             callback_token = attrs.get('token', None)
 
