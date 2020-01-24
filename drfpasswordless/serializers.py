@@ -168,43 +168,75 @@ class AbstractBaseCallbackTokenSerializer(serializers.Serializer):
     Abstract class inspired by DRF's own token serializer.
     Returns a user if valid, None or a message if not.
     """
+    phone_regex = RegexValidator(regex=r'^\+?1?\d{9,15}$',
+                                 message="Mobile number must be entered in the format:"
+                                         " '+999999999'. Up to 15 digits allowed.")
+
+    email = serializers.EmailField(required=False)  # Needs to be required=false to require both.
+    mobile = serializers.CharField(required=False, validators=[phone_regex], max_length=15)
     token = TokenField(min_length=6, max_length=6, validators=[token_age_validator])
+
+    def validate_alias(self, attrs):
+        email = attrs.get('email', None)
+        mobile = attrs.get('mobile', None)
+
+        if email and mobile:
+            raise serializers.ValidationError()
+
+        if not email and not mobile:
+            raise serializers.ValidationError()
+
+        if email:
+            return 'email', email
+        elif mobile:
+            return 'mobile', mobile
+
+        return None
 
 
 class CallbackTokenAuthSerializer(AbstractBaseCallbackTokenSerializer):
 
     def validate(self, attrs):
-        callback_token = attrs.get('token', None)
+        # Check Aliases
+        try:
+            alias_type, alias = self.validate_alias(attrs)
+            callback_token = attrs.get('token', None)
+            token = CallbackToken.objects.get(**{alias_type: alias,
+                                                 'key': callback_token,
+                                                 'type': CallbackToken.TOKEN_TYPE_AUTH,
+                                                 'is_active': True})
 
-        token = CallbackToken.objects.get(key=callback_token, is_active=True)
-
-        if token:
-            # Check the token type for our uni-auth method.
-            # authenticates and checks the expiry of the callback token.
-            user = authenticate_by_token(token)
-            if user:
-                if not user.is_active:
-                    msg = _('User account is disabled.')
-                    raise serializers.ValidationError(msg)
-
-                if api_settings.PASSWORDLESS_USER_MARK_EMAIL_VERIFIED \
-                        or api_settings.PASSWORDLESS_USER_MARK_MOBILE_VERIFIED:
-                    # Mark this alias as verified
-                    user = User.objects.get(pk=token.user.pk)
-                    success = verify_user_alias(user, token)
-
-                    if success is False:
-                        msg = _('Error validating user alias.')
+            if token:
+                # Check the token type for our uni-auth method.
+                # authenticates and checks the expiry of the callback token.
+                user = authenticate_by_token(token)
+                if user:
+                    if not user.is_active:
+                        msg = _('User account is disabled.')
                         raise serializers.ValidationError(msg)
 
-                attrs['user'] = user
-                return attrs
+                    if api_settings.PASSWORDLESS_USER_MARK_EMAIL_VERIFIED \
+                            or api_settings.PASSWORDLESS_USER_MARK_MOBILE_VERIFIED:
+                        # Mark this alias as verified
+                        user = User.objects.get(pk=token.user.pk)
+                        success = verify_user_alias(user, token)
 
+                        if success is False:
+                            msg = _('Error validating user alias.')
+                            raise serializers.ValidationError(msg)
+
+                    attrs['user'] = user
+                    return attrs
+
+                else:
+                    msg = _('Invalid Token')
+                    raise serializers.ValidationError(msg)
             else:
-                msg = _('Invalid Token')
+                msg = _('Missing authentication token.')
                 raise serializers.ValidationError(msg)
-        else:
-            msg = _('Missing authentication token.')
+
+        except serializers.ValidationError():
+            msg = _('Invalid alias parameters provided.')
             raise serializers.ValidationError(msg)
 
 
@@ -216,15 +248,18 @@ class CallbackTokenVerificationSerializer(AbstractBaseCallbackTokenSerializer):
 
     def validate(self, attrs):
         try:
+            alias_type, alias = self.validate_alias(attrs)
             user_id = self.context.get("user_id")
+            user = User.objects.get(pk=user_id)
             callback_token = attrs.get('token', None)
 
-            token = CallbackToken.objects.get(key=callback_token, is_active=True)
-            user = User.objects.get(pk=user_id)
+            token = CallbackToken.objects.get(**{'user': user,
+                                                 alias_type: alias,
+                                                 'key': callback_token,
+                                                 'type': CallbackToken.TOKEN_TYPE_VERIFY,
+                                                 'is_active': True})
 
-            if token.user == user:
-                # Check that the token.user is the request.user
-
+            if token:
                 # Mark this alias as verified
                 success = verify_user_alias(user, token)
                 if success is False:
@@ -237,7 +272,7 @@ class CallbackTokenVerificationSerializer(AbstractBaseCallbackTokenSerializer):
                 logger.debug("drfpasswordless: User token mismatch when verifying alias.")
 
         except CallbackToken.DoesNotExist:
-            msg = _('Missing authentication token.')
+            msg = _('We could not verify this alias.')
             logger.debug("drfpasswordless: Tried to validate alias with bad token.")
             pass
         except User.DoesNotExist:

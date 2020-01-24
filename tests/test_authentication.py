@@ -88,7 +88,33 @@ class EmailLoginCallbackTokenTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # Token sent to alias
-        challenge_data = {'token': '123456'}  # Send an arbitrary token instead
+        challenge_data = {'email': self.email, 'token': '123456'}  # Send an arbitrary token instead
+
+        # Try to auth with the callback token
+        challenge_response = self.client.post(self.challenge_url, challenge_data)
+        self.assertEqual(challenge_response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_email_auth_missing_alias(self):
+        data = {'email': self.email}
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Token sent to alias
+        callback_token = CallbackToken.objects.filter(user=self.user, is_active=True).first()
+        challenge_data = {'token': callback_token}  # Missing Alias
+
+        # Try to auth with the callback token
+        challenge_response = self.client.post(self.challenge_url, challenge_data)
+        self.assertEqual(challenge_response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_email_auth_bad_alias(self):
+        data = {'email': self.email}
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Token sent to alias
+        callback_token = CallbackToken.objects.filter(user=self.user, is_active=True).first()
+        challenge_data = {'email': 'abcde@example.com', 'token': callback_token}  # Bad Alias
 
         # Try to auth with the callback token
         challenge_response = self.client.post(self.challenge_url, challenge_data)
@@ -101,7 +127,7 @@ class EmailLoginCallbackTokenTests(APITestCase):
 
         # Token sent to alias
         callback_token = CallbackToken.objects.filter(user=self.user, is_active=True).first()
-        challenge_data = {'token': callback_token}
+        challenge_data = {'email': self.email, 'token': callback_token}
 
         data = {'email': self.email}
         response = self.client.post(self.url, data)
@@ -130,7 +156,7 @@ class EmailLoginCallbackTokenTests(APITestCase):
 
         # Token sent to alias
         callback_token = CallbackToken.objects.filter(user=self.user, is_active=True).first()
-        challenge_data = {'token': callback_token}
+        challenge_data = {'email': self.email, 'token': callback_token}
 
         # Try to auth with the callback token
         challenge_response = self.client.post(self.challenge_url, challenge_data)
@@ -295,7 +321,7 @@ class MobileLoginCallbackTokenTests(APITestCase):
 
         # Token sent to alias
         first_callback_token = CallbackToken.objects.filter(user=self.user, is_active=True).first()
-        first_challenge_data = {'token': first_callback_token}
+        first_challenge_data = {'mobile': self.mobile, 'token': first_callback_token}
 
         data = {'mobile': self.mobile}
         second_response = self.client.post(self.url, data)
@@ -303,7 +329,7 @@ class MobileLoginCallbackTokenTests(APITestCase):
 
         # Second token sent to alias
         second_callback_token = CallbackToken.objects.filter(user=self.user, is_active=True).first()
-        second_challenge_data = {'token': second_callback_token}
+        second_challenge_data = {'mobile': self.mobile, 'token': second_callback_token}
 
         # Try to auth with the old callback token
         challenge_response = self.client.post(self.challenge_url, first_challenge_data)
@@ -324,7 +350,7 @@ class MobileLoginCallbackTokenTests(APITestCase):
 
         # Token sent to alias
         callback_token = CallbackToken.objects.filter(user=self.user, is_active=True).first()
-        challenge_data = {'token': callback_token}
+        challenge_data = {'mobile': self.mobile, 'token': callback_token}
 
         # Try to auth with the callback token
         challenge_response = self.client.post(self.challenge_url, challenge_data)
