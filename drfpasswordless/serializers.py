@@ -4,6 +4,7 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied
 from django.core.validators import RegexValidator
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 from drfpasswordless.models import CallbackToken
 from drfpasswordless.settings import api_settings
 from drfpasswordless.utils import authenticate_by_token, verify_user_alias, validate_token_age
@@ -233,7 +234,7 @@ class CallbackTokenAuthSerializer(AbstractBaseCallbackTokenSerializer):
         except User.DoesNotExist:
             msg = _('Invalid alias parameters provided.')
             raise serializers.ValidationError(msg)
-        except serializers.ValidationError():
+        except ValidationError:
             msg = _('Invalid alias parameters provided.')
             raise serializers.ValidationError(msg)
 
@@ -248,7 +249,7 @@ class CallbackTokenVerificationSerializer(AbstractBaseCallbackTokenSerializer):
         try:
             alias_type, alias = self.validate_alias(attrs)
             user_id = self.context.get("user_id")
-            user = User.objects.get(pk=user_id)
+            user = User.objects.get(**{'pk': user_id, alias_type: alias})
             callback_token = attrs.get('token', None)
 
             token = CallbackToken.objects.get(**{'user': user,
