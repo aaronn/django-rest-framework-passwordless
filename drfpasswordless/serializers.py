@@ -250,32 +250,22 @@ class CallbackTokenVerificationSerializer(AbstractBaseCallbackTokenSerializer):
         try:
             alias_type, alias = self.validate_alias(attrs)
             user_id = self.context.get("user_id")
-
-            print(user_id, file=sys.stderr)
             user = User.objects.get(**{'id': user_id, alias_type: alias})
             callback_token = attrs.get('token', None)
-            print(alias_type, file=sys.stderr)
-            print(alias, file=sys.stderr)
 
-            token = CallbackToken.objects.get(**{'user': user,
-                                                 'key': callback_token,
+            token = CallbackToken.objects.get(**{'key': callback_token,
                                                  'type': CallbackToken.TOKEN_TYPE_VERIFY,
                                                  'is_active': True})
 
-            print("test", file=sys.stderr)
-
             if token:
-                print("test2", file=sys.stderr)
                 # Mark this alias as verified
                 success = verify_user_alias(user, token)
                 if success is False:
-                    print("test3", file=sys.stderr)
                     logger.debug("drfpasswordless: Error verifying alias.")
 
                 attrs['user'] = user
                 return attrs
             else:
-                print("test4", file=sys.stderr)
                 msg = _('This token is invalid. Try again later.')
                 logger.debug("drfpasswordless: User token mismatch when verifying alias.")
 
