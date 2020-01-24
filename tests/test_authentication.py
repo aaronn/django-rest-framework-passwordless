@@ -135,7 +135,7 @@ class EmailLoginCallbackTokenTests(APITestCase):
 
         # Second token sent to alias
         second_callback_token = CallbackToken.objects.filter(user=self.user, is_active=True).first()
-        second_challenge_data = {'token': second_callback_token}
+        second_challenge_data = {'email': self.email, 'token': second_callback_token}
 
         # Try to auth with the old callback token
         challenge_response = self.client.post(self.challenge_url, challenge_data)
@@ -268,7 +268,7 @@ class OverrideTokenCreationTests(APITestCase):
 
         # Token sent to alias
         callback_token = CallbackToken.objects.filter(user=self.user, is_active=True).first()
-        challenge_data = {'token': callback_token}
+        challenge_data = {'email': self.email, 'token': callback_token}
 
         # Try to auth with the callback token
         challenge_response = self.client.post(self.challenge_url, challenge_data)
@@ -308,7 +308,7 @@ class MobileLoginCallbackTokenTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # Token sent to alias
-        challenge_data = {'token': '123456'}  # Send an arbitrary token instead
+        challenge_data = {'mobile': self.mobile, 'token': '123456'}  # Send an arbitrary token instead
 
         # Try to auth with the callback token
         challenge_response = self.client.post(self.challenge_url, challenge_data)
