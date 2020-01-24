@@ -112,7 +112,7 @@ class AliasMobileVerificationTests(APITestCase):
         self.assertEqual(getattr(user, self.mobile_verified_field_name), False)
 
         # Verify a token exists for the user, sign in and check verified again
-        callback = CallbackToken.objects.filter(user=user, is_active=True).first()
+        callback = CallbackToken.objects.filter(user=user, type=CallbackToken.TOKEN_TYPE_AUTH, is_active=True).first()
         callback_data = {'mobile': mobile, 'token': callback}
         callback_response = self.client.post(self.callback_url, callback_data)
         self.assertEqual(callback_response.status_code, status.HTTP_200_OK)
@@ -143,7 +143,7 @@ class AliasMobileVerificationTests(APITestCase):
         self.assertEqual(getattr(user, self.mobile_verified_field_name), False)
 
         # Post callback token back.
-        verify_token = CallbackToken.objects.filter(user=user, is_active=True).first()
+        verify_token = CallbackToken.objects.filter(user=user, type=CallbackToken.TOKEN_TYPE_VERIFY, is_active=True).first()
         self.assertNotEqual(verify_token, None)
         verify_callback_response = self.client.post(self.callback_verify, {'mobile': mobile2, 'token': verify_token.key})
         self.assertEqual(verify_callback_response.status_code, status.HTTP_200_OK)
