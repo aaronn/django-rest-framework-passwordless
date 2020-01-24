@@ -5,7 +5,6 @@ from django.contrib.auth import get_user_model
 from django.urls import reverse
 from drfpasswordless.settings import api_settings, DEFAULTS
 from drfpasswordless.utils import CallbackToken
-import sys
 
 User = get_user_model()
 
@@ -37,7 +36,7 @@ class AliasEmailVerificationTests(APITestCase):
         self.assertEqual(getattr(user, self.email_verified_field_name), False)
 
         # Verify a token exists for the user, sign in and check verified again
-        callback = CallbackToken.objects.filter(user=user, is_active=True).first()
+        callback = CallbackToken.objects.filter(user=user, type=CallbackToken.TOKEN_TYPE_AUTH, is_active=True).first()
         callback_data = {'email': email, 'token': callback}
         callback_response = self.client.post(self.callback_url, callback_data)
         self.assertEqual(callback_response.status_code, status.HTTP_200_OK)
@@ -68,18 +67,9 @@ class AliasEmailVerificationTests(APITestCase):
         self.assertEqual(getattr(user, self.email_verified_field_name), False)
 
         # Post callback token back.
-        verify_token = CallbackToken.objects.filter(user=user, is_active=True).first()
+        verify_token = CallbackToken.objects.filter(user=user, type=CallbackToken.TOKEN_TYPE_VERIFY, is_active=True).first()
         self.assertNotEqual(verify_token, None)
         verify_callback_response = self.client.post(self.callback_verify, {'email': email2, 'token': verify_token.key})
-        print(verify_token.id, file=sys.stderr)
-        print(verify_token.user.id, file=sys.stderr)
-        print(verify_token.user.email, file=sys.stderr)
-        print(verify_token.type, file=sys.stderr)
-        print(verify_token.is_active, file=sys.stderr)
-        print(verify_token.key, file=sys.stderr)
-        print(user.id, file=sys.stderr)
-        print(user.email, file=sys.stderr)
-
         self.assertEqual(verify_callback_response.status_code, status.HTTP_200_OK)
 
         # Refresh User
