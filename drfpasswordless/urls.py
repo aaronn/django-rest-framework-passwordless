@@ -9,6 +9,7 @@ from drfpasswordless.views import (
      ObtainMobileVerificationCallbackToken,
 )
 
+app_name = 'drfpasswordless'
 urlpatterns = [
      path(api_settings.PASSWORDLESS_AUTH_PREFIX + 'email/', ObtainEmailCallbackToken.as_view(), name='auth_email'),
      path(api_settings.PASSWORDLESS_AUTH_PREFIX + 'mobile/', ObtainMobileCallbackToken.as_view(), name='auth_mobile'),
