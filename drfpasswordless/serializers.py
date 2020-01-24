@@ -201,40 +201,35 @@ class CallbackTokenAuthSerializer(AbstractBaseCallbackTokenSerializer):
         try:
             alias_type, alias = self.validate_alias(attrs)
             callback_token = attrs.get('token', None)
-            token = CallbackToken.objects.get(**{alias_type: alias,
-                                                 'key': callback_token,
+            token = CallbackToken.objects.get(**{'key': callback_token,
                                                  'type': CallbackToken.TOKEN_TYPE_AUTH,
                                                  'is_active': True})
 
-            if token:
+            user = User.objects.get(**{alias_type: alias})
+
+            if token.user == user:
                 # Check the token type for our uni-auth method.
                 # authenticates and checks the expiry of the callback token.
-                user = authenticate_by_token(token)
-                if user:
-                    if not user.is_active:
-                        msg = _('User account is disabled.')
+                if not user.is_active:
+                    msg = _('User account is disabled.')
+                    raise serializers.ValidationError(msg)
+
+                if api_settings.PASSWORDLESS_USER_MARK_EMAIL_VERIFIED \
+                        or api_settings.PASSWORDLESS_USER_MARK_MOBILE_VERIFIED:
+                    # Mark this alias as verified
+                    user = User.objects.get(pk=token.user.pk)
+                    success = verify_user_alias(user, token)
+
+                    if success is False:
+                        msg = _('Error validating user alias.')
                         raise serializers.ValidationError(msg)
 
-                    if api_settings.PASSWORDLESS_USER_MARK_EMAIL_VERIFIED \
-                            or api_settings.PASSWORDLESS_USER_MARK_MOBILE_VERIFIED:
-                        # Mark this alias as verified
-                        user = User.objects.get(pk=token.user.pk)
-                        success = verify_user_alias(user, token)
+                attrs['user'] = user
+                return attrs
 
-                        if success is False:
-                            msg = _('Error validating user alias.')
-                            raise serializers.ValidationError(msg)
-
-                    attrs['user'] = user
-                    return attrs
-
-                else:
-                    msg = _('Invalid Token')
-                    raise serializers.ValidationError(msg)
             else:
-                msg = _('Missing authentication token.')
+                msg = _('Invalid Token')
                 raise serializers.ValidationError(msg)
-
         except serializers.ValidationError():
             msg = _('Invalid alias parameters provided.')
             raise serializers.ValidationError(msg)
@@ -254,7 +249,6 @@ class CallbackTokenVerificationSerializer(AbstractBaseCallbackTokenSerializer):
             callback_token = attrs.get('token', None)
 
             token = CallbackToken.objects.get(**{'user': user,
-                                                 alias_type: alias,
                                                  'key': callback_token,
                                                  'type': CallbackToken.TOKEN_TYPE_VERIFY,
                                                  'is_active': True})
