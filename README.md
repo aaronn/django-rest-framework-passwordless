@@ -125,7 +125,7 @@ curl -X POST -d "mobile=+15552143912" localhost:8000/auth/mobile/
    TokenAuthentication scheme.
 
 ```bash
-curl -X POST -d "token=815381" localhost:8000/callback/auth/
+curl -X POST -d "email=aaron@email.com&token=815381" localhost:8000/auth/token/
 
 > HTTP/1.0 200 OK
 > {"token":"76be2d9ecfaf5fa4226d722bzdd8a4fff207ed0e”}
@@ -149,19 +149,11 @@ You’ll also need to set up an SMTP server to send emails (`See Django
 Docs <https://docs.djangoproject.com/en/1.10/topics/email/>`__), but for
 development you can set up a dummy development smtp server to test
 emails. Sent emails will print to the console. `Read more
-here. <https://docs.djangoproject.com/en/1.10/topics/email/#configuring-email-for-development>`__
+here. <https://docs.djangoproject.com/en/3.0/topics/email/#console-backend>`__
 
 ```python
 # Settings.py
-…
-EMAIL_HOST = 'localhost'
-EMAIL_PORT = 1025
-```
-
-Then run the following:
-
-```bash
-python -m smtpd -n -c DebuggingServer localhost:1025
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 ```
 
 Configuring Mobile
@@ -210,11 +202,11 @@ This is off by default but can be turned on with
 enabled they look for the User model fields ``email_verified`` or
 ``mobile_verified``.
 
-You can also use ``/validate/email/`` or ``/validate/mobile/`` which will
+You can also use ``auth/verify/email/`` or ``/auth/verify/mobile/`` which will
 automatically send a token to the endpoint attached to the current
 ``request.user``'s email or mobile if available.
 
-You can then send that token to ``/callback/verify/`` which will double-check
+You can then send that token to ``/auth/verify/`` which will double-check
 that the endpoint belongs to the request.user and mark the alias as verified.
 
 Registration
@@ -238,6 +230,12 @@ DEFAULTS = {
 
     # Allowed auth types, can be EMAIL, MOBILE, or both.
     'PASSWORDLESS_AUTH_TYPES': ['EMAIL'],
+
+    # URL Prefix for Authentication Endpoints
+    'PASSWORDLESS_AUTH_PREFIX': 'auth',
+    
+    #  URL Prefix for Verification Endpoints
+    'PASSWORDLESS_VERIFY_PREFIX': 'auth',
 
     # Amount of time that tokens last, in seconds
     'PASSWORDLESS_TOKEN_EXPIRE_TIME': 15 * 60,
@@ -338,7 +336,7 @@ License
 
 The MIT License (MIT)
 
-Copyright (c) 2018 Aaron Ng
+Copyright (c) 2020 Aaron Ng
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

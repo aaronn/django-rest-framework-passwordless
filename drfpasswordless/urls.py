@@ -1,3 +1,4 @@
+from drfpasswordless.settings import api_settings
 from django.urls import path
 from drfpasswordless.views import (
      ObtainEmailCallbackToken,
@@ -8,11 +9,13 @@ from drfpasswordless.views import (
      ObtainMobileVerificationCallbackToken,
 )
 
+app_name = 'drfpasswordless'
+
 urlpatterns = [
-     path('callback/auth/', ObtainAuthTokenFromCallbackToken.as_view(), name='auth_callback'),
-     path('auth/email/', ObtainEmailCallbackToken.as_view(), name='auth_email'),
-     path('auth/mobile/', ObtainMobileCallbackToken.as_view(), name='auth_mobile'),
-     path('callback/verify/', VerifyAliasFromCallbackToken.as_view(), name='verify_callback'),
-     path('verify/email/', ObtainEmailVerificationCallbackToken.as_view(), name='verify_email'),
-     path('verify/mobile/', ObtainMobileVerificationCallbackToken.as_view(), name='verify_mobile'),
+     path(api_settings.PASSWORDLESS_AUTH_PREFIX + 'email/', ObtainEmailCallbackToken.as_view(), name='auth_email'),
+     path(api_settings.PASSWORDLESS_AUTH_PREFIX + 'mobile/', ObtainMobileCallbackToken.as_view(), name='auth_mobile'),
+     path(api_settings.PASSWORDLESS_AUTH_PREFIX + 'token/', ObtainAuthTokenFromCallbackToken.as_view(), name='auth_token'),
+     path(api_settings.PASSWORDLESS_VERIFY_PREFIX + 'email/', ObtainEmailVerificationCallbackToken.as_view(), name='verify_email'),
+     path(api_settings.PASSWORDLESS_VERIFY_PREFIX + 'mobile/', ObtainMobileVerificationCallbackToken.as_view(), name='verify_mobile'),
+     path(api_settings.PASSWORDLESS_VERIFY_PREFIX, VerifyAliasFromCallbackToken.as_view(), name='verify_token'),
 ]

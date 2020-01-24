@@ -16,7 +16,7 @@ User = get_user_model()
 
 def authenticate_by_token(callback_token):
     try:
-        token = CallbackToken.objects.get(key=callback_token, is_active=True)
+        token = CallbackToken.objects.get(key=callback_token, is_active=True, type=CallbackToken.TOKEN_TYPE_AUTH)
 
         # Returning a user designates a successful authentication.
         token.user = User.objects.get(pk=token.user.pk)
@@ -35,20 +35,22 @@ def authenticate_by_token(callback_token):
     return None
 
 
-def create_callback_token_for_user(user, token_type):
+def create_callback_token_for_user(user, alias_type, token_type):
 
     token = None
-    token_type = token_type.upper()
+    alias_type_u = alias_type.upper()
 
-    if token_type == 'EMAIL':
+    if alias_type_u == 'EMAIL':
         token = CallbackToken.objects.create(user=user,
-                                             to_alias_type=token_type,
-                                             to_alias=getattr(user, api_settings.PASSWORDLESS_USER_EMAIL_FIELD_NAME))
+                                             to_alias_type=alias_type_u,
+                                             to_alias=getattr(user, api_settings.PASSWORDLESS_USER_EMAIL_FIELD_NAME),
+                                             type=token_type)
 
-    elif token_type == 'MOBILE':
+    elif alias_type_u == 'MOBILE':
         token = CallbackToken.objects.create(user=user,
-                                             to_alias_type=token_type,
-                                             to_alias=getattr(user, api_settings.PASSWORDLESS_USER_MOBILE_FIELD_NAME))
+                                             to_alias_type=alias_type_u,
+                                             to_alias=getattr(user, api_settings.PASSWORDLESS_USER_MOBILE_FIELD_NAME),
+                                             type=token_type)
 
     if token is not None:
         return token

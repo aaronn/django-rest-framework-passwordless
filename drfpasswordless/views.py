@@ -4,6 +4,7 @@ from rest_framework import parsers, renderers, status
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated 
 from rest_framework.views import APIView
+from drfpasswordless.models import CallbackToken
 from drfpasswordless.settings import api_settings
 from drfpasswordless.serializers import (
     EmailAuthSerializer,
@@ -37,6 +38,11 @@ class AbstractBaseObtainCallbackToken(APIView):
         # Alias Type
         raise NotImplementedError
 
+    @property
+    def token_type(self):
+        # Token Type
+        raise NotImplementedError
+
     def post(self, request, *args, **kwargs):
         if self.alias_type.upper() not in api_settings.PASSWORDLESS_AUTH_TYPES:
             # Only allow auth types allowed in settings.
@@ -47,7 +53,7 @@ class AbstractBaseObtainCallbackToken(APIView):
             # Validate -
             user = serializer.validated_data['user']
             # Create and send callback token
-            success = TokenService.send_token(user, self.alias_type, **self.message_payload)
+            success = TokenService.send_token(user, self.alias_type, self.token_type, **self.message_payload)
 
             # Respond With Success Or Failure of Sent
             if success:
@@ -68,6 +74,7 @@ class ObtainEmailCallbackToken(AbstractBaseObtainCallbackToken):
     failure_response = "Unable to email you a login code. Try again later."
 
     alias_type = 'email'
+    token_type = CallbackToken.TOKEN_TYPE_AUTH
 
     email_subject = api_settings.PASSWORDLESS_EMAIL_SUBJECT
     email_plaintext = api_settings.PASSWORDLESS_EMAIL_PLAINTEXT_MESSAGE
@@ -84,6 +91,7 @@ class ObtainMobileCallbackToken(AbstractBaseObtainCallbackToken):
     failure_response = "Unable to send you a login code. Try again later."
 
     alias_type = 'mobile'
+    token_type = CallbackToken.TOKEN_TYPE_AUTH
 
     mobile_message = api_settings.PASSWORDLESS_MOBILE_MESSAGE
     message_payload = {'mobile_message': mobile_message}
@@ -96,6 +104,7 @@ class ObtainEmailVerificationCallbackToken(AbstractBaseObtainCallbackToken):
     failure_response = "Unable to email you a verification code. Try again later."
 
     alias_type = 'email'
+    token_type = CallbackToken.TOKEN_TYPE_VERIFY
 
     email_subject = api_settings.PASSWORDLESS_EMAIL_VERIFICATION_SUBJECT
     email_plaintext = api_settings.PASSWORDLESS_EMAIL_VERIFICATION_PLAINTEXT_MESSAGE
@@ -114,6 +123,7 @@ class ObtainMobileVerificationCallbackToken(AbstractBaseObtainCallbackToken):
     failure_response = "Unable to send you a verification code. Try again later."
 
     alias_type = 'mobile'
+    token_type = CallbackToken.TOKEN_TYPE_VERIFY
 
     mobile_message = api_settings.PASSWORDLESS_MOBILE_MESSAGE
     message_payload = {'mobile_message': mobile_message}

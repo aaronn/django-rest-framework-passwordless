@@ -10,20 +10,13 @@ from drfpasswordless.services import TokenService
 logger = logging.getLogger(__name__)
 
 
-@receiver(signals.pre_save, sender=CallbackToken)
-def invalidate_previous_tokens(sender, instance, **kwargs):
+@receiver(signals.post_save, sender=CallbackToken)
+def invalidate_previous_tokens(sender, instance, created, **kwargs):
     """
-    Invalidates all previously issued tokens as a post_save signal.
+    Invalidates all previously issued tokens of that type when a new one is created, used, or anything like that.
     """
-    active_tokens = None
     if isinstance(instance, CallbackToken):
-        active_tokens = CallbackToken.objects.active().filter(user=instance.user).exclude(id=instance.id)
-
-    # Invalidate tokens
-    if active_tokens:
-        for token in active_tokens:
-            token.is_active = False
-            token.save()
+        CallbackToken.objects.active().filter(user=instance.user, type=instance.type).exclude(id=instance.id).update(is_active=False)
 
 
 @receiver(signals.pre_save, sender=CallbackToken)
@@ -72,7 +65,7 @@ def update_alias_verification(sender, instance, **kwargs):
                             message_payload = {'email_subject': email_subject,
                                                'email_plaintext': email_plaintext,
                                                'email_html': email_html}
-                            success = TokenService.send_token(instance, 'email', **message_payload)
+                            success = TokenService.send_token(instance, 'email', CallbackToken.TOKEN_TYPE_VERIFY, **message_payload)
 
                             if success:
                                 logger.info('drfpasswordless: Successfully sent email on updated address: %s'
@@ -104,7 +97,7 @@ def update_alias_verification(sender, instance, **kwargs):
                         if api_settings.PASSWORDLESS_AUTO_SEND_VERIFICATION_TOKEN is True:
                             mobile_message = api_settings.PASSWORDLESS_MOBILE_MESSAGE
                             message_payload = {'mobile_message': mobile_message}
-                            success = TokenService.send_token(instance, 'mobile', **message_payload)
+                            success = TokenService.send_token(instance, 'mobile', CallbackToken.TOKEN_TYPE_VERIFY, **message_payload)
 
                             if success:
                                 logger.info('drfpasswordless: Successfully sent SMS on updated mobile: %s'

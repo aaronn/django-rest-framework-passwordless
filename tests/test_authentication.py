@@ -3,6 +3,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase
 
 from django.contrib.auth import get_user_model
+from django.urls import reverse
 from drfpasswordless.settings import api_settings, DEFAULTS
 from drfpasswordless.utils import CallbackToken
 
@@ -15,7 +16,7 @@ class EmailSignUpCallbackTokenTests(APITestCase):
         api_settings.PASSWORDLESS_EMAIL_NOREPLY_ADDRESS = 'noreply@example.com'
         self.email_field_name = api_settings.PASSWORDLESS_USER_EMAIL_FIELD_NAME
 
-        self.url = '/auth/email/'
+        self.url = reverse('drfpasswordless:auth_email')
 
     def test_email_signup_failed(self):
         email = 'failedemail182+'
@@ -75,8 +76,8 @@ class EmailLoginCallbackTokenTests(APITestCase):
         api_settings.PASSWORDLESS_EMAIL_NOREPLY_ADDRESS = 'noreply@example.com'
 
         self.email = 'aaron@example.com'
-        self.url = '/auth/email/'
-        self.challenge_url = '/callback/auth/'
+        self.url = reverse('drfpasswordless:auth_email')
+        self.challenge_url = reverse('drfpasswordless:auth_token')
 
         self.email_field_name = api_settings.PASSWORDLESS_USER_EMAIL_FIELD_NAME
         self.user = User.objects.create(**{self.email_field_name: self.email})
@@ -87,7 +88,33 @@ class EmailLoginCallbackTokenTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # Token sent to alias
-        challenge_data = {'token': '123456'}  # Send an arbitrary token instead
+        challenge_data = {'email': self.email, 'token': '123456'}  # Send an arbitrary token instead
+
+        # Try to auth with the callback token
+        challenge_response = self.client.post(self.challenge_url, challenge_data)
+        self.assertEqual(challenge_response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_email_auth_missing_alias(self):
+        data = {'email': self.email}
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Token sent to alias
+        callback_token = CallbackToken.objects.filter(user=self.user, is_active=True).first()
+        challenge_data = {'token': callback_token}  # Missing Alias
+
+        # Try to auth with the callback token
+        challenge_response = self.client.post(self.challenge_url, challenge_data)
+        self.assertEqual(challenge_response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_email_auth_bad_alias(self):
+        data = {'email': self.email}
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Token sent to alias
+        callback_token = CallbackToken.objects.filter(user=self.user, is_active=True).first()
+        challenge_data = {'email': 'abcde@example.com', 'token': callback_token}  # Bad Alias
 
         # Try to auth with the callback token
         challenge_response = self.client.post(self.challenge_url, challenge_data)
@@ -100,7 +127,7 @@ class EmailLoginCallbackTokenTests(APITestCase):
 
         # Token sent to alias
         callback_token = CallbackToken.objects.filter(user=self.user, is_active=True).first()
-        challenge_data = {'token': callback_token}
+        challenge_data = {'email': self.email, 'token': callback_token}
 
         data = {'email': self.email}
         response = self.client.post(self.url, data)
@@ -108,7 +135,7 @@ class EmailLoginCallbackTokenTests(APITestCase):
 
         # Second token sent to alias
         second_callback_token = CallbackToken.objects.filter(user=self.user, is_active=True).first()
-        second_challenge_data = {'token': second_callback_token}
+        second_challenge_data = {'email': self.email, 'token': second_callback_token}
 
         # Try to auth with the old callback token
         challenge_response = self.client.post(self.challenge_url, challenge_data)
@@ -129,7 +156,7 @@ class EmailLoginCallbackTokenTests(APITestCase):
 
         # Token sent to alias
         callback_token = CallbackToken.objects.filter(user=self.user, is_active=True).first()
-        challenge_data = {'token': callback_token}
+        challenge_data = {'email': self.email, 'token': callback_token}
 
         # Try to auth with the callback token
         challenge_response = self.client.post(self.challenge_url, challenge_data)
@@ -156,7 +183,7 @@ class MobileSignUpCallbackTokenTests(APITestCase):
         api_settings.PASSWORDLESS_TEST_SUPPRESSION = True
         api_settings.PASSWORDLESS_AUTH_TYPES = ['MOBILE']
         api_settings.PASSWORDLESS_MOBILE_NOREPLY_NUMBER = '+15550000000'
-        self.url = '/auth/mobile/'
+        self.url = reverse('drfpasswordless:auth_mobile')
 
         self.mobile_field_name = api_settings.PASSWORDLESS_USER_MOBILE_FIELD_NAME
 
@@ -227,8 +254,8 @@ class OverrideTokenCreationTests(APITestCase):
         api_settings.PASSWORDLESS_EMAIL_NOREPLY_ADDRESS = 'noreply@example.com'
 
         self.email = 'aaron@example.com'
-        self.url = '/auth/email/'
-        self.challenge_url = '/callback/auth/'
+        self.url = reverse('drfpasswordless:auth_email')
+        self.challenge_url = reverse('drfpasswordless:auth_token')
 
         self.email_field_name = api_settings.PASSWORDLESS_USER_EMAIL_FIELD_NAME
         self.user = User.objects.create(**{self.email_field_name: self.email})
@@ -241,7 +268,7 @@ class OverrideTokenCreationTests(APITestCase):
 
         # Token sent to alias
         callback_token = CallbackToken.objects.filter(user=self.user, is_active=True).first()
-        challenge_data = {'token': callback_token}
+        challenge_data = {'email': self.email, 'token': callback_token}
 
         # Try to auth with the callback token
         challenge_response = self.client.post(self.challenge_url, challenge_data)
@@ -268,8 +295,8 @@ class MobileLoginCallbackTokenTests(APITestCase):
         api_settings.PASSWORDLESS_MOBILE_NOREPLY_NUMBER = '+15550000000'
 
         self.mobile = '+15551234567'
-        self.url = '/auth/mobile/'
-        self.challenge_url = '/callback/auth/'
+        self.url = reverse('drfpasswordless:auth_mobile')
+        self.challenge_url = reverse('drfpasswordless:auth_token')
 
         self.mobile_field_name = api_settings.PASSWORDLESS_USER_MOBILE_FIELD_NAME
 
@@ -281,7 +308,7 @@ class MobileLoginCallbackTokenTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # Token sent to alias
-        challenge_data = {'token': '123456'}  # Send an arbitrary token instead
+        challenge_data = {'mobile': self.mobile, 'token': '123456'}  # Send an arbitrary token instead
 
         # Try to auth with the callback token
         challenge_response = self.client.post(self.challenge_url, challenge_data)
@@ -294,7 +321,7 @@ class MobileLoginCallbackTokenTests(APITestCase):
 
         # Token sent to alias
         first_callback_token = CallbackToken.objects.filter(user=self.user, is_active=True).first()
-        first_challenge_data = {'token': first_callback_token}
+        first_challenge_data = {'mobile': self.mobile, 'token': first_callback_token}
 
         data = {'mobile': self.mobile}
         second_response = self.client.post(self.url, data)
@@ -302,7 +329,7 @@ class MobileLoginCallbackTokenTests(APITestCase):
 
         # Second token sent to alias
         second_callback_token = CallbackToken.objects.filter(user=self.user, is_active=True).first()
-        second_challenge_data = {'token': second_callback_token}
+        second_challenge_data = {'mobile': self.mobile, 'token': second_callback_token}
 
         # Try to auth with the old callback token
         challenge_response = self.client.post(self.challenge_url, first_challenge_data)
@@ -323,7 +350,7 @@ class MobileLoginCallbackTokenTests(APITestCase):
 
         # Token sent to alias
         callback_token = CallbackToken.objects.filter(user=self.user, is_active=True).first()
-        challenge_data = {'token': callback_token}
+        challenge_data = {'mobile': self.mobile, 'token': callback_token}
 
         # Try to auth with the callback token
         challenge_response = self.client.post(self.challenge_url, challenge_data)

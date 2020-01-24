@@ -19,8 +19,8 @@ class UserLinkMixin(object):
 class AbstractCallbackTokenInline(admin.StackedInline):
     max_num = 0
     extra = 0
-    readonly_fields = ('created_at', 'key', 'is_active')
-    fields = ('created_at', 'user', 'key', 'is_active')
+    readonly_fields = ('created_at', 'key', 'type', 'is_active')
+    fields = ('created_at', 'user', 'key', 'type', 'is_active')
 
 
 class CallbackInline(AbstractCallbackTokenInline):
@@ -28,7 +28,7 @@ class CallbackInline(AbstractCallbackTokenInline):
 
 
 class AbstractCallbackTokenAdmin(UserLinkMixin, admin.ModelAdmin):
-    readonly_fields = ('created_at', 'user', 'key')
-    list_display = ('created_at', UserLinkMixin.LINK_TO_USER_FIELD, 'key', 'is_active')
-    fields = ('created_at', 'user', 'key', 'is_active')
+    readonly_fields = ('created_at', 'user', 'key', 'type',)
+    list_display = ('created_at', UserLinkMixin.LINK_TO_USER_FIELD, 'key', 'type', 'is_active')
+    fields = ('created_at', 'user', 'key', 'type', 'is_active')
     extra = 0

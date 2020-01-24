@@ -3,6 +3,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase
 
 from django.contrib.auth import get_user_model
+from django.urls import reverse
 from drfpasswordless.settings import api_settings, DEFAULTS
 from drfpasswordless.utils import CallbackToken
 
@@ -19,11 +20,11 @@ class AuthTypeTests(APITestCase):
         api_settings.PASSWORDLESS_TEST_SUPPRESSION = True
 
         self.email = 'aaron@example.com'
-        self.email_url = '/auth/email/'
+        self.email_url = reverse('drfpasswordless:auth_email')
         self.email_data = {'email': self.email}
 
         self.mobile = '+15551234567'
-        self.mobile_url = '/auth/mobile/'
+        self.mobile_url = reverse('drfpasswordless:auth_mobile')
         self.mobile_data = {'mobile': self.mobile}
 
     def test_email_auth_disabled(self):
@@ -89,8 +90,8 @@ class AliasEmailVerificationTests(APITestCase):
         api_settings.PASSWORDLESS_EMAIL_NOREPLY_ADDRESS = 'noreply@example.com'
         api_settings.PASSWORDLESS_USER_MARK_EMAIL_VERIFIED = True
 
-        self.url = '/auth/email/'
-        self.callback_url = '/callback/auth/'
+        self.url = reverse('drfpasswordless:auth_email')
+        self.callback_url = reverse('drfpasswordless:auth_token')
         self.email_field_name = api_settings.PASSWORDLESS_USER_EMAIL_FIELD_NAME
         self.email_verified_field_name = api_settings.PASSWORDLESS_USER_EMAIL_VERIFIED_FIELD_NAME
 
@@ -107,7 +108,7 @@ class AliasEmailVerificationTests(APITestCase):
 
         # Verify a token exists for the user, sign in and check verified again
         callback = CallbackToken.objects.filter(user=user, is_active=True).first()
-        callback_data = {'token': callback}
+        callback_data = {'email': email, 'token': callback}
         callback_response = self.client.post(self.callback_url, callback_data)
         self.assertEqual(callback_response.status_code, status.HTTP_200_OK)
 
@@ -139,8 +140,8 @@ class AliasMobileVerificationTests(APITestCase):
         api_settings.PASSWORDLESS_MOBILE_NOREPLY_NUMBER = '+15550000000'
         api_settings.PASSWORDLESS_USER_MARK_MOBILE_VERIFIED = True
 
-        self.url = '/auth/mobile/'
-        self.callback_url = '/callback/auth/'
+        self.url = reverse('drfpasswordless:auth_mobile')
+        self.callback_url = reverse('drfpasswordless:auth_token')
         self.mobile_field_name = api_settings.PASSWORDLESS_USER_MOBILE_FIELD_NAME
         self.mobile_verified_field_name = api_settings.PASSWORDLESS_USER_MOBILE_VERIFIED_FIELD_NAME
 
@@ -157,7 +158,7 @@ class AliasMobileVerificationTests(APITestCase):
 
         # Verify a token exists for the user, sign in and check verified again
         callback = CallbackToken.objects.filter(user=user, is_active=True).first()
-        callback_data = {'token': callback}
+        callback_data = {'mobile': mobile, 'token': callback}
         callback_response = self.client.post(self.callback_url, callback_data)
         self.assertEqual(callback_response.status_code, status.HTTP_200_OK)
 
