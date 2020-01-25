@@ -283,3 +283,15 @@ class CallbackTokenVerificationSerializer(AbstractBaseCallbackTokenSerializer):
             pass
 
         raise serializers.ValidationError(msg)
+
+
+"""
+Responses
+"""
+
+
+class TokenResponseSerializer(serializers.Serializer):
+    """
+    Our default response serializer.
+    """
+    key = serializers.CharField(min_length=6, max_length=6)

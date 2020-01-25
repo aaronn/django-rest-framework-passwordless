@@ -77,7 +77,11 @@ DEFAULTS = {
 
     # What function is called to construct an authentication tokens when
     # exchanging a passwordless token for a real user auth token.
-    'PASSWORDLESS_AUTH_TOKEN_CREATOR': 'drfpasswordless.utils.create_authentication_token'
+    'PASSWORDLESS_AUTH_TOKEN_CREATOR': 'drfpasswordless.utils.create_authentication_token',
+
+    # What function is called to construct a serializer for drf tokens when
+    # exchanging a passwordless token for a real user auth token.
+    'PASSWORDLESS_AUTH_TOKEN_SERIALIZER': 'drfpasswordless.serializers.TokenResponseSerializer'
 }
 
 # List of settings that may be in string import notation.
