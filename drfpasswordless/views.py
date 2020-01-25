@@ -144,7 +144,8 @@ class AbstractBaseObtainAuthToken(APIView):
             (token, _) = token_creator(user)
 
             if token:
-                token_serializer = import_string(api_settings.PASSWORDLESS_AUTH_TOKEN_SERIALIZER)
+                TokenSerializer = import_string(api_settings.PASSWORDLESS_AUTH_TOKEN_SERIALIZER)
+                token_serializer = TokenSerializer(data={'token':token.key})
                 # Return our key for consumption.
                 return Response(token_serializer.data, status=status.HTTP_200_OK)
         else:
