@@ -1,4 +1,4 @@
-[splash-image]
+![splash-image]
 ![ci-image]
 
 drfpasswordless is a quick way to integrate ‘passwordless’ auth into
