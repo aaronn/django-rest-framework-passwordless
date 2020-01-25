@@ -294,4 +294,8 @@ class TokenResponseSerializer(serializers.Serializer):
     """
     Our default response serializer.
     """
-    token = serializers.CharField()
+    token = serializers.CharField(read_only=True, source='get_token')
+    key = serializers.CharField(write_only=True)
+
+    def get_token(self):
+        return self.key
