@@ -1,3 +1,4 @@
+[splash-image]
 ![ci-image]
 
 drfpasswordless is a quick way to integrate ‘passwordless’ auth into
@@ -356,3 +357,4 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 [ci-image]: https://travis-ci.org/aaronn/django-rest-framework-passwordless.svg?branch=master
+[splash-image]: https://i.imgur.com/OdDHAIf.png
