@@ -294,4 +294,4 @@ class TokenResponseSerializer(serializers.Serializer):
     """
     Our default response serializer.
     """
-    token = serializers.CharField(min_length=6, max_length=6)
+    token = serializers.CharField()
