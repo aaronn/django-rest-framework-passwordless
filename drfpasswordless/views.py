@@ -148,7 +148,7 @@ class AbstractBaseObtainAuthToken(APIView):
                 token_serializer = TokenSerializer(data={'token': token.key})
                 if token_serializer.is_valid():
                     # Return our key for consumption.
-                    return Response(token_serializer.data, status=status.HTTP_200_OK)
+                    return Response(token_serializer.validated_data, status=status.HTTP_200_OK)
         else:
             logger.error("Couldn't log in unknown user. Errors on serializer: {}".format(serializer.error_messages))
         return Response({'detail': 'Couldn\'t log you in. Try again later.'}, status=status.HTTP_400_BAD_REQUEST)
