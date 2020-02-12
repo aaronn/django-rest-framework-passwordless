@@ -2,7 +2,7 @@ import logging
 from django.utils.module_loading import import_string
 from rest_framework import parsers, renderers, status
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny, IsAuthenticated 
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView
 from drfpasswordless.models import CallbackToken
 from drfpasswordless.settings import api_settings
@@ -53,6 +53,7 @@ class AbstractBaseObtainCallbackToken(APIView):
             # Validate -
             user = serializer.validated_data['user']
             # Create and send callback token
+            self.message_payload['request'] = request
             success = TokenService.send_token(user, self.alias_type, self.token_type, **self.message_payload)
 
             # Respond With Success Or Failure of Sent

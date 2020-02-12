@@ -125,13 +125,14 @@ def send_email_with_callback_token(user, email_token, **kwargs):
                                     api_settings.PASSWORDLESS_EMAIL_TOKEN_HTML_TEMPLATE_NAME)
 
             # Inject context if user specifies.
-            context = inject_template_context({'callback_token': email_token.key, })
+            user_email = getattr(user, api_settings.PASSWORDLESS_USER_EMAIL_FIELD_NAME)
+            context = inject_template_context({'callback_token': email_token.key, 'user_email':user_email, 'request': kwargs['request']})
             html_message = loader.render_to_string(email_html, context,)
             send_mail(
                 email_subject,
                 email_plaintext % email_token.key,
                 api_settings.PASSWORDLESS_EMAIL_NOREPLY_ADDRESS,
-                [getattr(user, api_settings.PASSWORDLESS_USER_EMAIL_FIELD_NAME)],
+                [user_email],
                 fail_silently=False,
                 html_message=html_message,)
 
