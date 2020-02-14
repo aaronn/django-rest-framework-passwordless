@@ -6,6 +6,7 @@ from django.contrib.auth import get_user_model
 from django.urls import reverse
 from drfpasswordless.settings import api_settings, DEFAULTS
 from drfpasswordless.utils import CallbackToken
+from drfpasswordless.views import ObtainEmailCallbackToken
 
 User = get_user_model()
 
@@ -74,6 +75,15 @@ class AuthTypeTests(APITestCase):
 
         mobile_response = self.client.post(self.mobile_url, self.mobile_data)
         self.assertEqual(mobile_response.status_code, status.HTTP_200_OK)
+
+    def test_email_plaintext_ordered_context(self):
+        api_settings.PASSWORDLESS_AUTH_TYPES = ['EMAIL']
+        api_settings.PASSWORDLESS_EMAIL_NOREPLY_ADDRESS = 'email@example.com'
+        api_settings.PASSWORDLESS_EMAIL_PLAINTEXT_MESSAGE_ORDERED_CONTEXT = ["kwargs['request'].get_host()", 'user_email', 'email_token.key']
+        api_settings.PASSWORDLESS_EMAIL_PLAINTEXT_MESSAGE = 'click on link to activate  https://%s/login/%s/%s'
+
+        email_response = self.client.post(self.email_url, self.email_data)
+        self.assertEqual(email_response.data['detail'], ObtainEmailCallbackToken.success_response)
 
     def tearDown(self):
         api_settings.PASSWORDLESS_AUTH_TYPES = DEFAULTS['PASSWORDLESS_AUTH_TYPES']
