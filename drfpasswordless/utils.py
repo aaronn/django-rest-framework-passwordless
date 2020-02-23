@@ -127,6 +127,7 @@ def send_email_with_callback_token(user, email_token, **kwargs):
                 string_options = tuple()
                 for x in api_settings.PASSWORDLESS_EMAIL_PLAINTEXT_MESSAGE_ORDERED_CONTEXT:
                     string_options = string_options +  (eval(x),)
+                email_plaintext = email_plaintext % string_options
             else:
                 email_plaintext = email_plaintext % email_token.key
 
