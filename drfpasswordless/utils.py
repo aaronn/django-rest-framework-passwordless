@@ -5,10 +5,10 @@ from django.core.exceptions import PermissionDenied
 from django.core.mail import send_mail
 from django.template import loader
 from django.utils import timezone
+from django.utils.module_loading import import_string
 from rest_framework.authtoken.models import Token
 from drfpasswordless.models import CallbackToken
 from drfpasswordless.settings import api_settings
-
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -164,19 +164,17 @@ def send_sms_with_callback_token(user, mobile_token, **kwargs):
                 # we assume success to prevent spamming SMS during testing.
                 return True
 
-            from twilio.rest import Client
-            twilio_client = Client(os.environ['TWILIO_ACCOUNT_SID'], os.environ['TWILIO_AUTH_TOKEN'])
-
             to_number = getattr(user, api_settings.PASSWORDLESS_USER_MOBILE_FIELD_NAME)
             if to_number.__class__.__name__ == 'PhoneNumber':
                 to_number = to_number.__str__()
 
-            twilio_client.messages.create(
-                body=base_string % mobile_token.key,
-                to=to_number,
-                from_=api_settings.PASSWORDLESS_MOBILE_NOREPLY_NUMBER
-            )
-            return True
+            body = base_string % mobile_token.key,
+            to = to_number,
+            from_ = api_settings.PASSWORDLESS_MOBILE_NOREPLY_NUMBER
+
+            client = import_string(api_settings.PASSWORDLESS_MOBILE_BACKEND)
+            
+            return client(body, to, from_)
         else:
             logger.debug("Failed to send token sms. Missing PASSWORDLESS_MOBILE_NOREPLY_NUMBER.")
             return False
