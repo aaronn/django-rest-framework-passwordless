@@ -16,7 +16,7 @@ def invalidate_previous_tokens(sender, instance, created, **kwargs):
     Invalidates all previously issued tokens of that type when a new one is created, used, or anything like that.
     """
     if isinstance(instance, CallbackToken):
-        CallbackToken.objects.active().filter(user=instance.user, type=instance.type).exclude(id=instance.id).update(is_active=False)
+        CallbackToken.objects.active().filter(user=instance.user, type=instance.type).exclude(pk=instance.pk).update(is_active=False)
 
 
 @receiver(signals.pre_save, sender=CallbackToken)
@@ -40,7 +40,7 @@ def update_alias_verification(sender, instance, **kwargs):
     """
     if isinstance(instance, User):
 
-        if instance.id:
+        if instance.pk:
 
             if api_settings.PASSWORDLESS_USER_MARK_EMAIL_VERIFIED is True:
                 """
@@ -51,7 +51,7 @@ def update_alias_verification(sender, instance, **kwargs):
 
                 # Verify that this is an existing instance and not a new one.
                 try:
-                    user_old = User.objects.get(id=instance.id)  # Pre-save object
+                    user_old = User.objects.get(pk=instance.pk)  # Pre-save object
                     instance_email = getattr(instance, email_field)  # Incoming Email
                     old_email = getattr(user_old, email_field)  # Pre-save object email
 
@@ -87,7 +87,7 @@ def update_alias_verification(sender, instance, **kwargs):
 
                 # Verify that this is an existing instance and not a new one.
                 try:
-                    user_old = User.objects.get(id=instance.id)  # Pre-save object
+                    user_old = User.objects.get(pk=instance.pk)  # Pre-save object
                     instance_mobile = getattr(instance, mobile_field)  # Incoming mobile
                     old_mobile = getattr(user_old, mobile_field)  # Pre-save object mobile
 
