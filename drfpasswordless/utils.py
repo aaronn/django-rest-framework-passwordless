@@ -1,5 +1,4 @@
 import logging
-import os
 from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied
 from django.core.mail import send_mail
@@ -171,7 +170,7 @@ def send_sms_with_callback_token(user, mobile_token, **kwargs):
             body = base_string % mobile_token.key,
             to = to_number,
             from_ = api_settings.PASSWORDLESS_MOBILE_NOREPLY_NUMBER
-
+            # we import a service to send sms
             client = import_string(api_settings.PASSWORDLESS_MOBILE_BACKEND)
             
             return client(body, to, from_)

@@ -4,6 +4,7 @@ from django.conf import settings
 import string
 from django.utils.crypto import get_random_string
 
+
 def generate_hex_token():
     return uuid.uuid1().hex
 

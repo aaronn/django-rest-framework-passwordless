@@ -9,6 +9,7 @@ from drfpasswordless.models import CallbackToken
 from drfpasswordless.settings import api_settings
 from drfpasswordless.utils import authenticate_by_token, verify_user_alias, validate_token_age
 
+
 logger = logging.getLogger(__name__)
 User = get_user_model()
 
@@ -296,5 +297,3 @@ class TokenResponseSerializer(serializers.Serializer):
     """
     token = serializers.CharField(source='key')
     key = serializers.CharField(write_only=True)
-
-
