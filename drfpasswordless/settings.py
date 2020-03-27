@@ -84,7 +84,7 @@ DEFAULTS = {
     'PASSWORDLESS_AUTH_TOKEN_SERIALIZER': 'drfpasswordless.serializers.TokenResponseSerializer',
 
     # A dictionary of demo user's primary key mapped to their static pin
-    'DEMO_USERS': {},
+    'PASSWORDLESS_DEMO_USERS': {},
 }
 
 # List of settings that may be in string import notation.
