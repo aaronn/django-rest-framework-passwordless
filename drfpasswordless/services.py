@@ -1,3 +1,4 @@
+from drfpasswordless.settings import api_settings
 from drfpasswordless.utils import (
     create_callback_token_for_user,
     send_email_with_callback_token,
@@ -10,6 +11,9 @@ class TokenService(object):
     def send_token(user, alias_type, token_type, **message_payload):
         token = create_callback_token_for_user(user, alias_type, token_type)
         send_action = None
+
+        if user.pk in api_settings.DEMO_USERS.keys():
+            return True
         if alias_type == 'email':
             send_action = send_email_with_callback_token
         elif alias_type == 'mobile':
