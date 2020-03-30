@@ -39,14 +39,14 @@ def create_callback_token_for_user(user, alias_type, token_type):
     token = None
     alias_type_u = alias_type.upper()
     to_alias_field = getattr(api_settings, f'PASSWORDLESS_USER_{alias_type_u}_FIELD_NAME')
-    if user.pk in api_settings.DEMO_USERS.keys():
+    if user.pk in api_settings.PASSWORDLESS_DEMO_USERS.keys():
         token = CallbackToken.objects.filter(user=user).first()
         if token:
             return token
         else:
             return CallbackToken.objects.create(
                 user=user,
-                key=api_settings.DEMO_USERS[user.pk],
+                key=api_settings.PASSWORDLESS_DEMO_USERS[user.pk],
                 to_alias_type=token_type,
                 to_alias=getattr(user, to_alias_field)
             )
@@ -73,7 +73,7 @@ def validate_token_age(callback_token):
         token = CallbackToken.objects.get(key=callback_token, is_active=True)
         seconds = (timezone.now() - token.created_at).total_seconds()
         token_expiry_time = api_settings.PASSWORDLESS_TOKEN_EXPIRE_TIME
-        if token.user.pk in api_settings.DEMO_USERS.keys():
+        if token.user.pk in api_settings.PASSWORDLESS_DEMO_USERS.keys():
             return True
         if seconds <= token_expiry_time:
             return True

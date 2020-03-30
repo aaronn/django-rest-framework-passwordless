@@ -16,7 +16,7 @@ def invalidate_previous_tokens(sender, instance, created, **kwargs):
     Invalidates all previously issued tokens of that type when a new one is created, used, or anything like that.
     """
 
-    if instance.user.pk in api_settings.DEMO_USERS.keys():
+    if instance.user.pk in api_settings.PASSWORDLESS_DEMO_USERS.keys():
         return
 
     if isinstance(instance, CallbackToken):
