@@ -173,7 +173,15 @@ def send_sms_with_callback_token(user, mobile_token, **kwargs):
         return True
     
     base_string = kwargs.get('mobile_message', api_settings.PASSWORDLESS_MOBILE_MESSAGE)
+    message = base_string % mobile_token.key
 
+    to_number = getattr(user, api_settings.PASSWORDLESS_USER_MOBILE_FIELD_NAME)
+    if to_number.__class__.__name__ == 'PhoneNumber':
+        to_number = to_number.__str__()
+
+    return send_twilio_sms(to_number, message)
+
+def send_twilio_sms(to_number, message):
     try:
         if api_settings.PASSWORDLESS_MOBILE_NOREPLY_NUMBER:
             # We need a sending number to send properly
@@ -181,12 +189,8 @@ def send_sms_with_callback_token(user, mobile_token, **kwargs):
             from twilio.rest import Client
             twilio_client = Client(os.environ['TWILIO_ACCOUNT_SID'], os.environ['TWILIO_AUTH_TOKEN'])
 
-            to_number = getattr(user, api_settings.PASSWORDLESS_USER_MOBILE_FIELD_NAME)
-            if to_number.__class__.__name__ == 'PhoneNumber':
-                to_number = to_number.__str__()
-
             twilio_client.messages.create(
-                body=base_string % mobile_token.key,
+                body=message,
                 to=to_number,
                 from_=api_settings.PASSWORDLESS_MOBILE_NOREPLY_NUMBER
             )
@@ -201,9 +205,9 @@ def send_sms_with_callback_token(user, mobile_token, **kwargs):
         logger.debug("Couldn't send SMS."
                   "Did you set your Twilio account tokens and specify a PASSWORDLESS_MOBILE_NOREPLY_NUMBER?")
     except Exception as e:
-        logger.debug("Failed to send token SMS to user: {}. "
+        logger.debug("Failed to send token SMS to user. "
                   "Possibly no mobile number on user object or the twilio package isn't set up yet. "
-                  "Number entered was {}".format(user.id, getattr(user, api_settings.PASSWORDLESS_USER_MOBILE_FIELD_NAME)))
+                  "Number entered was {}".format(getattr(to_number)))
         logger.debug(e)
         return False
 
