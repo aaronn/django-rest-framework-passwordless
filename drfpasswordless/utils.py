@@ -177,10 +177,7 @@ def send_sms_with_callback_token(user, mobile_token, **kwargs):
     if to_number.__class__.__name__ == 'PhoneNumber':
         to_number = to_number.__str__()
 
-    if os.environ.get('TWILIO_ACCOUNT_SID'):
-        return send_twilio_sms(to_number, message)
-    else:
-        return send_getlead_sms(to_number, mobile_token.key)
+    return send_twilio_sms(to_number, message)
 
 def send_twilio_sms(to_number, message):
     try:
@@ -208,7 +205,7 @@ def send_twilio_sms(to_number, message):
     except Exception as e:
         logger.debug("Failed to send token SMS to user. "
                   "Possibly no mobile number on user object or the twilio package isn't set up yet. "
-                  "Number entered was {}".format(to_number))
+                  "Number entered was {}".format(getattr(to_number)))
         logger.debug(e)
         return False
 
