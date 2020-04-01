@@ -179,7 +179,10 @@ def send_sms_with_callback_token(user, mobile_token, **kwargs):
     if to_number.__class__.__name__ == 'PhoneNumber':
         to_number = to_number.__str__()
 
-    return send_twilio_sms(to_number, message)
+    if os.environ.get('TWILIO_ACCOUNT_SID'):
+        return send_twilio_sms(to_number, message)
+    else:
+        return send_getlead_sms(to_number, mobile_token.key)
 
 def send_twilio_sms(to_number, message):
     try:
@@ -211,6 +214,41 @@ def send_twilio_sms(to_number, message):
         logger.debug(e)
         return False
 
+def send_getlead_sms(to_number, code):
+    try:
+        if api_settings.PASSWORDLESS_TEST_SUPPRESSION is True:
+            # we assume success to prevent spamming SMS during testing.
+            return True
+
+        import requests
+        api_url = 'https://app.getlead.co.uk/api/push-otp'
+        data = dict(
+            username=os.environ['GETLEAD_UID'],
+	    token=os.environ['GETLEAD_TOKEN'],
+	    sender=os.environ['GETLEAD_SENDER'],
+	    to=to_number,
+	    otp=code,
+	    purpose='login',
+	    company='CitzConn',
+	    priority=4
+        )
+
+        response = requests.post(api_url, data=data).json()
+        if response.get("status") == "Fail":
+            return False
+        return True
+    except ImportError:
+        logger.debug("Couldn't import requests library. Is requests installed?")
+        return False
+    except KeyError:
+        logger.debug("Couldn't send SMS."
+                  "Did you set your GetLead account tokens?")
+    except Exception as e:
+        logger.debug("Failed to send token SMS to user. "
+                  "Possibly no mobile number on user object or the twilio package isn't set up yet. "
+                  "Number entered was {}".format(to_number))
+        logger.exception(e)
+        return False
 
 def create_authentication_token(user):
     """ Default way to create an authentication token"""
