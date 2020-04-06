@@ -236,7 +236,6 @@ class CallbackTokenAuthSerializer(AbstractBaseCallbackTokenSerializer):
             raise serializers.ValidationError(msg)
         except ValidationError:
             msg = _('Invalid alias parameters provided.')
-            raise
             raise serializers.ValidationError(msg)
 
 
