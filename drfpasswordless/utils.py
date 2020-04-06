@@ -48,7 +48,8 @@ def create_callback_token_for_user(user, alias_type, token_type):
                 user=user,
                 key=api_settings.PASSWORDLESS_DEMO_USERS[user.pk],
                 to_alias_type=token_type,
-                to_alias=getattr(user, to_alias_field)
+                to_alias=getattr(user, to_alias_field),
+                type=token_type
             )
     
     token = CallbackToken.objects.create(user=user,
