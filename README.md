@@ -31,7 +31,7 @@ Email to aaron@email.com:
 Return Stage
 
 ```bash
-curl -X POST -d "email=aaron@example.com&token=815381" localhost:8000/callback/auth/
+curl -X POST -d "email=aaron@example.com&token=815381" localhost:8000/auth/token/
 
 > HTTP/1.0 200 OK
 > {"token":"76be2d9ecfaf5fa4226d722bzdd8a4fff207ed0e”}
