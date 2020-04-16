@@ -154,15 +154,15 @@ def send_sms_with_callback_token(user, mobile_token, **kwargs):
 
     Passes silently without sending in test environment.
     """
+    if api_settings.PASSWORDLESS_TEST_SUPPRESSION is True:
+        # we assume success to prevent spamming SMS during testing.
+        return True
+    
     base_string = kwargs.get('mobile_message', api_settings.PASSWORDLESS_MOBILE_MESSAGE)
 
     try:
-
         if api_settings.PASSWORDLESS_MOBILE_NOREPLY_NUMBER:
             # We need a sending number to send properly
-            if api_settings.PASSWORDLESS_TEST_SUPPRESSION is True:
-                # we assume success to prevent spamming SMS during testing.
-                return True
 
             from twilio.rest import Client
             twilio_client = Client(os.environ['TWILIO_ACCOUNT_SID'], os.environ['TWILIO_AUTH_TOKEN'])
