@@ -156,6 +156,11 @@ def send_sms_with_callback_token(user, mobile_token, **kwargs):
     """
     if api_settings.PASSWORDLESS_TEST_SUPPRESSION is True:
         # we assume success to prevent spamming SMS during testing.
+
+        # even if you have suppression on– you must provide a number if you have mobile selected.
+        if api_settings.PASSWORDLESS_MOBILE_NOREPLY_NUMBER is None:
+            return False
+            
         return True
     
     base_string = kwargs.get('mobile_message', api_settings.PASSWORDLESS_MOBILE_MESSAGE)

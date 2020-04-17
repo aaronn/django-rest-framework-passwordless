@@ -41,7 +41,7 @@ class AuthTypeTests(APITestCase):
 
     def test_email_sender_required(self):
         """
-        Check to make sure user has a send address if email is selected.
+        This tests if a noreply email address has been set in settings.
         """
         api_settings.PASSWORDLESS_AUTH_TYPES = ['EMAIL']
         email_response = self.client.post(self.email_url, self.email_data)
@@ -49,11 +49,12 @@ class AuthTypeTests(APITestCase):
 
     def test_mobile_sender_required(self):
         """
-        Check to make sure user has a send address if mobile is selected.
+        Check to make sure user has a noreply mobile address is set.
+        Even if you have suppression on, you must provide some kind of sender number if mobile is selected.
         """
         api_settings.PASSWORDLESS_AUTH_TYPES = ['MOBILE']
-        email_response = self.client.post(self.mobile_url, self.mobile_data)
-        self.assertEqual(email_response.status_code, status.HTTP_400_BAD_REQUEST)
+        mobile_response = self.client.post(self.mobile_url, self.mobile_data)
+        self.assertEqual(mobile_response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_email_only_auth_enabled(self):
         api_settings.PASSWORDLESS_AUTH_TYPES = ['EMAIL']
