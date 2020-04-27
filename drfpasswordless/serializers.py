@@ -31,7 +31,10 @@ class AbstractBaseAliasAuthenticationSerializer(serializers.Serializer):
 
     @property
     def alias_type(self):
-        # The alias type, either email or mobile
+        raise NotImplementedError
+
+    @property
+    def alias_attribute_name(self):
         raise NotImplementedError
 
     def validate(self, attrs):
@@ -44,7 +47,7 @@ class AbstractBaseAliasAuthenticationSerializer(serializers.Serializer):
             if api_settings.PASSWORDLESS_REGISTER_NEW_USERS is True:
                 # If new aliases should register new users.
                 user, user_created = User.objects.get_or_create(
-                    **{self.alias_type: alias})
+                    **{self.alias_attribute_name: alias})
 
                 if user_created:
                     user.set_unusable_password()
@@ -52,7 +55,7 @@ class AbstractBaseAliasAuthenticationSerializer(serializers.Serializer):
             else:
                 # If new aliases should not register new users.
                 try:
-                    user = User.objects.get(**{self.alias_type: alias})
+                    user = User.objects.get(**{self.alias_attribute_name: alias})
                 except User.DoesNotExist:
                     user = None
 
@@ -77,6 +80,10 @@ class EmailAuthSerializer(AbstractBaseAliasAuthenticationSerializer):
     def alias_type(self):
         return 'email'
 
+    @property
+    def alias_attribute_name(self):
+        return api_settings.PASSWORDLESS_EMAIL_ALIAS_ATTRIBUTE_NAME
+
     email = serializers.EmailField()
 
 
@@ -84,6 +91,10 @@ class MobileAuthSerializer(AbstractBaseAliasAuthenticationSerializer):
     @property
     def alias_type(self):
         return 'mobile'
+
+    @property
+    def alias_attribute_name(self):
+        return api_settings.PASSWORDLESS_MOBILE_ALIAS_ATTRIBUTE_NAME
 
     phone_regex = RegexValidator(regex=r'^\+?1?\d{9,15}$',
                                  message="Mobile number must be entered in the format:"
@@ -188,9 +199,9 @@ class AbstractBaseCallbackTokenSerializer(serializers.Serializer):
             raise serializers.ValidationError()
 
         if email:
-            return 'email', email
+            return 'email', api_settings.PASSWORDLESS_EMAIL_ALIAS_ATTRIBUTE_NAME, email
         elif mobile:
-            return 'mobile', mobile
+            return 'mobile', api_settings.PASSWORDLESS_MOBILE_ALIAS_ATTRIBUTE_NAME, mobile
 
         return None
 
@@ -200,9 +211,9 @@ class CallbackTokenAuthSerializer(AbstractBaseCallbackTokenSerializer):
     def validate(self, attrs):
         # Check Aliases
         try:
-            alias_type, alias = self.validate_alias(attrs)
+            alias_type, alias_attribute_name, alias = self.validate_alias(attrs)
             callback_token = attrs.get('token', None)
-            user = User.objects.get(**{alias_type: alias})
+            user = User.objects.get(**{alias_attribute_name: alias})
             token = CallbackToken.objects.get(**{'user': user,
                                                  'key': callback_token,
                                                  'type': CallbackToken.TOKEN_TYPE_AUTH,
