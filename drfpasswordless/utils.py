@@ -1,5 +1,6 @@
 import logging
 import os
+from box import Box
 from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied
 from django.core.mail import send_mail
@@ -36,20 +37,21 @@ def authenticate_by_token(callback_token):
 
 
 def create_callback_token_for_user(user, alias_type, token_type):
-
     token = None
     alias_type_u = alias_type.upper()
+
+    to_alias = eval(f"user.{api_settings.PASSWORDLESS_USER_EMAIL_FIELD_NAME}")
 
     if alias_type_u == 'EMAIL':
         token = CallbackToken.objects.create(user=user,
                                              to_alias_type=alias_type_u,
-                                             to_alias=getattr(user, api_settings.PASSWORDLESS_USER_EMAIL_FIELD_NAME),
+                                             to_alias=to_alias,
                                              type=token_type)
 
     elif alias_type_u == 'MOBILE':
         token = CallbackToken.objects.create(user=user,
                                              to_alias_type=alias_type_u,
-                                             to_alias=getattr(user, api_settings.PASSWORDLESS_USER_MOBILE_FIELD_NAME),
+                                             to_alias=to_alias,
                                              type=token_type)
 
     if token is not None:
