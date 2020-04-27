@@ -81,7 +81,15 @@ DEFAULTS = {
 
     # What function is called to construct a serializer for drf tokens when
     # exchanging a passwordless token for a real user auth token.
-    'PASSWORDLESS_AUTH_TOKEN_SERIALIZER': 'drfpasswordless.serializers.TokenResponseSerializer'
+    'PASSWORDLESS_AUTH_TOKEN_SERIALIZER': 'drfpasswordless.serializers.TokenResponseSerializer',
+
+    # Functions to be called when sending email or sms
+    'PASSWORDLESS_AUTH_MOBILE_SEND_FUNCTION': 'drfpasswordless.utils.send_sms_with_callback_token',
+    'PASSWORDLESS_AUTH_EMAIL_SEND_FUNCTION': 'drfpasswordless.utils.send_email_with_callback_token',
+
+    # Functions to be called when sending email or sms
+    'PASSWORDLESS_EMAIL_ALIAS_ATTRIBUTE_NAME': 'email',
+    'PASSWORDLESS_MOBILE_ALIAS_ATTRIBUTE_NAME': 'mobile'
 }
 
 # List of settings that may be in string import notation.
