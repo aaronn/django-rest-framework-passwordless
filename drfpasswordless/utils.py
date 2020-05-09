@@ -210,7 +210,7 @@ def send_twilio_sms(to_number, message):
     except Exception as e:
         logger.debug("Failed to send token SMS to user. "
                   "Possibly no mobile number on user object or the twilio package isn't set up yet. "
-                  "Number entered was {}".format(getattr(to_number)))
+                  "Number entered was {}".format(to_number))
         logger.debug(e)
         return False
 
