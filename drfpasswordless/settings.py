@@ -17,6 +17,9 @@ DEFAULTS = {
     # Amount of time that tokens last, in seconds
     'PASSWORDLESS_TOKEN_EXPIRE_TIME': 15 * 60,
 
+    # The length of the token to send in email or sms
+    'PASSWORDLESS_TOKEN_LENGTH': 6,
+
     # The user's email field name
     'PASSWORDLESS_USER_EMAIL_FIELD_NAME': 'email',
 

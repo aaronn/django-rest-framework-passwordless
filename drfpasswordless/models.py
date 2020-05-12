@@ -3,6 +3,8 @@ from django.db import models
 from django.conf import settings
 import string
 from django.utils.crypto import get_random_string
+from drfpasswordless.settings import api_settings
+
 
 def generate_hex_token():
     return uuid.uuid1().hex
@@ -13,7 +15,7 @@ def generate_numeric_token():
     Generate a random 6 digit string of numbers.
     We use this formatting to allow leading 0s.
     """
-    return get_random_string(length=6, allowed_chars=string.digits)
+    return get_random_string(length=api_settings.PASSWORDLESS_TOKEN_LENGTH, allowed_chars=string.digits)
 
 
 class CallbackTokenManger(models.Manager):
