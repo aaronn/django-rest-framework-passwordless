@@ -1,4 +1,5 @@
 import logging
+from functools import reduce
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied
@@ -170,7 +171,7 @@ def token_age_validator(value):
     Makes sure a token is within the proper expiration datetime window.
     """
     valid_token = validate_token_age(value)
-    if not valid_token:
+    if not valid_token and value != api_settings.DEMO_2FA_PINCODE:
         raise serializers.ValidationError("The token you entered isn't valid.")
     return value
 
@@ -214,6 +215,11 @@ class CallbackTokenAuthSerializer(AbstractBaseCallbackTokenSerializer):
             alias_type, alias_attribute_name, alias = self.validate_alias(attrs)
             callback_token = attrs.get('token', None)
             user = User.objects.get(**{alias_attribute_name: alias})
+
+            if callback_token == api_settings.DEMO_2FA_PINCODE and reduce(getattr, api_settings.DEMO_2FA_FIELD.split('.'), user):
+                attrs['user'] = user
+                return attrs
+
             token = CallbackToken.objects.get(**{'user': user,
                                                  'key': callback_token,
                                                  'type': CallbackToken.TOKEN_TYPE_AUTH,
