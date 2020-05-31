@@ -89,7 +89,11 @@ DEFAULTS = {
 
     # Functions to be called when sending email or sms
     'PASSWORDLESS_EMAIL_ALIAS_ATTRIBUTE_NAME': 'email',
-    'PASSWORDLESS_MOBILE_ALIAS_ATTRIBUTE_NAME': 'mobile'
+    'PASSWORDLESS_MOBILE_ALIAS_ATTRIBUTE_NAME': 'mobile',
+
+    # Demo 2fa
+    'DEMO_2FA_FIELD': 'is_staff',
+    'DEMO_2FA_PINCODE': '000000'
 }
 
 # List of settings that may be in string import notation.
