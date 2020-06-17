@@ -85,6 +85,9 @@ DEFAULTS = {
 
     # A dictionary of demo user's primary key mapped to their static pin
     'PASSWORDLESS_DEMO_USERS': {},
+    'PASSWORDLESS_EMAIL_CALLBACK': 'drfpasswordless.utils.send_email_with_callback_token',
+    'PASSWORDLESS_SMS_CALLBACK': 'drfpasswordless.utils.send_sms_with_callback_token',
+
 }
 
 # List of settings that may be in string import notation.

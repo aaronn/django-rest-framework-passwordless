@@ -1,8 +1,7 @@
+from django.utils.module_loading import import_string
 from drfpasswordless.settings import api_settings
 from drfpasswordless.utils import (
     create_callback_token_for_user,
-    send_email_with_callback_token,
-    send_sms_with_callback_token
 )
 
 
@@ -15,9 +14,9 @@ class TokenService(object):
         if user.pk in api_settings.PASSWORDLESS_DEMO_USERS.keys():
             return True
         if alias_type == 'email':
-            send_action = send_email_with_callback_token
+            send_action = import_string(api_settings.PASSWORDLESS_EMAIL_CALLBACK)
         elif alias_type == 'mobile':
-            send_action = send_sms_with_callback_token
+            send_action = import_string(api_settings.PASSWORDLESS_SMS_CALLBACK)
         # Send to alias
         success = send_action(user, token, **message_payload)
         return success
