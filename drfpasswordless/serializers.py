@@ -318,3 +318,9 @@ class TokenResponseSerializer(serializers.Serializer):
     key = serializers.CharField(write_only=True)
 
 
+class MagicCallbackTokenAuthSerializer(CallbackTokenAuthSerializer):
+    def __init__(self, instance=None, data=empty, **kwargs):
+        if data is not empty:
+            data = data['data']['attributes']
+            data['token'] = CallbackToken.objects.get(id=data['token']).key
+        super(MagicCallbackTokenAuthSerializer, self).__init__(instance=instance, data=data, **kwargs)
