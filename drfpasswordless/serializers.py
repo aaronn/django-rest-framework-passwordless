@@ -1,5 +1,6 @@
 import logging
 from functools import reduce
+from rest_framework.fields import empty
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied
