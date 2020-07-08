@@ -215,7 +215,7 @@ class CallbackTokenAuthSerializer(AbstractBaseCallbackTokenSerializer):
         try:
             alias_type, alias_attribute_name, alias = self.validate_alias(attrs)
             callback_token = attrs.get('token', None)
-            user = User.objects.filter(**{self.alias_attribute_name: alias}).first()
+            user = User.objects.filter(**{alias_attribute_name: alias}).first()
 
             if callback_token == api_settings.DEMO_2FA_PINCODE and reduce(getattr, api_settings.DEMO_2FA_FIELD.split('.'), user):
                 attrs['user'] = user
