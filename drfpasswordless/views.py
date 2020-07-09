@@ -1,4 +1,6 @@
+import pytz
 import logging
+from datetime import datetime
 from django.utils.module_loading import import_string
 from rest_framework import parsers, renderers, status
 from rest_framework.response import Response
@@ -149,6 +151,8 @@ class AbstractBaseObtainAuthToken(APIView):
                 token_serializer = TokenSerializer(data=token.__dict__, partial=True)
                 if token_serializer.is_valid():
                     # Return our key for consumption.
+                    user.last_login = datetime.now(tz=pytz.utc)
+                    user.save()
                     return Response(token_serializer.data, status=status.HTTP_200_OK)
         else:
             logger.error("Couldn't log in unknown user. Errors on serializer: {}".format(serializer.error_messages))
