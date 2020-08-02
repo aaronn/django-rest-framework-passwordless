@@ -85,7 +85,7 @@ class MobileAuthSerializer(AbstractBaseAliasAuthenticationSerializer):
     def alias_type(self):
         return 'mobile'
 
-    phone_regex = RegexValidator(regex=r'^\+?[1-9]\d{1,14}$',
+    phone_regex = RegexValidator(regex=r'^\+[1-9]\d{1,14}$',
                                  message="Mobile number must be entered in the format:"
                                          " '+999999999'. Up to 15 digits allowed.")
     mobile = serializers.CharField(validators=[phone_regex], max_length=17)
@@ -169,7 +169,7 @@ class AbstractBaseCallbackTokenSerializer(serializers.Serializer):
     Abstract class inspired by DRF's own token serializer.
     Returns a user if valid, None or a message if not.
     """
-    phone_regex = RegexValidator(regex=r'^\+?[1-9]\d{1,14}$',
+    phone_regex = RegexValidator(regex=r'^\+[1-9]\d{1,14}$',
                                  message="Mobile number must be entered in the format:"
                                          " '+999999999'. Up to 15 digits allowed.")
 
