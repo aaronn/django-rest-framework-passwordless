@@ -309,6 +309,15 @@ DEFAULTS = {
     # exchanging a passwordless token for a real user auth token.
     'PASSWORDLESS_AUTH_TOKEN_SERIALIZER': 'drfpasswordless.serializers.TokenResponseSerializer'
 
+    # A dictionary of demo user's primary key mapped to their static pin
+    'PASSWORDLESS_DEMO_USERS': {},
+
+    # configurable function for sending email
+    'PASSWORDLESS_EMAIL_CALLBACK': 'drfpasswordless.utils.send_email_with_callback_token'
+    # configurable function for sending sms
+    'PASSWORDLESS_SMS_CALLBACK': 'drfpasswordless.utils.send_sms_with_callback_token'
+
+
 }
 ```
 
