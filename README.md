@@ -314,6 +314,7 @@ DEFAULTS = {
 
     # configurable function for sending email
     'PASSWORDLESS_EMAIL_CALLBACK': 'drfpasswordless.utils.send_email_with_callback_token'
+    
     # configurable function for sending sms
     'PASSWORDLESS_SMS_CALLBACK': 'drfpasswordless.utils.send_sms_with_callback_token'
 
