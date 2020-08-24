@@ -40,7 +40,8 @@ def create_callback_token_for_user(user, alias_type, token_type, to_alias=None):
     token = None
     alias_type_u = alias_type.upper()
 
-    to_alias = eval(f"user.{api_settings.PASSWORDLESS_USER_EMAIL_FIELD_NAME}")
+    if to_alias is None:
+        to_alias = eval(f"user.{api_settings.PASSWORDLESS_USER_EMAIL_FIELD_NAME}")
 
     if alias_type_u == 'EMAIL':
         token = CallbackToken.objects.create(user=user,
