@@ -36,7 +36,7 @@ def authenticate_by_token(callback_token):
     return None
 
 
-def create_callback_token_for_user(user, alias_type, token_type):
+def create_callback_token_for_user(user, alias_type, token_type, to_alias=None):
     token = None
     alias_type_u = alias_type.upper()
 
