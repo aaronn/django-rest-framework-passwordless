@@ -201,13 +201,14 @@ def send_twilio_sms(to_number, message):
         return False
     except KeyError:
         logger.debug("Couldn't send SMS."
-                  "Did you set your Twilio account tokens and specify a PASSWORDLESS_MOBILE_NOREPLY_NUMBER?")
+                     "Did you set your Twilio account tokens and specify a PASSWORDLESS_MOBILE_NOREPLY_NUMBER?")
     except Exception as e:
         logger.debug("Failed to send token SMS to user. "
-                  "Possibly no mobile number on user object or the twilio package isn't set up yet. "
-                  "Number entered was {}".format(getattr(to_number)))
+                     "Possibly no mobile number on user object or the twilio package isn't set up yet. "
+                     "Number entered was {}".format(to_number))
         logger.debug(e)
         return False
+
 
 def send_getlead_sms(to_number, code):
     try:
@@ -219,13 +220,13 @@ def send_getlead_sms(to_number, code):
         api_url = 'https://app.getlead.co.uk/api/push-otp'
         data = dict(
             username=os.environ['GETLEAD_UID'],
-	    token=os.environ['GETLEAD_TOKEN'],
-	    sender=os.environ['GETLEAD_SENDER'],
-	    to=to_number,
-	    otp=code,
-	    purpose='login',
-	    company='CitzConn',
-	    priority=4
+            token=os.environ['GETLEAD_TOKEN'],
+            sender=os.environ['GETLEAD_SENDER'],
+            to=to_number,
+            otp=code,
+            purpose='login',
+            company='CitzConn',
+            priority=4
         )
 
         response = requests.post(api_url, data=data).json()
@@ -237,13 +238,14 @@ def send_getlead_sms(to_number, code):
         return False
     except KeyError:
         logger.debug("Couldn't send SMS."
-                  "Did you set your GetLead account tokens?")
+                     "Did you set your GetLead account tokens?")
     except Exception as e:
         logger.debug("Failed to send token SMS to user. "
-                  "Possibly no mobile number on user object or the twilio package isn't set up yet. "
-                  "Number entered was {}".format(to_number))
+                     "Possibly no mobile number on user object or the twilio package isn't set up yet. "
+                     "Number entered was {}".format(to_number))
         logger.exception(e)
         return False
+
 
 def create_authentication_token(user):
     """ Default way to create an authentication token"""
