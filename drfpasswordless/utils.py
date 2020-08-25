@@ -177,7 +177,13 @@ def send_sms_with_callback_token(user, mobile_token, **kwargs):
     if to_number.__class__.__name__ == 'PhoneNumber':
         to_number = to_number.__str__()
 
-    return send_twilio_sms(to_number, message)
+    if os.environ.get('TWILIO_ACCOUNT_SID'):
+        return send_twilio_sms(to_number, message)
+    elif os.environ.get('GETLEAD_UID'):
+        return send_getlead_sms(to_number, mobile_token.key)
+    else:
+        return send_plivo_sms(to_number, message)
+
 
 def send_twilio_sms(to_number, message):
     try:
@@ -242,6 +248,38 @@ def send_getlead_sms(to_number, code):
     except Exception as e:
         logger.debug("Failed to send token SMS to user. "
                      "Possibly no mobile number on user object or the twilio package isn't set up yet. "
+                     "Number entered was {}".format(to_number))
+        logger.exception(e)
+        return False
+
+
+def send_plivo_sms(to_number, message):
+    try:
+        if api_settings.PASSWORDLESS_MOBILE_NOREPLY_NUMBER:
+            # We need a sending number to send properly
+            if api_settings.PASSWORDLESS_TEST_SUPPRESSION is True:
+                # we assume success to prevent spamming SMS during testing.
+                return True
+            from plivo import RestClient
+            client = RestClient(os.environ["PLIVO_AUTH_ID"], os.environ["PLIVO_AUTH_TOKEN"])
+            client.messages.create(
+                src=api_settings.PASSWORDLESS_MOBILE_NOREPLY_NUMBER,
+                dst=to_number,
+                text=message,
+            )
+            return True
+        else:
+            logger.debug("Failed to send token sms. Missing PASSWORDLESS_MOBILE_NOREPLY_NUMBER.")
+            return False
+    except ImportError:
+        logger.debug("Couldn't import plivo library. Is plivo installed?")
+        return False
+    except KeyError:
+        logger.debug("Couldn't send SMS."
+                     "Did you set your Plivo account tokens?")
+    except Exception as e:
+        logger.debug("Failed to send token SMS to user. "
+                     "Possibly no mobile number on user object or the plivo package isn't set up yet. "
                      "Number entered was {}".format(to_number))
         logger.exception(e)
         return False
