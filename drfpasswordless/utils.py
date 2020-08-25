@@ -169,7 +169,6 @@ def send_sms_with_callback_token(user, mobile_token, **kwargs):
         if api_settings.PASSWORDLESS_MOBILE_NOREPLY_NUMBER is None:
             return False
         return True
-    
     base_string = kwargs.get('mobile_message', api_settings.PASSWORDLESS_MOBILE_MESSAGE)
     message = base_string % mobile_token.key
 
@@ -177,112 +176,77 @@ def send_sms_with_callback_token(user, mobile_token, **kwargs):
     if to_number.__class__.__name__ == 'PhoneNumber':
         to_number = to_number.__str__()
 
-    if os.environ.get('TWILIO_ACCOUNT_SID'):
-        return send_twilio_sms(to_number, message)
-    elif os.environ.get('GETLEAD_UID'):
-        return send_getlead_sms(to_number, mobile_token.key)
-    else:
-        return send_plivo_sms(to_number, message)
-
-
-def send_twilio_sms(to_number, message):
+    if not api_settings.PASSWORDLESS_MOBILE_NOREPLY_NUMBER:
+        logger.debug("Failed to send token sms. Missing PASSWORDLESS_MOBILE_NOREPLY_NUMBER.")
+        return False
     try:
-        if api_settings.PASSWORDLESS_MOBILE_NOREPLY_NUMBER:
-            # We need a sending number to send properly
-
-            from twilio.rest import Client
-            twilio_client = Client(os.environ['TWILIO_ACCOUNT_SID'], os.environ['TWILIO_AUTH_TOKEN'])
-
-            twilio_client.messages.create(
-                body=message,
-                to=to_number,
-                from_=api_settings.PASSWORDLESS_MOBILE_NOREPLY_NUMBER
-            )
-            return True
-        else:
-            logger.debug("Failed to send token sms. Missing PASSWORDLESS_MOBILE_NOREPLY_NUMBER.")
+        provider = os.environ.get('PASSWORDLESS_SMS_PROVIDER', 'TWILIO')
+        SMS_PROVIDERS = {
+            'TWILIO': send_twilio_sms,
+            'GETLEAD': send_getlead_sms,
+            'PLIVO': send_plivo_sms,
+        }
+        try:
+            handler = SMS_PROVIDERS[provider]
+        except KeyError:
+            logger.debug("SMS-Provider not found.")
             return False
+        else:
+            return handler(to_number, message, mobile_token.key)
     except ImportError:
-        logger.debug("Couldn't import Twilio client. Is twilio installed?")
+        logger.debug("Couldn't import SMS-Provider client. Is SMS-Provider installed?")
         return False
     except KeyError:
         logger.debug("Couldn't send SMS."
-                     "Did you set your Twilio account tokens and specify a PASSWORDLESS_MOBILE_NOREPLY_NUMBER?")
+                     "Did you set your SMS-Provider account tokens and specify a PASSWORDLESS_MOBILE_NOREPLY_NUMBER?")
     except Exception as e:
         logger.debug("Failed to send token SMS to user. "
-                     "Possibly no mobile number on user object or the twilio package isn't set up yet. "
+                     "Possibly no mobile number on user object or the SMS-Provider package isn't set up yet. "
                      "Number entered was {}".format(to_number))
         logger.debug(e)
         return False
 
 
-def send_getlead_sms(to_number, code):
-    try:
-        if api_settings.PASSWORDLESS_TEST_SUPPRESSION is True:
-            # we assume success to prevent spamming SMS during testing.
-            return True
-
-        import requests
-        api_url = 'https://app.getlead.co.uk/api/push-otp'
-        data = dict(
-            username=os.environ['GETLEAD_UID'],
-            token=os.environ['GETLEAD_TOKEN'],
-            sender=os.environ['GETLEAD_SENDER'],
-            to=to_number,
-            otp=code,
-            purpose='login',
-            company='CitzConn',
-            priority=4
-        )
-
-        response = requests.post(api_url, data=data).json()
-        if response.get("status") == "Fail":
-            return False
-        return True
-    except ImportError:
-        logger.debug("Couldn't import requests library. Is requests installed?")
-        return False
-    except KeyError:
-        logger.debug("Couldn't send SMS."
-                     "Did you set your GetLead account tokens?")
-    except Exception as e:
-        logger.debug("Failed to send token SMS to user. "
-                     "Possibly no mobile number on user object or the twilio package isn't set up yet. "
-                     "Number entered was {}".format(to_number))
-        logger.exception(e)
-        return False
+def send_twilio_sms(to_number, message, code):
+    from twilio.rest import Client
+    twilio_client = Client(os.environ['TWILIO_ACCOUNT_SID'], os.environ['TWILIO_AUTH_TOKEN'])
+    twilio_client.messages.create(
+        body=message,
+        to=to_number,
+        from_=api_settings.PASSWORDLESS_MOBILE_NOREPLY_NUMBER
+    )
+    return True
 
 
-def send_plivo_sms(to_number, message):
-    try:
-        if api_settings.PASSWORDLESS_MOBILE_NOREPLY_NUMBER:
-            # We need a sending number to send properly
-            if api_settings.PASSWORDLESS_TEST_SUPPRESSION is True:
-                # we assume success to prevent spamming SMS during testing.
-                return True
-            from plivo import RestClient
-            client = RestClient(os.environ["PLIVO_AUTH_ID"], os.environ["PLIVO_AUTH_TOKEN"])
-            client.messages.create(
-                src=api_settings.PASSWORDLESS_MOBILE_NOREPLY_NUMBER,
-                dst=to_number,
-                text=message,
-            )
-            return True
-        else:
-            logger.debug("Failed to send token sms. Missing PASSWORDLESS_MOBILE_NOREPLY_NUMBER.")
-            return False
-    except ImportError:
-        logger.debug("Couldn't import plivo library. Is plivo installed?")
+def send_getlead_sms(to_number, message, code):
+    import requests
+    api_url = 'https://app.getlead.co.uk/api/push-otp'
+    data = dict(
+        username=os.environ['GETLEAD_UID'],
+        token=os.environ['GETLEAD_TOKEN'],
+        sender=api_settings.PASSWORDLESS_MOBILE_NOREPLY_NUMBER,
+        to=to_number,
+        otp=code,
+        purpose='login',
+        company=os.environ['GETLEAD_COMPANY_NAME'],
+        priority=4
+    )
+
+    response = requests.post(api_url, data=data).json()
+    if response.get("status") == "Fail":
         return False
-    except KeyError:
-        logger.debug("Couldn't send SMS."
-                     "Did you set your Plivo account tokens?")
-    except Exception as e:
-        logger.debug("Failed to send token SMS to user. "
-                     "Possibly no mobile number on user object or the plivo package isn't set up yet. "
-                     "Number entered was {}".format(to_number))
-        logger.exception(e)
-        return False
+    return True
+
+
+def send_plivo_sms(to_number, message, code):
+    from plivo import RestClient
+    client = RestClient(os.environ["PLIVO_AUTH_ID"], os.environ["PLIVO_AUTH_TOKEN"])
+    client.messages.create(
+        src=api_settings.PASSWORDLESS_MOBILE_NOREPLY_NUMBER,
+        dst=to_number,
+        text=message,
+    )
+    return True
 
 
 def create_authentication_token(user):
