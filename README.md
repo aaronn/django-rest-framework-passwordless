@@ -102,6 +102,8 @@ PASSWORDLESS_AUTH = {
 4. Add ``drfpasswordless.urls`` to your urls.py
 
 ```python
+ from django.urls import path, include
+
  urlpatterns = [
      ..
      path('', include('drfpasswordless.urls')),
