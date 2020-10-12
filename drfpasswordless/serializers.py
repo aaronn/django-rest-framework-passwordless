@@ -9,7 +9,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from drfpasswordless.models import CallbackToken
 from drfpasswordless.settings import api_settings
-from landa_exceptions.core import InvalidTwoFactorAuthToken
+from landa_exceptions.accounts import InvalidCallbackToken, ExpiredCallbackToken
 from drfpasswordless.utils import authenticate_by_token, verify_user_alias, validate_token_age
 
 logger = logging.getLogger(__name__)
@@ -18,9 +18,9 @@ User = get_user_model()
 
 class TokenField(serializers.CharField):
     default_error_messages = {
-        'required': _('Invalid Token'),
-        'invalid': _('Invalid Token'),
-        'blank': _('Invalid Token'),
+        'required': _(str(InvalidCallbackToken()),
+        'invalid': _(str(InvalidCallbackToken()),
+        'blank': _(str(InvalidCallbackToken()),
         'max_length': _('Tokens are {max_length} digits long.'),
         'min_length': _('Tokens are {min_length} digits long.')
     }
@@ -174,7 +174,7 @@ def token_age_validator(value):
     """
     valid_token = validate_token_age(value)
     if not valid_token and value != api_settings.DEMO_2FA_PINCODE:
-        raise serializers.ValidationError(str(InvalidTwoFactorAuthToken()))
+        raise serializers.ValidationError(str(InvalidCallbackToken())
     return value
 
 
