@@ -174,7 +174,7 @@ def token_age_validator(value):
     """
     valid_token = validate_token_age(value)
     if not valid_token and value != api_settings.DEMO_2FA_PINCODE:
-        raise serializers.ValidationError(str(InvalidCallbackToken())
+        raise serializers.ValidationError(str(InvalidCallbackToken()))
     return value
 
 
