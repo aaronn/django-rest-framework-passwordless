@@ -28,9 +28,18 @@ def check_unique_tokens(sender, instance, **kwargs):
     """
     Ensures that mobile and email tokens are unique or tries once more to generate.
     """
-    if isinstance(instance, CallbackToken):
-        if CallbackToken.objects.filter(key=instance.key, is_active=True).exists():
-            instance.key = generate_numeric_token()
+    if instance._state.adding:
+        # save is called on a token to create it in the db
+        # before creating check whether a token with the same key exists
+        if isinstance(instance, CallbackToken):
+            if CallbackToken.objects.filter(key=instance.key, is_active=True).exists():
+                instance.key = generate_numeric_token()
+    else:
+        # save is called on an already existing token to update it. Such as invalidating it.
+        # in that case there is no need to check for the key. This way we both avoid an unneccessary db hit
+        # and avoid to change key field of used tokens.
+        pass 
+
 
 
 User = get_user_model()
