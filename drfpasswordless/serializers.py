@@ -46,7 +46,7 @@ class AbstractBaseAliasAuthenticationSerializer(serializers.Serializer):
                 try:
                     user = User.objects.get(**{self.alias_type+'__iexact': alias})
                 except User.DoesNotExist:
-                    user = User.objects.create(**{self.alias_type: alias})
+                    user = User(**{self.alias_type: alias})
                     user.set_unusable_password()
                     user.save()
             else:
