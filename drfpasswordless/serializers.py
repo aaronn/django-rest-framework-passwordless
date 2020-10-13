@@ -9,7 +9,6 @@ from drfpasswordless.models import CallbackToken
 from drfpasswordless.settings import api_settings
 from drfpasswordless.utils import authenticate_by_token, verify_user_alias, validate_token_age
 
-
 logger = logging.getLogger(__name__)
 User = get_user_model()
 
@@ -53,7 +52,7 @@ class AbstractBaseAliasAuthenticationSerializer(serializers.Serializer):
             else:
                 # If new aliases should not register new users.
                 try:
-                    user = User.objects.get(**{self.alias_type: alias})
+                    user = User.objects.get(**{self.alias_type+'__iexact': alias})
                 except User.DoesNotExist:
                     user = None
 
@@ -86,10 +85,10 @@ class MobileAuthSerializer(AbstractBaseAliasAuthenticationSerializer):
     def alias_type(self):
         return 'mobile'
 
-    phone_regex = RegexValidator(regex=r'^\+?1?\d{9,15}$',
+    phone_regex = RegexValidator(regex=r'^\+[1-9]\d{1,14}$',
                                  message="Mobile number must be entered in the format:"
                                          " '+999999999'. Up to 15 digits allowed.")
-    mobile = serializers.CharField(validators=[phone_regex], max_length=15)
+    mobile = serializers.CharField(validators=[phone_regex], max_length=17)
 
 
 """
@@ -170,12 +169,12 @@ class AbstractBaseCallbackTokenSerializer(serializers.Serializer):
     Abstract class inspired by DRF's own token serializer.
     Returns a user if valid, None or a message if not.
     """
-    phone_regex = RegexValidator(regex=r'^\+?1?\d{9,15}$',
+    phone_regex = RegexValidator(regex=r'^\+[1-9]\d{1,14}$',
                                  message="Mobile number must be entered in the format:"
                                          " '+999999999'. Up to 15 digits allowed.")
 
     email = serializers.EmailField(required=False)  # Needs to be required=false to require both.
-    mobile = serializers.CharField(required=False, validators=[phone_regex], max_length=15)
+    mobile = serializers.CharField(required=False, validators=[phone_regex], max_length=17)
     token = TokenField(min_length=6, max_length=6, validators=[token_age_validator])
 
     def validate_alias(self, attrs):
@@ -203,7 +202,7 @@ class CallbackTokenAuthSerializer(AbstractBaseCallbackTokenSerializer):
         try:
             alias_type, alias = self.validate_alias(attrs)
             callback_token = attrs.get('token', None)
-            user = User.objects.get(**{alias_type: alias})
+            user = User.objects.get(**{alias_type+'__iexact': alias})
             token = CallbackToken.objects.get(**{'user': user,
                                                  'key': callback_token,
                                                  'type': CallbackToken.TOKEN_TYPE_AUTH,
@@ -232,8 +231,11 @@ class CallbackTokenAuthSerializer(AbstractBaseCallbackTokenSerializer):
             else:
                 msg = _('Invalid Token')
                 raise serializers.ValidationError(msg)
-        except User.DoesNotExist:
+        except CallbackToken.DoesNotExist:
             msg = _('Invalid alias parameters provided.')
+            raise serializers.ValidationError(msg)
+        except User.DoesNotExist:
+            msg = _('Invalid user alias parameters provided.')
             raise serializers.ValidationError(msg)
         except ValidationError:
             msg = _('Invalid alias parameters provided.')
@@ -250,7 +252,7 @@ class CallbackTokenVerificationSerializer(AbstractBaseCallbackTokenSerializer):
         try:
             alias_type, alias = self.validate_alias(attrs)
             user_id = self.context.get("user_id")
-            user = User.objects.get(**{'id': user_id, alias_type: alias})
+            user = User.objects.get(**{'id': user_id, alias_type+'__iexact': alias})
             callback_token = attrs.get('token', None)
 
             token = CallbackToken.objects.get(**{'user': user,
