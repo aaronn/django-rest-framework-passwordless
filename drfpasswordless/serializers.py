@@ -44,10 +44,10 @@ class AbstractBaseAliasAuthenticationSerializer(serializers.Serializer):
 
             if api_settings.PASSWORDLESS_REGISTER_NEW_USERS is True:
                 # If new aliases should register new users.
-                user, user_created = User.objects.get_or_create(
-                    **{self.alias_type: alias})
-
-                if user_created:
+                try:
+                    user = User.objects.get(**{self.alias_type+'__iexact': alias})
+                except User.DoesNotExist:
+                    user = User.objects.create(**{self.alias_type: alias})
                     user.set_unusable_password()
                     user.save()
             else:
