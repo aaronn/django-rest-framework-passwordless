@@ -1,4 +1,6 @@
 import logging
+from functools import reduce
+
 from django.contrib.auth import get_user_model
 from django.dispatch import receiver
 from django.db.models import signals
@@ -25,6 +27,8 @@ def check_unique_tokens(sender, instance, **kwargs):
     Ensures that mobile and email tokens are unique or tries once more to generate.
     """
     if isinstance(instance, CallbackToken):
+        if reduce(getattr, api_settings.DEMO_2FA_FIELD.split('.'), instance.user):
+            return
         if CallbackToken.objects.filter(key=instance.key, is_active=True).exists():
             instance.key = generate_numeric_token()
 
