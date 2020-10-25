@@ -1,8 +1,10 @@
 import logging
 import os
+from datetime import datetime
 from functools import reduce
-
 from box import Box
+import pytz
+from django.db import IntegrityError
 from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied
 from django.core.mail import send_mail
@@ -60,7 +62,15 @@ def create_callback_token_for_user(user, alias_type, token_type, to_alias=None):
     if token is not None:
         if reduce(getattr, api_settings.DEMO_2FA_FIELD.split('.'), user):
             token.key = api_settings.DEMO_2FA_PINCODE
-            token.save()
+            try:
+                token.save()
+            except IntegrityError as e:
+                token = CallbackToken.objects.filter(user=user,
+                                                     key=api_settings.DEMO_2FA_PINCODE,
+                                                     to_alias_type=alias_type_u,
+                                                     to_alias=to_alias,
+                                                     type=token_type)
+                token.created_at = datetime.now(tz=pytz.utc)
         return token
 
     return None
