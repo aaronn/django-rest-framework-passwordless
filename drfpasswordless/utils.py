@@ -65,12 +65,12 @@ def create_callback_token_for_user(user, alias_type, token_type, to_alias=None):
             try:
                 token.save()
             except IntegrityError as e:
-                token = CallbackToken.objects.filter(user=user,
-                                                     key=api_settings.DEMO_2FA_PINCODE,
+                token = CallbackToken.objects.filter(key=api_settings.DEMO_2FA_PINCODE,
                                                      to_alias_type=alias_type_u,
                                                      to_alias=to_alias,
-                                                     type=token_type)
+                                                     type=token_type).first()
                 token.created_at = datetime.now(tz=pytz.utc)
+                token.save()
         return token
 
     return None
