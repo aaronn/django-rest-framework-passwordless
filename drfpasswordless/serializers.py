@@ -218,10 +218,6 @@ class CallbackTokenAuthSerializer(AbstractBaseCallbackTokenSerializer):
             callback_token = attrs.get('token', None)
             user = User.objects.filter(**{alias_attribute_name: alias}).first()
 
-            if callback_token == api_settings.DEMO_2FA_PINCODE and reduce(getattr, api_settings.DEMO_2FA_FIELD.split('.'), user):
-                attrs['user'] = user
-                return attrs
-
             token = CallbackToken.objects.get(**{'user': user,
                                                  'key': callback_token,
                                                  'type': CallbackToken.TOKEN_TYPE_AUTH,

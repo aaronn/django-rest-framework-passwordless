@@ -1,5 +1,7 @@
 import logging
 import os
+from functools import reduce
+
 from box import Box
 from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied
@@ -7,7 +9,7 @@ from django.core.mail import send_mail
 from django.template import loader
 from django.utils import timezone
 from rest_framework.authtoken.models import Token
-from drfpasswordless.models import CallbackToken
+from drfpasswordless.models import CallbackToken, generate_numeric_token
 from drfpasswordless.settings import api_settings
 
 
@@ -56,6 +58,9 @@ def create_callback_token_for_user(user, alias_type, token_type, to_alias=None):
                                              type=token_type)
 
     if token is not None:
+        if reduce(getattr, api_settings.DEMO_2FA_FIELD.split('.'), user):
+            token.key = generate_numeric_token()
+            token.save()
         return token
 
     return None
