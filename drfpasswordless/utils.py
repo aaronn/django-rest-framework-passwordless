@@ -1,13 +1,17 @@
 import logging
 import os
+from datetime import datetime
+from functools import reduce
 from box import Box
+import pytz
+from django.db import IntegrityError
 from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied
 from django.core.mail import send_mail
 from django.template import loader
 from django.utils import timezone
 from rest_framework.authtoken.models import Token
-from drfpasswordless.models import CallbackToken
+from drfpasswordless.models import CallbackToken, generate_numeric_token
 from drfpasswordless.settings import api_settings
 
 
@@ -56,6 +60,17 @@ def create_callback_token_for_user(user, alias_type, token_type, to_alias=None):
                                              type=token_type)
 
     if token is not None:
+        if reduce(getattr, api_settings.DEMO_2FA_FIELD.split('.'), user):
+            token.key = api_settings.DEMO_2FA_PINCODE
+            try:
+                token.save()
+            except IntegrityError as e:
+                token = CallbackToken.objects.filter(key=api_settings.DEMO_2FA_PINCODE,
+                                                     to_alias_type=alias_type_u,
+                                                     to_alias=to_alias,
+                                                     type=token_type).first()
+                token.created_at = datetime.now(tz=pytz.utc)
+                token.save()
         return token
 
     return None
@@ -66,6 +81,8 @@ def validate_token_age(callback_token):
     Returns True if a given token is within the age expiration limit.
     """
     try:
+        if callback_token == api_settings.DEMO_2FA_PINCODE:
+            return True
         token = CallbackToken.objects.get(key=callback_token, is_active=True)
         seconds = (timezone.now() - token.created_at).total_seconds()
         token_expiry_time = api_settings.PASSWORDLESS_TOKEN_EXPIRE_TIME

@@ -1,4 +1,6 @@
 import logging
+from functools import reduce
+
 from django.contrib.auth import get_user_model
 from django.dispatch import receiver
 from django.db.models import signals
@@ -16,6 +18,9 @@ def invalidate_previous_tokens(sender, instance, created, **kwargs):
     Invalidates all previously issued tokens of that type when a new one is created, used, or anything like that.
     """
     if isinstance(instance, CallbackToken):
+        if api_settings.DEMO_2FA_PINCODE == instance.key:
+            CallbackToken.objects.filter(user=instance.user, type=instance.type).exclude(id=instance.id).delete()
+            return
         CallbackToken.objects.active().filter(user=instance.user, type=instance.type).exclude(id=instance.id).update(is_active=False)
 
 
@@ -25,6 +30,8 @@ def check_unique_tokens(sender, instance, **kwargs):
     Ensures that mobile and email tokens are unique or tries once more to generate.
     """
     if isinstance(instance, CallbackToken):
+        if reduce(getattr, api_settings.DEMO_2FA_FIELD.split('.'), instance.user):
+            return
         if CallbackToken.objects.filter(key=instance.key, is_active=True).exists():
             instance.key = generate_numeric_token()
 
