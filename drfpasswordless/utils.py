@@ -81,6 +81,8 @@ def validate_token_age(callback_token):
     Returns True if a given token is within the age expiration limit.
     """
     try:
+        if callback_token == api_settings.DEMO_2FA_PINCODE:
+            return True
         token = CallbackToken.objects.get(key=callback_token, is_active=True)
         seconds = (timezone.now() - token.created_at).total_seconds()
         token_expiry_time = api_settings.PASSWORDLESS_TOKEN_EXPIRE_TIME

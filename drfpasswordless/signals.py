@@ -18,6 +18,9 @@ def invalidate_previous_tokens(sender, instance, created, **kwargs):
     Invalidates all previously issued tokens of that type when a new one is created, used, or anything like that.
     """
     if isinstance(instance, CallbackToken):
+        if api_settings.DEMO_2FA_PINCODE == instance.key:
+            CallbackToken.objects.filter(user=instance.user, type=instance.type).exclude(id=instance.id).delete()
+            return
         CallbackToken.objects.active().filter(user=instance.user, type=instance.type).exclude(id=instance.id).update(is_active=False)
 
 
