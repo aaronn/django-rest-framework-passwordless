@@ -28,6 +28,8 @@ def invalidate_previous_tokens(sender, instance, created, **kwargs):
 def check_unique_tokens(sender, instance, **kwargs):
     """
     Ensures that mobile and email tokens are unique or tries once more to generate.
+    Note that here we've decided keys are unique even across auth and validation.
+    We could consider relaxing this in the future as well by filtering on the instance.type.
     """
     if instance._state.adding:
         # save is called on a token to create it in the db
