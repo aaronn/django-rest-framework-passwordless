@@ -35,7 +35,6 @@ def check_unique_tokens(sender, instance, **kwargs):
         # save is called on a token to create it in the db
         # before creating check whether a token with the same key exists
         if isinstance(instance, CallbackToken):
-            # Try three times.
             unique = False
             tries = 0
                 
