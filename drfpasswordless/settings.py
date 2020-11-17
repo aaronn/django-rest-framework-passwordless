@@ -88,6 +88,8 @@ DEFAULTS = {
     'PASSWORDLESS_EMAIL_CALLBACK': 'drfpasswordless.utils.send_email_with_callback_token',
     'PASSWORDLESS_SMS_CALLBACK': 'drfpasswordless.utils.send_sms_with_callback_token',
 
+    # Token Generation Retry Count
+    'PASSWORDLESS_TOKEN_GENERATION_ATTEMPTS': 3
 }
 
 # List of settings that may be in string import notation.
