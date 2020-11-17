@@ -1,5 +1,6 @@
 import logging
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.dispatch import receiver
 from django.db.models import signals
 from drfpasswordless.models import CallbackToken
@@ -27,18 +28,41 @@ def invalidate_previous_tokens(sender, instance, created, **kwargs):
 def check_unique_tokens(sender, instance, **kwargs):
     """
     Ensures that mobile and email tokens are unique or tries once more to generate.
+    Note that here we've decided keys are unique even across auth and validation.
+    We could consider relaxing this in the future as well by filtering on the instance.type.
     """
     if instance._state.adding:
         # save is called on a token to create it in the db
         # before creating check whether a token with the same key exists
         if isinstance(instance, CallbackToken):
+            unique = False
+            tries = 0
+                
             if CallbackToken.objects.filter(key=instance.key, is_active=True).exists():
-                instance.key = generate_numeric_token()
+                # Try N(default=3) times before giving up.
+                while tries < api_settings.PASSWORDLESS_TOKEN_GENERATION_ATTEMPTS:
+                    tries = tries + 1
+                    new_key = generate_numeric_token()
+                    instance.key = new_key
+                
+                    if not CallbackToken.objects.filter(key=instance.key, is_active=True).exists():
+                        # Leave the loop if we found a valid token that doesn't exist yet.
+                        unique = True
+                        break
+
+                if not unique:
+                    # A unique value wasn't found after three tries
+                    raise ValidationError("Couldn't create a unique token even after retrying.")
+            else:
+                # A unique value was found immediately.
+                pass
+
+        
     else:
         # save is called on an already existing token to update it. Such as invalidating it.
         # in that case there is no need to check for the key. This way we both avoid an unneccessary db hit
         # and avoid to change key field of used tokens.
-        pass 
+        pass
 
 
 

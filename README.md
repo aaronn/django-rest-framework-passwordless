@@ -320,6 +320,9 @@ DEFAULTS = {
     # configurable function for sending sms
     'PASSWORDLESS_SMS_CALLBACK': 'drfpasswordless.utils.send_sms_with_callback_token'
 
+    # Token Generation Retry Count
+    'PASSWORDLESS_TOKEN_GENERATION_ATTEMPTS': 3
+
 
 }
 ```

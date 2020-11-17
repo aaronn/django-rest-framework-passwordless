@@ -47,7 +47,6 @@ class AbstractBaseCallbackToken(models.Model):
         abstract = True
         get_latest_by = 'created_at'
         ordering = ['-id']
-        unique_together = (('key', 'is_active'),)
 
     def __str__(self):
         return str(self.key)
@@ -66,4 +65,3 @@ class CallbackToken(AbstractBaseCallbackToken):
 
     class Meta(AbstractBaseCallbackToken.Meta):
         verbose_name = 'Callback Token'
-        unique_together = ['is_active', 'key', 'type']
