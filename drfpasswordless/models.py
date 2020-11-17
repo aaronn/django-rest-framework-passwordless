@@ -66,4 +66,4 @@ class CallbackToken(AbstractBaseCallbackToken):
 
     class Meta(AbstractBaseCallbackToken.Meta):
         verbose_name = 'Callback Token'
-        unique_together = ['is_active', 'key', 'type', 'to_alias']
+        unique_together = ['is_active', 'key', 'type', 'to_alias', 'user_id']
