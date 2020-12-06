@@ -247,13 +247,13 @@ class CallbackTokenAuthSerializer(AbstractBaseCallbackTokenSerializer):
                 msg = _('Invalid Token')
                 raise serializers.ValidationError(msg)
         except CallbackToken.DoesNotExist:
-            msg = _('Invalid alias parameters provided.')
+            msg = _(str(InvalidCallbackToken()))
             raise serializers.ValidationError(msg)
         except User.DoesNotExist:
-            msg = _('Invalid alias parameters provided.')
+            msg = _(str(InvalidCallbackToken()))
             raise serializers.ValidationError(msg)
         except ValidationError:
-            msg = _('Invalid alias parameters provided.')
+            msg = _(str(InvalidCallbackToken()))
             raise serializers.ValidationError(msg)
 
 
