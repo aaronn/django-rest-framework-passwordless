@@ -221,6 +221,7 @@ class CallbackTokenAuthSerializer(AbstractBaseCallbackTokenSerializer):
             token = CallbackToken.objects.get(**{'user': user,
                                                  'key': callback_token,
                                                  'type': CallbackToken.TOKEN_TYPE_AUTH,
+                                                 'to_alias_type': alias_type.upper(),
                                                  'is_active': True})
 
             if token.user == user:
