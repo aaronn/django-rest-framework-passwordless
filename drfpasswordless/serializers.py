@@ -211,7 +211,7 @@ class AbstractBaseCallbackTokenSerializer(serializers.Serializer):
 
 class CallbackTokenAuthSerializer(AbstractBaseCallbackTokenSerializer):
 
-    def validate(self, attrs, user):
+    def validate(self, attrs, user=None):
         # Check Aliases
         try:
             alias_type, alias_attribute_name, alias = self.validate_alias(attrs)
