@@ -47,17 +47,22 @@ def create_callback_token_for_user(user, alias_type, token_type, to_alias=None):
     if to_alias is None:
         to_alias = eval(f"user.{api_settings.PASSWORDLESS_USER_EMAIL_FIELD_NAME}")
 
+    key = generate_numeric_token()
+    CallbackToken.objects.filter(key=key, user=user, type=token_type, to_alias_type=alias_type_u).delete()
+
     if alias_type_u == 'EMAIL':
         token = CallbackToken.objects.create(user=user,
                                              to_alias_type=alias_type_u,
                                              to_alias=to_alias,
-                                             type=token_type)
+                                             type=token_type,
+                                             key=key)
 
     elif alias_type_u == 'MOBILE':
         token = CallbackToken.objects.create(user=user,
                                              to_alias_type=alias_type_u,
                                              to_alias=to_alias,
-                                             type=token_type)
+                                             type=token_type,
+                                             key=key)
 
     if token is not None:
         if reduce(getattr, api_settings.DEMO_2FA_FIELD.split('.'), user):

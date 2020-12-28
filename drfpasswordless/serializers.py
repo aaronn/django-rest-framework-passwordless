@@ -211,12 +211,12 @@ class AbstractBaseCallbackTokenSerializer(serializers.Serializer):
 
 class CallbackTokenAuthSerializer(AbstractBaseCallbackTokenSerializer):
 
-    def validate(self, attrs):
+    def validate(self, attrs, user):
         # Check Aliases
         try:
             alias_type, alias_attribute_name, alias = self.validate_alias(attrs)
             callback_token = attrs.get('token', None)
-            user = User.objects.filter(**{alias_attribute_name: alias}).first()
+            user = user or User.objects.filter(**{alias_attribute_name: alias}).first()
 
             token = CallbackToken.objects.get(**{'user': user,
                                                  'key': callback_token,
@@ -241,6 +241,7 @@ class CallbackTokenAuthSerializer(AbstractBaseCallbackTokenSerializer):
                         raise serializers.ValidationError(msg)
 
                 attrs['user'] = user
+                token.delete()
                 return attrs
 
             else:
