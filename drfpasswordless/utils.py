@@ -1,6 +1,6 @@
 import logging
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 from functools import reduce
 from box import Box
 import pytz
@@ -47,17 +47,22 @@ def create_callback_token_for_user(user, alias_type, token_type, to_alias=None):
     if to_alias is None:
         to_alias = eval(f"user.{api_settings.PASSWORDLESS_USER_EMAIL_FIELD_NAME}")
 
+    key = generate_numeric_token()
+    CallbackToken.objects.filter(key=key, user=user, type=token_type, to_alias_type=alias_type_u).delete()
+
     if alias_type_u == 'EMAIL':
         token = CallbackToken.objects.create(user=user,
                                              to_alias_type=alias_type_u,
                                              to_alias=to_alias,
-                                             type=token_type)
+                                             type=token_type,
+                                             key=key)
 
     elif alias_type_u == 'MOBILE':
         token = CallbackToken.objects.create(user=user,
                                              to_alias_type=alias_type_u,
                                              to_alias=to_alias,
-                                             type=token_type)
+                                             type=token_type,
+                                             key=key)
 
     if token is not None:
         if reduce(getattr, api_settings.DEMO_2FA_FIELD.split('.'), user):
@@ -214,3 +219,11 @@ def send_sms_with_callback_token(user, mobile_token, **kwargs):
 def create_authentication_token(user):
     """ Default way to create an authentication token"""
     return Token.objects.get_or_create(user=user)
+
+
+def is_callback_overflow(user, to_alias_type=None, delta=timedelta(hours=1), count=5):
+    filter_by = {"user": user, "created_at__gt": datetime.now(tz=pytz.utc) - delta}
+    if to_alias_type:
+        filter_by.update({"to_alias_type": to_alias_type})
+
+    return CallbackToken.objects.filter(**filter_by).count() >= count
