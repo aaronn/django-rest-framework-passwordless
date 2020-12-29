@@ -1,6 +1,6 @@
 import logging
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 from functools import reduce
 from box import Box
 import pytz
@@ -219,3 +219,11 @@ def send_sms_with_callback_token(user, mobile_token, **kwargs):
 def create_authentication_token(user):
     """ Default way to create an authentication token"""
     return Token.objects.get_or_create(user=user)
+
+
+def get_callback_tokens_interval(user, to_alias_type=None, delta=timedelta(hours=1)):
+    filter_by = {"user": user, "created_at__gt": datetime.now(tz=pytz.utc) - delta}
+    if to_alias_type:
+        filter_by.update({"to_alias_type": to_alias_type})
+
+    return CallbackToken.objects.filter(**filter_by)
