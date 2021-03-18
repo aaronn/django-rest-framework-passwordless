@@ -183,12 +183,13 @@ token, specify your template name with this setting:
 ```bash
 PASSWORDLESS_AUTH = {
    ...
-  'PASSWORDLESS_EMAIL_TOKEN_HTML_TEMPLATE_NAME': "mytemplate.html"
+  'PASSWORDLESS_EMAIL_TOKEN_HTML_TEMPLATE_NAME': "mytemplate.html",
+  'PASSWORDLESS_TOKEN_LENGTH': 6
 }
 ```
 
 The template renders a single variable ``{{ callback_token }}`` which is
-the 6 digit callback token being sent.
+the 6 (or defined as above) digit callback token being sent.
 
 Contact Point Validation
 ========================
