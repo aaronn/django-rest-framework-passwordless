@@ -323,6 +323,8 @@ DEFAULTS = {
     # Token Generation Retry Count
     'PASSWORDLESS_TOKEN_GENERATION_ATTEMPTS': 3
 
+    # The length of the token to send in email or sms, maximum 6
+    'PASSWORDLESS_TOKEN_LENGTH': 6
 
 }
 ```
