@@ -3,6 +3,7 @@ from django.db import models
 from django.conf import settings
 import string
 from django.utils.crypto import get_random_string
+from drfpasswordless.settings import api_settings
 
 def generate_hex_token():
     return uuid.uuid1().hex
@@ -60,7 +61,7 @@ class CallbackToken(AbstractBaseCallbackToken):
     TOKEN_TYPE_VERIFY = 'VERIFY'
     TOKEN_TYPES = ((TOKEN_TYPE_AUTH, 'Auth'), (TOKEN_TYPE_VERIFY, 'Verify'))
 
-    key = models.CharField(default=generate_numeric_token, max_length=6)
+    key = models.CharField(default=generate_numeric_token, max_length=api_settings.PASSWORDLESS_TOKEN_LENGTH, min_length=api_settings.PASSWORDLESS_TOKEN_LENGTH)
     type = models.CharField(max_length=20, choices=TOKEN_TYPES)
 
     class Meta(AbstractBaseCallbackToken.Meta):
