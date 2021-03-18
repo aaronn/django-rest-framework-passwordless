@@ -61,7 +61,7 @@ class CallbackToken(AbstractBaseCallbackToken):
     TOKEN_TYPE_VERIFY = 'VERIFY'
     TOKEN_TYPES = ((TOKEN_TYPE_AUTH, 'Auth'), (TOKEN_TYPE_VERIFY, 'Verify'))
 
-    key = models.CharField(default=generate_numeric_token, max_length=api_settings.PASSWORDLESS_TOKEN_LENGTH, min_length=api_settings.PASSWORDLESS_TOKEN_LENGTH)
+    key = models.CharField(default=generate_numeric_token, max_length=api_settings.PASSWORDLESS_TOKEN_LENGTH)
     type = models.CharField(max_length=20, choices=TOKEN_TYPES)
 
     class Meta(AbstractBaseCallbackToken.Meta):
