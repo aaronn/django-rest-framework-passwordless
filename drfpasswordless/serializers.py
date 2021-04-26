@@ -7,7 +7,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from drfpasswordless.models import CallbackToken
 from drfpasswordless.settings import api_settings
-from drfpasswordless.utils import authenticate_by_token, verify_user_alias, validate_token_age
+from drfpasswordless.utils import verify_user_alias, validate_token_age
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
