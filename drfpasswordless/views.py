@@ -1,13 +1,15 @@
-import pytz
 import logging
 from datetime import datetime
+
+import pytz
 from django.utils.module_loading import import_string
-from rest_framework import parsers, renderers, status
+from rest_framework import status
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny, IsAuthenticated 
+from rest_framework.throttling import AnonRateThrottle
 from rest_framework.views import APIView
+
 from drfpasswordless.models import CallbackToken
-from drfpasswordless.settings import api_settings
 from drfpasswordless.serializers import (
     EmailAuthSerializer,
     MobileAuthSerializer,
@@ -18,6 +20,7 @@ from drfpasswordless.serializers import (
     MagicCallbackTokenAuthSerializer,
 )
 from drfpasswordless.services import TokenService
+from drfpasswordless.settings import api_settings
 
 logger = logging.getLogger(__name__)
 
@@ -159,6 +162,13 @@ class AbstractBaseObtainAuthToken(APIView):
         return Response({'detail': 'Couldn\'t log you in. Try again later.'}, status=status.HTTP_400_BAD_REQUEST)
 
 
+class CustomAnonRateThrottle(AnonRateThrottle):
+    THROTTLE_RATES = {
+        'anon': '10/minute',
+        'user': '100/minute'
+    }
+
+
 class ObtainAuthTokenFromCallbackToken(AbstractBaseObtainAuthToken):
     """
     This is a duplicate of rest_framework's own ObtainAuthToken method.
@@ -166,6 +176,7 @@ class ObtainAuthTokenFromCallbackToken(AbstractBaseObtainAuthToken):
     """
     permission_classes = (AllowAny,)
     serializer_class = CallbackTokenAuthSerializer
+    throttle_classes = [CustomAnonRateThrottle]
 
 
 class VerifyAliasFromCallbackToken(APIView):
