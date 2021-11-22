@@ -222,7 +222,7 @@ class CallbackTokenAuthSerializer(AbstractBaseCallbackTokenSerializer):
                                                  'key': callback_token,
                                                  'type': CallbackToken.TOKEN_TYPE_AUTH,
                                                  'to_alias_type': alias_type.upper(),
-                                                 'to_alias': attrs.get('mobile', None),
+                                                 'to_alias': attrs.get('mobile', None) or attrs.get('email', None),
                                                  'is_active': True})
 
             if token.user == user:
