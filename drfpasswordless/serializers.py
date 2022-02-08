@@ -1,5 +1,5 @@
 import logging
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied
 from django.core.validators import RegexValidator
@@ -175,7 +175,7 @@ class AbstractBaseCallbackTokenSerializer(serializers.Serializer):
 
     email = serializers.EmailField(required=False)  # Needs to be required=false to require both.
     mobile = serializers.CharField(required=False, validators=[phone_regex], max_length=17)
-    token = TokenField(min_length=6, max_length=6, validators=[token_age_validator])
+    token = TokenField(min_length=api_settings.PASSWORDLESS_TOKEN_LENGTH, max_length=api_settings.PASSWORDLESS_TOKEN_LENGTH, validators=[token_age_validator])
 
     def validate_alias(self, attrs):
         email = attrs.get('email', None)
@@ -299,5 +299,3 @@ class TokenResponseSerializer(serializers.Serializer):
     """
     token = serializers.CharField(source='key')
     key = serializers.CharField(write_only=True)
-
-
