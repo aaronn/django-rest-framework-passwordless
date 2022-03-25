@@ -91,7 +91,7 @@ DEFAULTS = {
     # Token Generation Retry Count
     'PASSWORDLESS_TOKEN_GENERATION_ATTEMPTS': 3,
     # Adds token to the end of the subject
-    'PASSWORDLESS_EMAIL_SUBJECT_CODE': True,
+    'PASSWORDLESS_EMAIL_SUBJECT_TOKEN': False,
 }
 
 # List of settings that may be in string import notation.
