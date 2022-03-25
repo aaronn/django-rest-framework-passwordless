@@ -89,7 +89,9 @@ DEFAULTS = {
     'PASSWORDLESS_SMS_CALLBACK': 'drfpasswordless.utils.send_sms_with_callback_token',
 
     # Token Generation Retry Count
-    'PASSWORDLESS_TOKEN_GENERATION_ATTEMPTS': 3
+    'PASSWORDLESS_TOKEN_GENERATION_ATTEMPTS': 3,
+    # Adds token to the end of the subject
+    'PASSWORDLESS_EMAIL_SUBJECT_CODE': True,
 }
 
 # List of settings that may be in string import notation.
