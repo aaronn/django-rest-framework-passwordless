@@ -1,5 +1,5 @@
 import logging
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied
 from django.core.validators import RegexValidator
