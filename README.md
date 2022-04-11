@@ -341,7 +341,7 @@ Pull requests are encouraged!
 Donations & Support
 ----
 If you found drfpasswordless useful, consider giving me a follow
-[@aaronykng](https://www.twitter.com/aaronykng) on Twitter and
+[@localghost](https://www.twitter.com/aaronykng) on Twitter and
 [@hi.aaron](https://www.instagram.com/hi.aaron) on Instagram.
 
 If you'd like to go a step further and are using drfpasswordless in your startup
