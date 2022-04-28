@@ -135,12 +135,13 @@ class AbstractBaseObtainAuthToken(APIView):
     Instead, this returns an Auth Token based on our 6 digit callback token and source.
     """
     serializer_class = None
+    passwordless_auth_token_creator = api_settings.PASSWORDLESS_AUTH_TOKEN_CREATOR
 
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid(raise_exception=True):
             user = serializer.validated_data['user']
-            token_creator = import_string(api_settings.PASSWORDLESS_AUTH_TOKEN_CREATOR)
+            token_creator = import_string(self.passwordless_auth_token_creator)
             (token, _) = token_creator(user)
 
             if token:
