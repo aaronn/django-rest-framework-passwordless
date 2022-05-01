@@ -6,7 +6,7 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied
 from django.core.validators import RegexValidator
 from rest_framework import serializers
-from rest_framework.exceptions import ValidationError, AuthenticationFailed
+from rest_framework.exceptions import AuthenticationFailed
 from drfpasswordless.models import CallbackToken
 from drfpasswordless.settings import api_settings
 from landa_exceptions.accounts import InvalidCallbackToken, ExpiredCallbackToken
@@ -218,17 +218,20 @@ class CallbackTokenAuthSerializer(AbstractBaseCallbackTokenSerializer):
             callback_token = attrs.get('token', None)
             user = user or User.objects.filter(**{alias_attribute_name: alias}).first()
 
-            tokens = CallbackToken.objects.filter(**{'user': user,
-                                                 'key': callback_token,
-                                                 'type': CallbackToken.TOKEN_TYPE_AUTH,
-                                                 'to_alias_type': alias_type.upper(),
-                                                 'to_alias': attrs.get('mobile', None) or attrs.get('email', None),})
+            tokens = list(CallbackToken.objects.filter(user=user,
+                                                  key=callback_token,
+                                                  type= CallbackToken.TOKEN_TYPE_AUTH,
+                                                 to_alias_type= alias_type.upper(),
+                                                  to_alias= attrs.get('mobile', None) or attrs.get('email', None)
+                                                  ).all())
 
-            if not tokens.count():
+            if not tokens:
                 msg = _(str(InvalidCallbackToken()))
                 raise serializers.ValidationError(msg)
 
-            token = tokens.get(**{'is_active': True})
+            token = next(filter(lambda token: token.is_active, tokens), None)
+            if not token:
+                raise AuthenticationFailed()
 
             # Check the token type for our uni-auth method.
             # authenticates and checks the expiry of the callback token.
@@ -239,9 +242,12 @@ class CallbackTokenAuthSerializer(AbstractBaseCallbackTokenSerializer):
             if api_settings.PASSWORDLESS_USER_MARK_EMAIL_VERIFIED \
                     or api_settings.PASSWORDLESS_USER_MARK_MOBILE_VERIFIED:
                 # Mark this alias as verified
-                user = User.objects.get(pk=token.user.pk)
-                success = verify_user_alias(user, token)
+                user = token.user
+                if not user:
+                    msg = _(str(InvalidCallbackToken()))
+                    raise serializers.ValidationError(msg)
 
+                success = verify_user_alias(user, token)
                 if success is False:
                     msg = _('Error validating user alias.')
                     raise serializers.ValidationError(msg)
@@ -250,11 +256,6 @@ class CallbackTokenAuthSerializer(AbstractBaseCallbackTokenSerializer):
             token.delete()
             return attrs
 
-        except CallbackToken.DoesNotExist:
-            raise AuthenticationFailed()
-        except User.DoesNotExist:
-            msg = _(str(InvalidCallbackToken()))
-            raise serializers.ValidationError(msg)
         except ValidationError:
             msg = _(str(InvalidCallbackToken()))
             raise serializers.ValidationError(msg)
