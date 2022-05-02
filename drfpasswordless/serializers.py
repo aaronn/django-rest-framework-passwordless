@@ -218,18 +218,21 @@ class CallbackTokenAuthSerializer(AbstractBaseCallbackTokenSerializer):
             callback_token = attrs.get('token', None)
             user = user or User.objects.filter(**{alias_attribute_name: alias}).first()
 
-            tokens = list(CallbackToken.objects.filter(user=user,
-                                                  key=callback_token,
-                                                  type= CallbackToken.TOKEN_TYPE_AUTH,
-                                                 to_alias_type= alias_type.upper(),
-                                                  to_alias= attrs.get('mobile', None) or attrs.get('email', None)
-                                                  ).all())
+            tokens = list(
+                CallbackToken.objects.filter(
+                    user=user,
+                    key=callback_token,
+                    type=CallbackToken.TOKEN_TYPE_AUTH,
+                    to_alias_type=alias_type.upper(),
+                    to_alias=attrs.get('mobile', None) or attrs.get('email', None)
+                ).all()
+            )
 
             if not tokens:
                 msg = _(str(InvalidCallbackToken()))
                 raise serializers.ValidationError(msg)
 
-            token = next(filter(lambda token: token.is_active, tokens), None)
+            token = next(filter(lambda _token: _token.is_active, tokens), None)
             if not token:
                 raise AuthenticationFailed()
 
