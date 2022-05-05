@@ -110,7 +110,7 @@ def inject_template_context(context):
     Injects additional context into email template.
     """
     for processor in api_settings.PASSWORDLESS_CONTEXT_PROCESSORS:
-        context.update(processor())
+        context.update(processor(context))
     return context
 
 
@@ -134,7 +134,7 @@ def send_email_with_callback_token(user, email_token, **kwargs):
                                     api_settings.PASSWORDLESS_EMAIL_TOKEN_HTML_TEMPLATE_NAME)
 
             # Inject context if user specifies.
-            context = inject_template_context({'callback_token': email_token.key, })
+            context = inject_template_context({'callback_token': email_token.key, 'token_obj': email_token })
             html_message = loader.render_to_string(email_html, context,)
             send_mail(
                 email_subject,
