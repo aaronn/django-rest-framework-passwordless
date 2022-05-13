@@ -255,7 +255,7 @@ class CallbackTokenAuthSerializer(AbstractBaseCallbackTokenSerializer):
         except User.DoesNotExist:
             msg = _(str(InvalidCallbackToken()))
             raise serializers.ValidationError(msg)
-        except ValidationError:
+        except serializers.ValidationError:
             msg = _(str(InvalidCallbackToken()))
             raise serializers.ValidationError(msg)
 
