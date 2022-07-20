@@ -115,6 +115,7 @@ class AbstractBaseAliasVerificationSerializer(serializers.Serializer):
     Abstract class that returns a callback token based on the field given
     Returns a token if valid, None or a message if not.
     """
+
     @property
     def alias_type(self):
         # The alias type, either email or mobile
@@ -211,7 +212,7 @@ class AbstractBaseCallbackTokenSerializer(serializers.Serializer):
 
 class CallbackTokenAuthSerializer(AbstractBaseCallbackTokenSerializer):
 
-    def validate(self, attrs, user=None, check_user=True):
+    def validate(self, attrs, user=None, check_user=True, delete_token=True):
         # Check Aliases
         try:
             alias_type, alias_attribute_name, alias = self.validate_alias(attrs)
@@ -258,7 +259,9 @@ class CallbackTokenAuthSerializer(AbstractBaseCallbackTokenSerializer):
                         raise serializers.ValidationError(msg)
 
                 attrs['user'] = user
-            token.delete()
+
+            if delete_token:
+                token.delete()
             return attrs
 
         except serializers.ValidationError:
