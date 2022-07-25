@@ -115,6 +115,7 @@ class AbstractBaseAliasVerificationSerializer(serializers.Serializer):
     Abstract class that returns a callback token based on the field given
     Returns a token if valid, None or a message if not.
     """
+
     @property
     def alias_type(self):
         # The alias type, either email or mobile
@@ -211,12 +212,13 @@ class AbstractBaseCallbackTokenSerializer(serializers.Serializer):
 
 class CallbackTokenAuthSerializer(AbstractBaseCallbackTokenSerializer):
 
-    def validate(self, attrs, user=None):
+    def validate(self, attrs, user=None, check_user=True, delete_token=True):
         # Check Aliases
         try:
             alias_type, alias_attribute_name, alias = self.validate_alias(attrs)
             callback_token = attrs.get('token', None)
-            user = user or User.objects.filter(**{alias_attribute_name: alias}).first()
+            if not user and check_user:
+                user = User.objects.filter(**{alias_attribute_name: alias}).first()
 
             tokens = list(
                 CallbackToken.objects.filter(
@@ -238,25 +240,28 @@ class CallbackTokenAuthSerializer(AbstractBaseCallbackTokenSerializer):
 
             # Check the token type for our uni-auth method.
             # authenticates and checks the expiry of the callback token.
-            if not user.is_active:
-                msg = _('User account is disabled.')
-                raise serializers.ValidationError(msg)
-
-            if api_settings.PASSWORDLESS_USER_MARK_EMAIL_VERIFIED \
-                    or api_settings.PASSWORDLESS_USER_MARK_MOBILE_VERIFIED:
-                # Mark this alias as verified
-                user = token.user
-                if not user:
-                    msg = _(str(InvalidCallbackToken()))
+            if user:
+                if not user.is_active:
+                    msg = _('User account is disabled.')
                     raise serializers.ValidationError(msg)
 
-                success = verify_user_alias(user, token)
-                if success is False:
-                    msg = _('Error validating user alias.')
-                    raise serializers.ValidationError(msg)
+                if api_settings.PASSWORDLESS_USER_MARK_EMAIL_VERIFIED \
+                        or api_settings.PASSWORDLESS_USER_MARK_MOBILE_VERIFIED:
+                    # Mark this alias as verified
+                    user = token.user
+                    if not user:
+                        msg = _(str(InvalidCallbackToken()))
+                        raise serializers.ValidationError(msg)
 
-            attrs['user'] = user
-            token.delete()
+                    success = verify_user_alias(user, token)
+                    if success is False:
+                        msg = _('Error validating user alias.')
+                        raise serializers.ValidationError(msg)
+
+                attrs['user'] = user
+
+            if delete_token:
+                token.delete()
             return attrs
 
         except serializers.ValidationError:
