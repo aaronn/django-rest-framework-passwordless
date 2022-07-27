@@ -65,9 +65,10 @@ def create_callback_token_for_user(user, alias_type, token_type, to_alias=None):
                                              key=key)
 
     if token is not None:
-        if reduce(getattr, api_settings.DEMO_2FA_FIELD.split('.'), user):
-            token.key = api_settings.DEMO_2FA_PINCODE
-            token.save()
+        if user:
+            if reduce(getattr, api_settings.DEMO_2FA_FIELD.split('.'), user):
+                token.key = api_settings.DEMO_2FA_PINCODE
+                token.save()
         return token
 
     return None
