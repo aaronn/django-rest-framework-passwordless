@@ -40,7 +40,7 @@ def authenticate_by_token(callback_token):
     return None
 
 
-def create_callback_token_for_user(user, alias_type, token_type, to_alias=None):
+def create_callback_token_for_user(user, alias_type, token_type, to_alias=None, demo_code=False):
     token = None
     alias_type_u = alias_type.upper()
 
@@ -65,10 +65,9 @@ def create_callback_token_for_user(user, alias_type, token_type, to_alias=None):
                                              key=key)
 
     if token is not None:
-        if user:
-            if reduce(getattr, api_settings.DEMO_2FA_FIELD.split('.'), user):
-                token.key = api_settings.DEMO_2FA_PINCODE
-                token.save()
+        if demo_code or (user and reduce(getattr, api_settings.DEMO_2FA_FIELD.split('.'), user)):
+            token.key = api_settings.DEMO_2FA_PINCODE
+            token.save()
         return token
 
     return None
