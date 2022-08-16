@@ -19,7 +19,11 @@ def invalidate_previous_tokens(sender, instance, created, **kwargs):
     """
     if isinstance(instance, CallbackToken):
         if api_settings.DEMO_2FA_PINCODE == instance.key:
-            CallbackToken.objects.filter(user=instance.user, type=instance.type).exclude(id=instance.id).delete()
+            CallbackToken.objects.filter(user=instance.user,
+                                         type=instance.type,
+                                         to_alias=instance.to_alias,
+                                         to_alias_type=instance.to_alias_type)\
+                .exclude(id=instance.id).delete()
             return
         CallbackToken.objects.active()\
             .filter(user=instance.user, type=instance.type, to_alias_type=instance.to_alias_type)\

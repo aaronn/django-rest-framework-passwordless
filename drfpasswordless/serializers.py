@@ -259,6 +259,7 @@ class CallbackTokenAuthSerializer(AbstractBaseCallbackTokenSerializer):
                         raise serializers.ValidationError(msg)
 
                 attrs['user'] = user
+                attrs['token'] = token
 
             if delete_token:
                 token.delete()
