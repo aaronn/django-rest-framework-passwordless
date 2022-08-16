@@ -19,8 +19,8 @@ name = 'drfpasswordless'
 NAME = 'drfpasswordless'
 DESCRIPTION = 'Passwordless auth for Django Rest Framework Token Authentication.'
 URL = 'https://github.com/aaronn/django-rest-framework-passwordless'
-EMAIL = 'hi@aaron.ng'
-AUTHOR = 'Aaron Ng'
+EMAIL = 'email@0xaaron.com'
+AUTHOR = 'Aaron N.'
 REQUIRES_PYTHON = '>=3'
 VERSION = None
 
