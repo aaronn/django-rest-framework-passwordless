@@ -14,7 +14,10 @@ def generate_numeric_token():
     Generate a random 6 digit string of numbers.
     We use this formatting to allow leading 0s.
     """
-    return get_random_string(length=api_settings.PASSWORDLESS_TOKEN_LENGTH, allowed_chars=string.digits)
+    return get_random_string(
+        length=api_settings.PASSWORDLESS_TOKEN_LENGTH,
+        allowed_chars=string.digits
+    )
 
 
 class CallbackTokenManger(models.Manager):
