@@ -222,7 +222,6 @@ class CallbackTokenAuthSerializer(AbstractBaseCallbackTokenSerializer):
 
             tokens = list(
                 CallbackToken.objects.filter(
-                    user=user,
                     key=callback_token,
                     type=CallbackToken.TOKEN_TYPE_AUTH,
                     to_alias_type=alias_type.upper(),
