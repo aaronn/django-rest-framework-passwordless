@@ -257,8 +257,8 @@ class CallbackTokenAuthSerializer(AbstractBaseCallbackTokenSerializer):
                         msg = _('Error validating user alias.')
                         raise serializers.ValidationError(msg)
 
-                attrs['user'] = user
-                attrs['token'] = token
+            attrs['user'] = token.user if token else user
+            attrs['token'] = token
 
             if delete_token:
                 token.delete()
