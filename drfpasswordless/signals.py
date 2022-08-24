@@ -1,12 +1,11 @@
 import logging
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
-from django.dispatch import receiver
 from django.db.models import signals
-from drfpasswordless.models import CallbackToken
-from drfpasswordless.models import generate_numeric_token
-from drfpasswordless.settings import api_settings
+from django.dispatch import receiver
+from drfpasswordless.models import CallbackToken, generate_numeric_token
 from drfpasswordless.services import TokenService
+from drfpasswordless.settings import api_settings
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +16,9 @@ def invalidate_previous_tokens(sender, instance, created, **kwargs):
     Invalidates all previously issued tokens of that type when a new one is created, used, or anything like that.
     """
 
-    if instance.user.pk in api_settings.PASSWORDLESS_DEMO_USERS.keys():
+    if instance.user.pk in api_settings.PASSWORDLESS_DEMO_USERS or instance.to_alias in getattr(
+        api_settings, f"PASSWORDLESS_DEMO_USERS_{instance.to_alias_type}"
+    ):
         return
 
     if isinstance(instance, CallbackToken):

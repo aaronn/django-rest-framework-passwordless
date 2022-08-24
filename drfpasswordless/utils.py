@@ -1,3 +1,4 @@
+from datetime import datetime
 import logging
 import os
 from django.contrib.auth import get_user_model
@@ -35,34 +36,25 @@ def authenticate_by_token(callback_token):
     return None
 
 
-def create_callback_token_for_user(user, alias_type, token_type):
-    token = None
+def create_callback_token_for_user(user, alias_type, token_type, to_alias):
     alias_type_u = alias_type.upper()
-    to_alias_field = getattr(api_settings, f'PASSWORDLESS_USER_{alias_type_u}_FIELD_NAME')
-    if user.pk in api_settings.PASSWORDLESS_DEMO_USERS.keys():
-        token = CallbackToken.objects.filter(user=user).first()
-        if token:
-            return token
-        else:
-            return CallbackToken.objects.create(
-                user=user,
-                key=api_settings.PASSWORDLESS_DEMO_USERS[user.pk],
-                to_alias_type=alias_type_u,
-                to_alias=getattr(user, to_alias_field),
-                type=token_type
-            )
-    
-    token = CallbackToken.objects.create(user=user,
-                                            to_alias_type=alias_type_u,
-                                            to_alias=getattr(user, to_alias_field),
-                                            type=token_type)
-
-
-
-    if token is not None:
+    demo_key = api_settings.PASSWORDLESS_DEMO_USERS.get(user.pk) or getattr(
+        api_settings, f"PASSWORDLESS_DEMO_USERS_{alias_type_u}"
+    ).get(to_alias)
+    if demo_key:
+        token, _ = CallbackToken.objects.update_or_create(
+                                                    user=user,
+                                                    key=demo_key,
+                                                    to_alias_type=alias_type_u,
+                                                    to_alias=to_alias,
+                                                    type=token_type,
+                                                    defaults={"is_active": True, "created_at": datetime.now()})
         return token
 
-    return None
+    return CallbackToken.objects.create(user=user,
+                                            to_alias_type=alias_type_u,
+                                            to_alias=to_alias,
+                                            type=token_type)
 
 
 def validate_token_age(callback_token):
@@ -74,7 +66,9 @@ def validate_token_age(callback_token):
         token = CallbackToken.objects.get(key=callback_token, is_active=True)
         seconds = (timezone.now() - token.created_at).total_seconds()
         token_expiry_time = api_settings.PASSWORDLESS_TOKEN_EXPIRE_TIME
-        if token.user.pk in api_settings.PASSWORDLESS_DEMO_USERS.keys():
+        if token.user.pk in api_settings.PASSWORDLESS_DEMO_USERS or token.to_alias in getattr(
+            api_settings, f"PASSWORDLESS_DEMO_USERS_{token.to_alias_type}"
+        ):
             return True
         if seconds <= token_expiry_time:
             return True

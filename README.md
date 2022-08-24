@@ -314,6 +314,12 @@ DEFAULTS = {
     # A dictionary of demo user's primary key mapped to their static pin
     'PASSWORDLESS_DEMO_USERS': {},
 
+    # A dictionary of demo user's email mapped to their static pin
+    'PASSWORDLESS_DEMO_USERS_EMAIL': {},
+
+    # A dictionary of demo user's mobile mapped to their static pin
+    'PASSWORDLESS_DEMO_USERS_MOBILE': {},
+
     # configurable function for sending email
     'PASSWORDLESS_EMAIL_CALLBACK': 'drfpasswordless.utils.send_email_with_callback_token',
     
