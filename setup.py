@@ -15,12 +15,12 @@ from setuptools import find_packages, setup, Command
 
 # Package meta-data.
 NAME = 'drfpasswordless-gstr169'
-DESCRIPTION = 'Passwordless auth for Django Rest Framework Token Authentication.'
+DESCRIPTION = 'Passwordless auth for Django Rest Framework Token Authentication. Update by Dmitry F.'
 URL = 'https://github.com/gstr169/drf-passwordless/'
 EMAIL = 'necronomicum169@gmail.com'
 AUTHOR = 'Original: Aaron N. Updated by: Dmitry F.'
 REQUIRES_PYTHON = '>=3'
-VERSION = None
+VERSION = '1.0.1'
 
 # What packages are required for this module to be executed?
 REQUIRED = [
