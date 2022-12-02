@@ -14,13 +14,13 @@ from shutil import rmtree
 from setuptools import find_packages, setup, Command
 
 # Package meta-data.
-name = 'drfpasswordless'
+name = 'drfpasswordless-gstr169'
 
-NAME = 'drfpasswordless'
+NAME = 'drfpasswordless-gstr169'
 DESCRIPTION = 'Passwordless auth for Django Rest Framework Token Authentication.'
-URL = 'https://github.com/aaronn/django-rest-framework-passwordless'
-EMAIL = 'email@0xaaron.com'
-AUTHOR = 'Aaron N.'
+URL = 'https://github.com/gstr169/drf-passwordless/'
+EMAIL = 'necronomicum169@gmail.com'
+AUTHOR = 'Original: Aaron N. Updated by: Dmitry F.'
 REQUIRES_PYTHON = '>=3'
 VERSION = None
 
