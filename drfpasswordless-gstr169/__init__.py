@@ -8,5 +8,3 @@ __copyright__ = 'Copyright 2022 Aaron Ng'
 
 # Version synonym
 VERSION = __version__
-
-default_app_config = '.apps.DrfpasswordlessConfig'
