@@ -11,6 +11,8 @@ def pytest_configure():
         },
         SITE_ID=1,
         SECRET_KEY='_',
+        USE_I18N=True,
+        USE_L10N=True,
         STATIC_URL='/static/',
         ROOT_URLCONF='tests.urls',
         TEMPLATES=[
@@ -44,7 +46,7 @@ def pytest_configure():
             'django.contrib.staticfiles',
             'rest_framework',
             'rest_framework.authtoken',
-            'drfpasswordless',
+            'drfpasswordless-gstr169',
             'tests',
         ),
         PASSWORD_HASHERS=(
