@@ -4,6 +4,7 @@ from django.utils.translation import gettext_lazy as _
 class DrfpasswordlessConfig(AppConfig):
     name = 'drfpasswordless'
     verbose = _("DRF Passwordless")
+    default = True
 
     def ready(self):
         import drfpasswordless.signals
