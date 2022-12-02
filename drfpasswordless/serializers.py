@@ -34,6 +34,10 @@ class AbstractBaseAliasAuthenticationSerializer(serializers.Serializer):
         # The alias type, either email or mobile
         raise NotImplementedError
 
+    @property
+    def alias_field_name(self):
+        raise NotImplementedError
+
     def validate(self, attrs):
         alias = attrs.get(self.alias_type)
 
@@ -44,15 +48,15 @@ class AbstractBaseAliasAuthenticationSerializer(serializers.Serializer):
             if api_settings.PASSWORDLESS_REGISTER_NEW_USERS is True:
                 # If new aliases should register new users.
                 try:
-                    user = User.objects.get(**{self.alias_type+'__iexact': alias})
+                    user = User.objects.get(**{self.alias_field_name+'__iexact': alias})
                 except User.DoesNotExist:
-                    user = User.objects.create(**{self.alias_type: alias})
+                    user = User.objects.create(**{self.alias_field_name: alias})
                     user.set_unusable_password()
                     user.save()
             else:
                 # If new aliases should not register new users.
                 try:
-                    user = User.objects.get(**{self.alias_type+'__iexact': alias})
+                    user = User.objects.get(**{self.alias_field_name+'__iexact': alias})
                 except User.DoesNotExist:
                     user = None
 
@@ -77,6 +81,10 @@ class EmailAuthSerializer(AbstractBaseAliasAuthenticationSerializer):
     def alias_type(self):
         return 'email'
 
+    @property
+    def alias_field_name(self):
+        return api_settings.PASSWORDLESS_USER_EMAIL_FIELD_NAME
+
     email = serializers.EmailField()
 
 
@@ -84,6 +92,10 @@ class MobileAuthSerializer(AbstractBaseAliasAuthenticationSerializer):
     @property
     def alias_type(self):
         return 'mobile'
+
+    @property
+    def alias_field_name(self):
+        return api_settings.PASSWORDLESS_USER_MOBILE_FIELD_NAME
 
     phone_regex = RegexValidator(regex=r'^\+[1-9]\d{1,14}$',
                                  message="Mobile number must be entered in the format:"
@@ -106,6 +118,10 @@ class AbstractBaseAliasVerificationSerializer(serializers.Serializer):
         # The alias type, either email or mobile
         raise NotImplementedError
 
+    @property
+    def alias_field_name(self):
+        raise NotImplementedError
+
     def validate(self, attrs):
 
         msg = _('There was a problem with your request.')
@@ -124,12 +140,12 @@ class AbstractBaseAliasVerificationSerializer(serializers.Serializer):
                         msg = _('User account is disabled.')
 
                     else:
-                        if hasattr(user, self.alias_type):
+                        if hasattr(user, self.alias_field_name):
                             # Has the appropriate alias type
                             attrs['user'] = user
                             return attrs
                         else:
-                            msg = _('This user doesn\'t have an %s.' % self.alias_type)
+                            msg = _('This user doesn\'t have an %s.' % self.alias_field_name)
             raise serializers.ValidationError(msg)
         else:
             msg = _('Missing %s.') % self.alias_type
@@ -141,12 +157,19 @@ class EmailVerificationSerializer(AbstractBaseAliasVerificationSerializer):
     def alias_type(self):
         return 'email'
 
+    @property
+    def alias_field_name(self):
+        return api_settings.PASSWORDLESS_USER_EMAIL_FIELD_NAME
+
 
 class MobileVerificationSerializer(AbstractBaseAliasVerificationSerializer):
     @property
     def alias_type(self):
         return 'mobile'
 
+    @property
+    def alias_field_name(self):
+        return api_settings.PASSWORDLESS_USER_MOBILE_FIELD_NAME
 
 """
 Callback Token
@@ -188,9 +211,9 @@ class AbstractBaseCallbackTokenSerializer(serializers.Serializer):
             raise serializers.ValidationError()
 
         if email:
-            return 'email', email
+            return api_settings.PASSWORDLESS_USER_EMAIL_FIELD_NAME, email
         elif mobile:
-            return 'mobile', mobile
+            return api_settings.PASSWORDLESS_USER_MOBILE_FIELD_NAME, mobile
 
         return None
 
