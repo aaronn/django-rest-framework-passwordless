@@ -14,8 +14,6 @@ from shutil import rmtree
 from setuptools import find_packages, setup, Command
 
 # Package meta-data.
-name = 'drfpasswordless-gstr169'
-
 NAME = 'drfpasswordless-gstr169'
 DESCRIPTION = 'Passwordless auth for Django Rest Framework Token Authentication.'
 URL = 'https://github.com/gstr169/drf-passwordless/'
