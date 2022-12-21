@@ -181,6 +181,8 @@ def token_age_validator(value):
     Check token age
     Makes sure a token is within the proper expiration datetime window.
     """
+    if api_settings.PASSWORDLESS_TEST_MODE:
+        return True
     valid_token = validate_token_age(value)
     if not valid_token:
         raise serializers.ValidationError("The token you entered isn't valid.")
@@ -226,10 +228,20 @@ class CallbackTokenAuthSerializer(AbstractBaseCallbackTokenSerializer):
             alias_type, alias = self.validate_alias(attrs)
             callback_token = attrs.get('token', None)
             user = User.objects.get(**{alias_type+'__iexact': alias})
-            token = CallbackToken.objects.get(**{'user': user,
-                                                 'key': callback_token,
-                                                 'type': CallbackToken.TOKEN_TYPE_AUTH,
-                                                 'is_active': True})
+            if api_settings.PASSWORDLESS_TEST_MODE:
+                token = CallbackToken(**{
+                    'user': user,
+                    'key': callback_token,
+                    'type': CallbackToken.TOKEN_TYPE_AUTH,
+                    'is_active': True,
+                })
+            else:
+                token = CallbackToken.objects.get(**{
+                    'user': user,
+                    'key': callback_token,
+                    'type': CallbackToken.TOKEN_TYPE_AUTH,
+                    'is_active': True,
+                })
 
             if token.user == user:
                 # Check the token type for our uni-auth method.
@@ -277,11 +289,20 @@ class CallbackTokenVerificationSerializer(AbstractBaseCallbackTokenSerializer):
             user_id = self.context.get("user_id")
             user = User.objects.get(**{'id': user_id, alias_type+'__iexact': alias})
             callback_token = attrs.get('token', None)
-
-            token = CallbackToken.objects.get(**{'user': user,
-                                                 'key': callback_token,
-                                                 'type': CallbackToken.TOKEN_TYPE_VERIFY,
-                                                 'is_active': True})
+            if api_settings.PASSWORDLESS_TEST_MODE:
+                token = CallbackToken(**{
+                    'user': user,
+                    'key': callback_token,
+                    'type': CallbackToken.TOKEN_TYPE_VERIFY,
+                    'is_active': True,
+                })
+            else:
+                token = CallbackToken.objects.get(**{
+                    'user': user,
+                    'key': callback_token,
+                    'type': CallbackToken.TOKEN_TYPE_VERIFY,
+                    'is_active': True,
+                })
 
             if token.user == user:
                 # Mark this alias as verified
