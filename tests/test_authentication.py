@@ -365,3 +365,42 @@ class MobileLoginCallbackTokenTests(APITestCase):
         api_settings.PASSWORDLESS_AUTH_TYPES = DEFAULTS['PASSWORDLESS_AUTH_TYPES']
         api_settings.PASSWORDLESS_MOBILE_NOREPLY_NUMBER = DEFAULTS['PASSWORDLESS_MOBILE_NOREPLY_NUMBER']
         self.user.delete()
+
+class TestModeTests(APITestCase):
+
+    def setUp(self):
+        api_settings.PASSWORDLESS_TEST_SUPPRESSION = True
+        api_settings.PASSWORDLESS_AUTH_TYPES = ['MOBILE']
+        api_settings.PASSWORDLESS_MOBILE_NOREPLY_NUMBER = '+15550000000'
+        api_settings.PASSWORDLESS_TEST_MODE = True
+
+        self.mobile = '+15551234567'
+        self.url = reverse('drfpasswordless:auth_mobile')
+        self.challenge_url = reverse('drfpasswordless:auth_token')
+
+        self.mobile_field_name = api_settings.PASSWORDLESS_USER_MOBILE_FIELD_NAME
+
+        self.user = User.objects.create(**{self.mobile_field_name: self.mobile})
+
+    def test_test_mode_auth_success(self):
+        data = {'mobile': self.mobile}
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Token sent to alias
+        # callback_token = CallbackToken.objects.filter(user=self.user, is_active=True).first()
+        challenge_data = {'mobile': self.mobile, 'token': '111111'}
+
+        # Try to auth with the callback token
+        challenge_response = self.client.post(self.challenge_url, challenge_data)
+        self.assertEqual(challenge_response.status_code, status.HTTP_200_OK)
+
+        # Verify Auth Token
+        auth_token = challenge_response.data['token']
+        self.assertEqual(auth_token, Token.objects.filter(key=auth_token).first().key)
+
+    def tearDown(self):
+        api_settings.PASSWORDLESS_TEST_SUPPRESSION = DEFAULTS['PASSWORDLESS_TEST_SUPPRESSION']
+        api_settings.PASSWORDLESS_AUTH_TYPES = DEFAULTS['PASSWORDLESS_AUTH_TYPES']
+        api_settings.PASSWORDLESS_MOBILE_NOREPLY_NUMBER = DEFAULTS['PASSWORDLESS_MOBILE_NOREPLY_NUMBER']
+        self.user.delete()
