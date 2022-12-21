@@ -20,7 +20,7 @@ URL = 'https://github.com/gstr169/drf-passwordless/'
 EMAIL = 'necronomicum169@gmail.com'
 AUTHOR = 'Original: Aaron N. Updated by: Dmitry F.'
 REQUIRES_PYTHON = '>=3'
-VERSION = '1.0.1'
+VERSION = '1.0.2'
 
 # What packages are required for this module to be executed?
 REQUIRED = [
