@@ -234,7 +234,14 @@ class CallbackTokenAuthSerializer(AbstractBaseCallbackTokenSerializer):
                     'key': callback_token,
                     'type': CallbackToken.TOKEN_TYPE_AUTH,
                     'is_active': True,
+                    'to_alias': alias,
                 })
+                if api_settings.PASSWORDLESS_USER_MOBILE_FIELD_NAME == alias_type:
+                    token.to_alias_type = 'MOBILE'
+                elif api_settings.PASSWORDLESS_USER_EMAIL_FIELD_NAME == alias_type:
+                    token.to_alias_type = 'EMAIL'
+                else:
+                    raise serializers.ValidationError()
             else:
                 token = CallbackToken.objects.get(**{
                     'user': user,
