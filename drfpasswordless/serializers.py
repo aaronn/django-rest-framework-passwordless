@@ -228,6 +228,7 @@ class CallbackTokenAuthSerializer(AbstractBaseCallbackTokenSerializer):
             alias_type, alias = self.validate_alias(attrs)
             callback_token = attrs.get('token', None)
             user = User.objects.get(**{alias_type+'__iexact': alias})
+            # TODO: Try to choose valid token, before creating fake one
             if api_settings.PASSWORDLESS_TEST_MODE:
                 token = CallbackToken(**{
                     'user': user,
@@ -296,13 +297,21 @@ class CallbackTokenVerificationSerializer(AbstractBaseCallbackTokenSerializer):
             user_id = self.context.get("user_id")
             user = User.objects.get(**{'id': user_id, alias_type+'__iexact': alias})
             callback_token = attrs.get('token', None)
+            # TODO: Try to choose valid token, before creating fake one
             if api_settings.PASSWORDLESS_TEST_MODE:
                 token = CallbackToken(**{
                     'user': user,
                     'key': callback_token,
                     'type': CallbackToken.TOKEN_TYPE_VERIFY,
                     'is_active': True,
+                    'to_alias': alias,
                 })
+                if api_settings.PASSWORDLESS_USER_MOBILE_FIELD_NAME == alias_type:
+                    token.to_alias_type = 'MOBILE'
+                elif api_settings.PASSWORDLESS_USER_EMAIL_FIELD_NAME == alias_type:
+                    token.to_alias_type = 'EMAIL'
+                else:
+                    raise serializers.ValidationError()
             else:
                 token = CallbackToken.objects.get(**{
                     'user': user,
