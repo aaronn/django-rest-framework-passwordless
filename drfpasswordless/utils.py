@@ -12,11 +12,16 @@ from drfpasswordless.settings import api_settings
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
+TOKEN_LENGTH = api_settings.PASSWORDLESS_CALLBACK_TOKEN_LENGTH
 
 
 def authenticate_by_token(callback_token):
     try:
-        token = CallbackToken.objects.get(key=callback_token, is_active=True, type=CallbackToken.TOKEN_TYPE_AUTH)
+        token = CallbackToken.objects.get(
+            key=callback_token,
+            is_active=True,
+            type=CallbackToken.TOKEN_TYPE_AUTH
+        )
 
         # Returning a user designates a successful authentication.
         token.user = User.objects.get(pk=token.user.pk)
@@ -26,11 +31,17 @@ def authenticate_by_token(callback_token):
         return token.user
 
     except CallbackToken.DoesNotExist:
-        logger.debug("drfpasswordless: Challenged with a callback token that doesn't exist.")
+        logger.debug(
+            "drfpasswordless: Challenged with a callback token that doesn't exist."
+        )
     except User.DoesNotExist:
-        logger.debug("drfpasswordless: Authenticated user somehow doesn't exist.")
+        logger.debug(
+            "drfpasswordless: Authenticated user somehow doesn't exist."
+        )
     except PermissionDenied:
-        logger.debug("drfpasswordless: Permission denied while authenticating.")
+        logger.debug(
+            "drfpasswordless: Permission denied while authenticating."
+        )
 
     return None
 
@@ -38,7 +49,10 @@ def authenticate_by_token(callback_token):
 def create_callback_token_for_user(user, alias_type, token_type):
     token = None
     alias_type_u = alias_type.upper()
-    to_alias_field = getattr(api_settings, f'PASSWORDLESS_USER_{alias_type_u}_FIELD_NAME')
+    to_alias_field = getattr(
+        api_settings,
+        f'PASSWORDLESS_USER_{alias_type_u}_FIELD_NAME',
+    )
     if user.pk in api_settings.PASSWORDLESS_DEMO_USERS.keys():
         token = CallbackToken.objects.filter(user=user).first()
         if token:
@@ -51,13 +65,13 @@ def create_callback_token_for_user(user, alias_type, token_type):
                 to_alias=getattr(user, to_alias_field),
                 type=token_type
             )
-    
-    token = CallbackToken.objects.create(user=user,
-                                            to_alias_type=alias_type_u,
-                                            to_alias=getattr(user, to_alias_field),
-                                            type=token_type)
 
-
+    token = CallbackToken.objects.create(
+        user=user,
+        to_alias_type=alias_type_u,
+        to_alias=getattr(user, to_alias_field),
+        type=token_type
+    )
 
     if token is not None:
         return token
@@ -94,11 +108,25 @@ def verify_user_alias(user, token):
     Marks a user's contact point as verified depending on accepted token type.
     """
     if token.to_alias_type == 'EMAIL':
-        if token.to_alias == getattr(user, api_settings.PASSWORDLESS_USER_EMAIL_FIELD_NAME):
-            setattr(user, api_settings.PASSWORDLESS_USER_EMAIL_VERIFIED_FIELD_NAME, True)
+        if token.to_alias == getattr(
+            user,
+            api_settings.PASSWORDLESS_USER_EMAIL_FIELD_NAME,
+        ):
+            setattr(
+                user,
+                api_settings.PASSWORDLESS_USER_EMAIL_VERIFIED_FIELD_NAME,
+                True,
+            )
     elif token.to_alias_type == 'MOBILE':
-        if token.to_alias == getattr(user, api_settings.PASSWORDLESS_USER_MOBILE_FIELD_NAME):
-            setattr(user, api_settings.PASSWORDLESS_USER_MOBILE_VERIFIED_FIELD_NAME, True)
+        if token.to_alias == getattr(
+            user,
+            api_settings.PASSWORDLESS_USER_MOBILE_FIELD_NAME,
+        ):
+            setattr(
+                user,
+                api_settings.PASSWORDLESS_USER_MOBILE_VERIFIED_FIELD_NAME,
+                True,
+            )
     else:
         return False
     user.save()
@@ -126,12 +154,18 @@ def send_email_with_callback_token(user, email_token, **kwargs):
             # Make sure we have a sending address before sending.
 
             # Get email subject and message
-            email_subject = kwargs.get('email_subject',
-                                       api_settings.PASSWORDLESS_EMAIL_SUBJECT)
-            email_plaintext = kwargs.get('email_plaintext',
-                                         api_settings.PASSWORDLESS_EMAIL_PLAINTEXT_MESSAGE)
-            email_html = kwargs.get('email_html',
-                                    api_settings.PASSWORDLESS_EMAIL_TOKEN_HTML_TEMPLATE_NAME)
+            email_subject = kwargs.get(
+                'email_subject',
+                api_settings.PASSWORDLESS_EMAIL_SUBJECT,
+            )
+            email_plaintext = kwargs.get(
+                'email_plaintext',
+                api_settings.PASSWORDLESS_EMAIL_PLAINTEXT_MESSAGE,
+            )
+            email_html = kwargs.get(
+                'email_html',
+                api_settings.PASSWORDLESS_EMAIL_TOKEN_HTML_TEMPLATE_NAME,
+            )
 
             # Inject context if user specifies.
             context = inject_template_context({'callback_token': email_token.key, })
@@ -142,36 +176,42 @@ def send_email_with_callback_token(user, email_token, **kwargs):
                 api_settings.PASSWORDLESS_EMAIL_NOREPLY_ADDRESS,
                 [getattr(user, api_settings.PASSWORDLESS_USER_EMAIL_FIELD_NAME)],
                 fail_silently=False,
-                html_message=html_message,)
+                html_message=html_message,
+            )
 
         else:
-            logger.debug("Failed to send token email. Missing PASSWORDLESS_EMAIL_NOREPLY_ADDRESS.")
+            logger.debug(
+                "Failed to send token email. "
+                "Missing PASSWORDLESS_EMAIL_NOREPLY_ADDRESS."
+            )
             return False
         return True
 
     except Exception as e:
-        logger.debug("Failed to send token email to user: %d."
-                  "Possibly no email on user object. Email entered was %s" %
-                  (user.id, getattr(user, api_settings.PASSWORDLESS_USER_EMAIL_FIELD_NAME)))
+        logger.debug(
+            "Failed to send token email to user: %d."
+            "Possibly no email on user object. Email entered was %s" %
+            (user.id, getattr(user, api_settings.PASSWORDLESS_USER_EMAIL_FIELD_NAME))
+        )
         logger.debug(e)
         return False
 
 
 def send_sms_with_callback_token(user, mobile_token, **kwargs):
     """
-    Sends a SMS to user.mobile via Twilio.
+    Sends an SMS to user.mobile via Twilio.
 
     Passes silently without sending in test environment.
     """
     if api_settings.PASSWORDLESS_TEST_SUPPRESSION is True:
         # we assume success to prevent spamming SMS during testing.
-
-        # even if you have suppression on– you must provide a number if you have mobile selected.
+        # even if you have suppression on – you must provide a number
+        # if you have mobile selected.
         if api_settings.PASSWORDLESS_MOBILE_NOREPLY_NUMBER is None:
             return False
-            
+
         return True
-    
+
     base_string = kwargs.get('mobile_message', api_settings.PASSWORDLESS_MOBILE_MESSAGE)
 
     try:
@@ -179,7 +219,10 @@ def send_sms_with_callback_token(user, mobile_token, **kwargs):
             # We need a sending number to send properly
 
             from twilio.rest import Client
-            twilio_client = Client(os.environ['TWILIO_ACCOUNT_SID'], os.environ['TWILIO_AUTH_TOKEN'])
+            twilio_client = Client(
+                os.environ['TWILIO_ACCOUNT_SID'],
+                os.environ['TWILIO_AUTH_TOKEN']
+            )
 
             to_number = getattr(user, api_settings.PASSWORDLESS_USER_MOBILE_FIELD_NAME)
             if to_number.__class__.__name__ == 'PhoneNumber':
@@ -192,18 +235,29 @@ def send_sms_with_callback_token(user, mobile_token, **kwargs):
             )
             return True
         else:
-            logger.debug("Failed to send token sms. Missing PASSWORDLESS_MOBILE_NOREPLY_NUMBER.")
+            logger.debug(
+                "Failed to send token sms. Missing PASSWORDLESS_MOBILE_NOREPLY_NUMBER."
+            )
             return False
     except ImportError:
-        logger.debug("Couldn't import Twilio client. Is twilio installed?")
+        logger.debug(
+            "Couldn't import Twilio client. Is twilio installed?"
+        )
         return False
     except KeyError:
-        logger.debug("Couldn't send SMS."
-                  "Did you set your Twilio account tokens and specify a PASSWORDLESS_MOBILE_NOREPLY_NUMBER?")
+        logger.debug(
+            "Couldn't send SMS."
+            "Did you set your Twilio account tokens "
+            "and specify a PASSWORDLESS_MOBILE_NOREPLY_NUMBER?"
+        )
     except Exception as e:
-        logger.debug("Failed to send token SMS to user: {}. "
-                  "Possibly no mobile number on user object or the twilio package isn't set up yet. "
-                  "Number entered was {}".format(user.id, getattr(user, api_settings.PASSWORDLESS_USER_MOBILE_FIELD_NAME)))
+        logger.debug(
+            f"Failed to send token SMS to user: {user.id}. "
+            f"Possibly no mobile number on user object "
+            f"or the twilio package isn't set up yet. "
+            f"Number entered was: "
+            f"{getattr(user, api_settings.PASSWORDLESS_USER_MOBILE_FIELD_NAME)}"
+        )
         logger.debug(e)
         return False
 

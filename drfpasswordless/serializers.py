@@ -11,13 +11,14 @@ from drfpasswordless.utils import verify_user_alias, validate_token_age
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
+TOKEN_LENGTH = api_settings.PASSWORDLESS_CALLBACK_TOKEN_LENGTH
 
 
 class TokenField(serializers.CharField):
     default_error_messages = {
-        'required': _('Invalid Token'),
-        'invalid': _('Invalid Token'),
-        'blank': _('Invalid Token'),
+        'required': _('Token required'),
+        'invalid': _('Invalid token'),
+        'blank': _('Blank token'),
         'max_length': _('Tokens are {max_length} digits long.'),
         'min_length': _('Tokens are {min_length} digits long.')
     }
@@ -62,7 +63,8 @@ class AbstractBaseAliasAuthenticationSerializer(serializers.Serializer):
 
             if user:
                 if not user.is_active:
-                    # If valid, return attrs so we can create a token in our logic controller
+                    # If valid, return attrs,
+                    # so we can create a token in our logic controller.
                     msg = _('User account is disabled.')
                     raise serializers.ValidationError(msg)
             else:
@@ -136,7 +138,8 @@ class AbstractBaseAliasVerificationSerializer(serializers.Serializer):
                 user = request.user
                 if user:
                     if not user.is_active:
-                        # If valid, return attrs so we can create a token in our logic controller
+                        # If valid, return attrs,
+                        # so we can create a token in our logic controller
                         msg = _('User account is disabled.')
 
                     else:
@@ -145,7 +148,9 @@ class AbstractBaseAliasVerificationSerializer(serializers.Serializer):
                             attrs['user'] = user
                             return attrs
                         else:
-                            msg = _('This user doesn\'t have an %s.' % self.alias_field_name)
+                            msg = _(
+                                'This user doesn\'t have an %s.' % self.alias_field_name
+                            )
             raise serializers.ValidationError(msg)
         else:
             msg = _('Missing %s.') % self.alias_type
@@ -198,9 +203,18 @@ class AbstractBaseCallbackTokenSerializer(serializers.Serializer):
                                  message="Mobile number must be entered in the format:"
                                          " '+999999999'. Up to 15 digits allowed.")
 
-    email = serializers.EmailField(required=False)  # Needs to be required=false to require both.
-    mobile = serializers.CharField(required=False, validators=[phone_regex], max_length=17)
-    token = TokenField(min_length=6, max_length=6, validators=[token_age_validator])
+    # Needs to be required=false to require both.
+    email = serializers.EmailField(required=False)
+    mobile = serializers.CharField(
+        required=False,
+        validators=[phone_regex],
+        max_length=17
+    )
+    token = TokenField(
+        min_length=TOKEN_LENGTH,
+        max_length=TOKEN_LENGTH,
+        validators=[token_age_validator]
+    )
 
     def validate_alias(self, attrs):
         email = attrs.get('email', None)
@@ -228,6 +242,7 @@ class CallbackTokenAuthSerializer(AbstractBaseCallbackTokenSerializer):
             alias_type, alias = self.validate_alias(attrs)
             callback_token = attrs.get('token', None)
             user = User.objects.get(**{alias_type+'__iexact': alias})
+
             # TODO: Try to choose valid token, before creating fake one
             if api_settings.PASSWORDLESS_TEST_MODE:
                 token = CallbackToken(**{
@@ -297,6 +312,7 @@ class CallbackTokenVerificationSerializer(AbstractBaseCallbackTokenSerializer):
             user_id = self.context.get("user_id")
             user = User.objects.get(**{'id': user_id, alias_type+'__iexact': alias})
             callback_token = attrs.get('token', None)
+
             # TODO: Try to choose valid token, before creating fake one
             if api_settings.PASSWORDLESS_TEST_MODE:
                 token = CallbackToken(**{

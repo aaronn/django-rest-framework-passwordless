@@ -45,6 +45,7 @@ nosetests.xml
 coverage.xml
 *.cover
 .hypothesis/
+.pytest_cache
 
 # Translations
 *.mo
@@ -126,3 +127,6 @@ local/
 
 !.gitignore
 !.travis.yml
+
+# Dockerfiles for local migration testing
+docker-compose.yml
