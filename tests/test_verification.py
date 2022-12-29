@@ -36,12 +36,15 @@ class AliasEmailVerificationTests(APITestCase):
         self.assertEqual(getattr(user, self.email_verified_field_name), False)
 
         # Verify a token exists for the user, sign in and check verified again
-        callback = CallbackToken.objects.filter(user=user, type=CallbackToken.TOKEN_TYPE_AUTH, is_active=True).first()
+        callback = CallbackToken.objects.filter(user=user,
+                                                type=CallbackToken.TOKEN_TYPE_AUTH,
+                                                is_active=True).first()
         callback_data = {'email': email, 'token': callback.key}
         callback_response = self.client.post(self.callback_url, callback_data)
         self.assertEqual(callback_response.status_code, status.HTTP_200_OK)
 
-        # Verify we got the token, then check and see that email_verified is now verified
+        # Verify we got the token,
+        # then check and see that email_verified is now verified
         token = callback_response.data['token']
         self.assertEqual(token, Token.objects.get(user=user).key)
 
@@ -67,9 +70,15 @@ class AliasEmailVerificationTests(APITestCase):
         self.assertEqual(getattr(user, self.email_verified_field_name), False)
 
         # Post callback token back.
-        verify_token = CallbackToken.objects.filter(user=user, type=CallbackToken.TOKEN_TYPE_VERIFY, is_active=True).first()
+        verify_token = CallbackToken.objects.filter(
+            user=user,
+            type=CallbackToken.TOKEN_TYPE_VERIFY,
+            is_active=True
+        ).first()
         self.assertNotEqual(verify_token, None)
-        verify_callback_response = self.client.post(self.callback_verify, {'email': email2, 'token': verify_token.key})
+        verify_callback_response = self.client.post(self.callback_verify,
+                                                    {'email': email2,
+                                                     'token': verify_token.key})
         self.assertEqual(verify_callback_response.status_code, status.HTTP_200_OK)
 
         # Refresh User
@@ -80,8 +89,10 @@ class AliasEmailVerificationTests(APITestCase):
 
     def tearDown(self):
         api_settings.PASSWORDLESS_AUTH_TYPES = DEFAULTS['PASSWORDLESS_AUTH_TYPES']
-        api_settings.PASSWORDLESS_EMAIL_NOREPLY_ADDRESS = DEFAULTS['PASSWORDLESS_EMAIL_NOREPLY_ADDRESS']
-        api_settings.PASSWORDLESS_USER_MARK_EMAIL_VERIFIED = DEFAULTS['PASSWORDLESS_USER_MARK_MOBILE_VERIFIED']
+        api_settings.PASSWORDLESS_EMAIL_NOREPLY_ADDRESS = DEFAULTS[
+            'PASSWORDLESS_EMAIL_NOREPLY_ADDRESS']
+        api_settings.PASSWORDLESS_USER_MARK_EMAIL_VERIFIED = DEFAULTS[
+            'PASSWORDLESS_USER_MARK_MOBILE_VERIFIED']
 
 
 class AliasMobileVerificationTests(APITestCase):
@@ -112,12 +123,15 @@ class AliasMobileVerificationTests(APITestCase):
         self.assertEqual(getattr(user, self.mobile_verified_field_name), False)
 
         # Verify a token exists for the user, sign in and check verified again
-        callback = CallbackToken.objects.filter(user=user, type=CallbackToken.TOKEN_TYPE_AUTH, is_active=True).first()
+        callback = CallbackToken.objects.filter(user=user,
+                                                type=CallbackToken.TOKEN_TYPE_AUTH,
+                                                is_active=True).first()
         callback_data = {'mobile': mobile, 'token': callback.key}
         callback_response = self.client.post(self.callback_url, callback_data)
         self.assertEqual(callback_response.status_code, status.HTTP_200_OK)
 
-        # Verify we got the token, then check and see that email_verified is now verified
+        # Verify we got the token,
+        # then check and see that email_verified is now verified
         token = callback_response.data['token']
         self.assertEqual(token, Token.objects.get(user=user).key)
 
@@ -143,9 +157,15 @@ class AliasMobileVerificationTests(APITestCase):
         self.assertEqual(getattr(user, self.mobile_verified_field_name), False)
 
         # Post callback token back.
-        verify_token = CallbackToken.objects.filter(user=user, type=CallbackToken.TOKEN_TYPE_VERIFY, is_active=True).first()
+        verify_token = CallbackToken.objects.filter(
+            user=user,
+            type=CallbackToken.TOKEN_TYPE_VERIFY,
+            is_active=True
+        ).first()
         self.assertNotEqual(verify_token, None)
-        verify_callback_response = self.client.post(self.callback_verify, {'mobile': mobile2, 'token': verify_token.key})
+        verify_callback_response = self.client.post(self.callback_verify,
+                                                    {'mobile': mobile2,
+                                                     'token': verify_token.key})
         self.assertEqual(verify_callback_response.status_code, status.HTTP_200_OK)
 
         # Refresh User
@@ -155,7 +175,10 @@ class AliasMobileVerificationTests(APITestCase):
         self.assertEqual(getattr(user, self.mobile_verified_field_name), True)
 
     def tearDown(self):
-        api_settings.PASSWORDLESS_TEST_SUPPRESSION = DEFAULTS['PASSWORDLESS_TEST_SUPPRESSION']
+        api_settings.PASSWORDLESS_TEST_SUPPRESSION = DEFAULTS[
+            'PASSWORDLESS_TEST_SUPPRESSION']
         api_settings.PASSWORDLESS_AUTH_TYPES = DEFAULTS['PASSWORDLESS_AUTH_TYPES']
-        api_settings.PASSWORDLESS_MOBILE_NOREPLY_ADDRESS = DEFAULTS['PASSWORDLESS_MOBILE_NOREPLY_NUMBER']
-        api_settings.PASSWORDLESS_USER_MARK_MOBILE_VERIFIED = DEFAULTS['PASSWORDLESS_USER_MARK_MOBILE_VERIFIED']
+        api_settings.PASSWORDLESS_MOBILE_NOREPLY_ADDRESS = DEFAULTS[
+            'PASSWORDLESS_MOBILE_NOREPLY_NUMBER']
+        api_settings.PASSWORDLESS_USER_MARK_MOBILE_VERIFIED = DEFAULTS[
+            'PASSWORDLESS_USER_MARK_MOBILE_VERIFIED']

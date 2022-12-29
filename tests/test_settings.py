@@ -50,7 +50,8 @@ class AuthTypeTests(APITestCase):
     def test_mobile_sender_required(self):
         """
         Check to make sure user has a noreply mobile address is set.
-        Even if you have suppression on, you must provide some kind of sender number if mobile is selected.
+        Even if you have suppression on,
+        you must provide some kind of sender number if mobile is selected.
         """
         api_settings.PASSWORDLESS_AUTH_TYPES = ['MOBILE']
         mobile_response = self.client.post(self.mobile_url, self.mobile_data)
@@ -78,10 +79,13 @@ class AuthTypeTests(APITestCase):
 
     def tearDown(self):
         api_settings.PASSWORDLESS_AUTH_TYPES = DEFAULTS['PASSWORDLESS_AUTH_TYPES']
-        api_settings.PASSWORDLESS_EMAIL_NOREPLY_ADDRESS = DEFAULTS['PASSWORDLESS_EMAIL_NOREPLY_ADDRESS']
-        api_settings.PASSWORDLESS_MOBILE_NOREPLY_NUMBER = DEFAULTS['PASSWORDLESS_MOBILE_NOREPLY_NUMBER']
+        api_settings.PASSWORDLESS_EMAIL_NOREPLY_ADDRESS = DEFAULTS[
+            'PASSWORDLESS_EMAIL_NOREPLY_ADDRESS']
+        api_settings.PASSWORDLESS_MOBILE_NOREPLY_NUMBER = DEFAULTS[
+            'PASSWORDLESS_MOBILE_NOREPLY_NUMBER']
 
-        api_settings.PASSWORDLESS_TEST_SUPPRESSION = DEFAULTS['PASSWORDLESS_TEST_SUPPRESSION']
+        api_settings.PASSWORDLESS_TEST_SUPPRESSION = DEFAULTS[
+            'PASSWORDLESS_TEST_SUPPRESSION']
 
 
 class AliasEmailVerificationTests(APITestCase):
@@ -113,7 +117,8 @@ class AliasEmailVerificationTests(APITestCase):
         callback_response = self.client.post(self.callback_url, callback_data)
         self.assertEqual(callback_response.status_code, status.HTTP_200_OK)
 
-        # Verify we got the token, then check and see that email_verified is now verified
+        # Verify we got the token,
+        # then check and see that email_verified is now verified
         token = callback_response.data['token']
         self.assertEqual(token, Token.objects.get(user=user).key)
 
@@ -129,8 +134,10 @@ class AliasEmailVerificationTests(APITestCase):
 
     def tearDown(self):
         api_settings.PASSWORDLESS_AUTH_TYPES = DEFAULTS['PASSWORDLESS_AUTH_TYPES']
-        api_settings.PASSWORDLESS_EMAIL_NOREPLY_ADDRESS = DEFAULTS['PASSWORDLESS_EMAIL_NOREPLY_ADDRESS']
-        api_settings.PASSWORDLESS_USER_MARK_EMAIL_VERIFIED = DEFAULTS['PASSWORDLESS_USER_MARK_MOBILE_VERIFIED']
+        api_settings.PASSWORDLESS_EMAIL_NOREPLY_ADDRESS = DEFAULTS[
+            'PASSWORDLESS_EMAIL_NOREPLY_ADDRESS']
+        api_settings.PASSWORDLESS_USER_MARK_EMAIL_VERIFIED = DEFAULTS[
+            'PASSWORDLESS_USER_MARK_MOBILE_VERIFIED']
 
 
 class AliasMobileVerificationTests(APITestCase):
@@ -163,7 +170,8 @@ class AliasMobileVerificationTests(APITestCase):
         callback_response = self.client.post(self.callback_url, callback_data)
         self.assertEqual(callback_response.status_code, status.HTTP_200_OK)
 
-        # Verify we got the token, then check and see that email_verified is now verified
+        # Verify we got the token,
+        # then check and see that email_verified is now verified
         token = callback_response.data['token']
         self.assertEqual(token, Token.objects.get(user=user).key)
 
@@ -178,10 +186,13 @@ class AliasMobileVerificationTests(APITestCase):
         self.assertEqual(getattr(user, self.mobile_verified_field_name), False)
 
     def tearDown(self):
-        api_settings.PASSWORDLESS_TEST_SUPPRESSION = DEFAULTS['PASSWORDLESS_TEST_SUPPRESSION']
+        api_settings.PASSWORDLESS_TEST_SUPPRESSION = DEFAULTS[
+            'PASSWORDLESS_TEST_SUPPRESSION']
         api_settings.PASSWORDLESS_AUTH_TYPES = DEFAULTS['PASSWORDLESS_AUTH_TYPES']
-        api_settings.PASSWORDLESS_MOBILE_NOREPLY_ADDRESS = DEFAULTS['PASSWORDLESS_EMAIL_NOREPLY_ADDRESS']
-        api_settings.PASSWORDLESS_USER_MARK_MOBILE_VERIFIED = DEFAULTS['PASSWORDLESS_USER_MARK_MOBILE_VERIFIED']
+        api_settings.PASSWORDLESS_MOBILE_NOREPLY_ADDRESS = DEFAULTS[
+            'PASSWORDLESS_EMAIL_NOREPLY_ADDRESS']
+        api_settings.PASSWORDLESS_USER_MARK_MOBILE_VERIFIED = DEFAULTS[
+            'PASSWORDLESS_USER_MARK_MOBILE_VERIFIED']
 
 # TODO: class CustomizableTokenLengthTests(APITestCase):
 

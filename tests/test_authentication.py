@@ -264,7 +264,7 @@ class MobileSignUpCallbackTokenTests(APITestCase):
 
 def dummy_token_creator(user):
     token = Token.objects.create(key="dummy", user=user)
-    return (token, True)
+    return token, True
 
 
 class OverrideTokenCreationTests(APITestCase):
@@ -283,7 +283,10 @@ class OverrideTokenCreationTests(APITestCase):
         self.user = User.objects.create(**{self.email_field_name: self.email})
 
     def test_token_creation_gets_overridden(self):
-        """Ensure that if we change the token creation function, the overridden one gets called"""
+        """
+        Ensure that if we change the token creation function,
+        the overridden one gets called
+        """
         data = {'email': self.email}
         response = self.client.post(self.url, data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -424,7 +427,6 @@ class TestModeTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # Token sent to alias
-        # callback_token = CallbackToken.objects.filter(user=self.user, is_active=True).first()
         challenge_data = {'mobile': self.mobile, 'token': '111111'}
 
         # Try to auth with the callback token
