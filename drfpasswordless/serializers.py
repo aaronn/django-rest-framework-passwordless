@@ -193,6 +193,8 @@ def token_age_validator(value):
     Makes sure a token is within the proper expiration datetime window.
     """
     if api_settings.PASSWORDLESS_TEST_MODE:
+        if int(value) in api_settings.PASSWORDLESS_TEST_CODE_INCORRECT:
+            return False
         return True
     valid_token = validate_token_age(value)
     if not valid_token:
@@ -249,8 +251,10 @@ class CallbackTokenAuthSerializer(AbstractBaseCallbackTokenSerializer):
             callback_token = attrs.get('token', None)
             user = User.objects.get(**{alias_type + '__iexact': alias})
 
-            # TODO: Try to choose valid token, before creating fake one
             if api_settings.PASSWORDLESS_TEST_MODE:
+                if int(callback_token) in api_settings.PASSWORDLESS_TEST_CODE_INCORRECT:
+                    raise serializers.ValidationError("Incorrect token from settings")
+
                 token = CallbackToken(**{
                     'user': user,
                     'key': callback_token,
@@ -321,8 +325,10 @@ class CallbackTokenVerificationSerializer(AbstractBaseCallbackTokenSerializer):
             user = User.objects.get(**{'id': user_id, alias_type + '__iexact': alias})
             callback_token = attrs.get('token', None)
 
-            # TODO: Try to choose valid token, before creating fake one
             if api_settings.PASSWORDLESS_TEST_MODE:
+                if int(callback_token) in api_settings.PASSWORDLESS_TEST_CODE_INCORRECT:
+                    raise serializers.ValidationError("Incorrect token from settings")
+
                 token = CallbackToken(**{
                     'user': user,
                     'key': callback_token,

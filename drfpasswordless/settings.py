@@ -94,7 +94,7 @@ DEFAULTS = {
     # Testing mode (every token applicable)
     'PASSWORDLESS_TEST_MODE': False,
 
-    # TODO: incorrect codes for the test mode
+    # List with incorrect codes (integer, please) for the test mode.
     'PASSWORDLESS_TEST_CODE_INCORRECT': [],
 
     # Configurable token length.
