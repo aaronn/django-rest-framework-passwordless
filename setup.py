@@ -20,7 +20,7 @@ URL = 'https://github.com/gstr169/drf-passwordless/'
 EMAIL = 'necronomicum169@gmail.com'
 AUTHOR = 'Original: Aaron N. Updated by: Dmitry F.'
 REQUIRES_PYTHON = '>=3'
-VERSION = '1.0.4'
+VERSION = '1.0.5'
 
 # What packages are required for this module to be executed?
 REQUIRED = [
@@ -81,7 +81,7 @@ class UploadCommand(Command):
         self.status('Pushing git tags…')
         os.system('git tag v{0}'.format(about['__version__']))
         os.system('git push --tags')
-        
+
         sys.exit()
 
 # Where the magic happens:
