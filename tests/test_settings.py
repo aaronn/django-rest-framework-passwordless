@@ -182,3 +182,7 @@ class AliasMobileVerificationTests(APITestCase):
         api_settings.PASSWORDLESS_AUTH_TYPES = DEFAULTS['PASSWORDLESS_AUTH_TYPES']
         api_settings.PASSWORDLESS_MOBILE_NOREPLY_ADDRESS = DEFAULTS['PASSWORDLESS_EMAIL_NOREPLY_ADDRESS']
         api_settings.PASSWORDLESS_USER_MARK_MOBILE_VERIFIED = DEFAULTS['PASSWORDLESS_USER_MARK_MOBILE_VERIFIED']
+
+# TODO: class CustomizableTokenLengthTests(APITestCase):
+
+# TODO: class IncorrectTestCodeTests(APITestCase):
