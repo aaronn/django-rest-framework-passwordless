@@ -49,7 +49,9 @@ class AbstractBaseAliasAuthenticationSerializer(serializers.Serializer):
             if api_settings.PASSWORDLESS_REGISTER_NEW_USERS is True:
                 # If new aliases should register new users.
                 try:
-                    user = User.objects.get(**{self.alias_field_name+'__iexact': alias})
+                    user = User.objects.get(
+                        **{self.alias_field_name + '__iexact': alias}
+                    )
                 except User.DoesNotExist:
                     user = User.objects.create(**{self.alias_field_name: alias})
                     user.set_unusable_password()
@@ -57,7 +59,9 @@ class AbstractBaseAliasAuthenticationSerializer(serializers.Serializer):
             else:
                 # If new aliases should not register new users.
                 try:
-                    user = User.objects.get(**{self.alias_field_name+'__iexact': alias})
+                    user = User.objects.get(
+                        **{self.alias_field_name + '__iexact': alias}
+                    )
                 except User.DoesNotExist:
                     user = None
 
@@ -115,6 +119,7 @@ class AbstractBaseAliasVerificationSerializer(serializers.Serializer):
     Abstract class that returns a callback token based on the field given
     Returns a token if valid, None or a message if not.
     """
+
     @property
     def alias_type(self):
         # The alias type, either email or mobile
@@ -175,6 +180,7 @@ class MobileVerificationSerializer(AbstractBaseAliasVerificationSerializer):
     @property
     def alias_field_name(self):
         return api_settings.PASSWORDLESS_USER_MOBILE_FIELD_NAME
+
 
 """
 Callback Token
@@ -241,7 +247,7 @@ class CallbackTokenAuthSerializer(AbstractBaseCallbackTokenSerializer):
         try:
             alias_type, alias = self.validate_alias(attrs)
             callback_token = attrs.get('token', None)
-            user = User.objects.get(**{alias_type+'__iexact': alias})
+            user = User.objects.get(**{alias_type + '__iexact': alias})
 
             # TODO: Try to choose valid token, before creating fake one
             if api_settings.PASSWORDLESS_TEST_MODE:
@@ -273,8 +279,10 @@ class CallbackTokenAuthSerializer(AbstractBaseCallbackTokenSerializer):
                     msg = _('User account is disabled.')
                     raise serializers.ValidationError(msg)
 
-                if api_settings.PASSWORDLESS_USER_MARK_EMAIL_VERIFIED \
-                        or api_settings.PASSWORDLESS_USER_MARK_MOBILE_VERIFIED:
+                if (
+                    api_settings.PASSWORDLESS_USER_MARK_EMAIL_VERIFIED or
+                    api_settings.PASSWORDLESS_USER_MARK_MOBILE_VERIFIED
+                ):
                     # Mark this alias as verified
                     user = User.objects.get(pk=token.user.pk)
                     success = verify_user_alias(user, token)
@@ -310,7 +318,7 @@ class CallbackTokenVerificationSerializer(AbstractBaseCallbackTokenSerializer):
         try:
             alias_type, alias = self.validate_alias(attrs)
             user_id = self.context.get("user_id")
-            user = User.objects.get(**{'id': user_id, alias_type+'__iexact': alias})
+            user = User.objects.get(**{'id': user_id, alias_type + '__iexact': alias})
             callback_token = attrs.get('token', None)
 
             # TODO: Try to choose valid token, before creating fake one
@@ -346,7 +354,8 @@ class CallbackTokenVerificationSerializer(AbstractBaseCallbackTokenSerializer):
                 return attrs
             else:
                 msg = _('This token is invalid. Try again later.')
-                logger.debug("drfpasswordless: User token mismatch when verifying alias.")
+                logger.debug(
+                    "drfpasswordless: User token mismatch when verifying alias.")
 
         except CallbackToken.DoesNotExist:
             msg = _('We could not verify this alias.')
@@ -375,5 +384,3 @@ class TokenResponseSerializer(serializers.Serializer):
     """
     token = serializers.CharField(source='key')
     key = serializers.CharField(write_only=True)
-
-

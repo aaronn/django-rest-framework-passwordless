@@ -30,7 +30,8 @@ class EmailSignUpCallbackTokenTests(APITestCase):
         data = {'email': email}
 
         # Verify user doesn't exist yet
-        user = User.objects.filter(**{self.email_field_name: 'aaron@example.com'}).first()
+        user = User.objects.filter(
+            **{self.email_field_name: 'aaron@example.com'}).first()
         # Make sure our user isn't None, meaning the user was created.
         self.assertEqual(user, None)
 
@@ -41,13 +42,15 @@ class EmailSignUpCallbackTokenTests(APITestCase):
         self.assertNotEqual(user, None)
 
         # Verify a token exists for the user
-        self.assertEqual(CallbackToken.objects.filter(user=user, is_active=True).exists(), 1)
+        self.assertEqual(
+            CallbackToken.objects.filter(user=user, is_active=True).exists(), 1)
 
     def test_email_signup_disabled(self):
         api_settings.PASSWORDLESS_REGISTER_NEW_USERS = False
 
         # Verify user doesn't exist yet
-        user = User.objects.filter(**{self.email_field_name: 'aaron@example.com'}).first()
+        user = User.objects.filter(
+            **{self.email_field_name: 'aaron@example.com'}).first()
         # Make sure our user isn't None, meaning the user was created.
         self.assertEqual(user, None)
 
@@ -58,15 +61,19 @@ class EmailSignUpCallbackTokenTests(APITestCase):
         response = self.client.post(self.url, data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-        user = User.objects.filter(**{self.email_field_name: 'aaron@example.com'}).first()
+        user = User.objects.filter(
+            **{self.email_field_name: 'aaron@example.com'}).first()
         self.assertEqual(user, None)
 
         # Verify no token was created for the user
-        self.assertEqual(CallbackToken.objects.filter(user=user, is_active=True).exists(), 0)
+        self.assertEqual(
+            CallbackToken.objects.filter(user=user, is_active=True).exists(), 0)
 
     def tearDown(self):
-        api_settings.PASSWORDLESS_EMAIL_NOREPLY_ADDRESS = DEFAULTS['PASSWORDLESS_EMAIL_NOREPLY_ADDRESS']
-        api_settings.PASSWORDLESS_REGISTER_NEW_USERS = DEFAULTS['PASSWORDLESS_REGISTER_NEW_USERS']
+        api_settings.PASSWORDLESS_EMAIL_NOREPLY_ADDRESS = DEFAULTS[
+            'PASSWORDLESS_EMAIL_NOREPLY_ADDRESS']
+        api_settings.PASSWORDLESS_REGISTER_NEW_USERS = DEFAULTS[
+            'PASSWORDLESS_REGISTER_NEW_USERS']
 
 
 class EmailLoginCallbackTokenTests(APITestCase):
@@ -88,7 +95,8 @@ class EmailLoginCallbackTokenTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # Token sent to alias
-        challenge_data = {'email': self.email, 'token': '123456'}  # Send an arbitrary token instead
+        challenge_data = {'email': self.email,
+                          'token': '123456'}  # Send an arbitrary token instead
 
         # Try to auth with the callback token
         challenge_response = self.client.post(self.challenge_url, challenge_data)
@@ -100,7 +108,8 @@ class EmailLoginCallbackTokenTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # Token sent to alias
-        callback_token = CallbackToken.objects.filter(user=self.user, is_active=True).first()
+        callback_token = CallbackToken.objects.filter(user=self.user,
+                                                      is_active=True).first()
         challenge_data = {'token': callback_token}  # Missing Alias
 
         # Try to auth with the callback token
@@ -113,8 +122,10 @@ class EmailLoginCallbackTokenTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # Token sent to alias
-        callback_token = CallbackToken.objects.filter(user=self.user, is_active=True).first()
-        challenge_data = {'email': 'abcde@example.com', 'token': callback_token}  # Bad Alias
+        callback_token = CallbackToken.objects.filter(user=self.user,
+                                                      is_active=True).first()
+        challenge_data = {'email': 'abcde@example.com',
+                          'token': callback_token}  # Bad Alias
 
         # Try to auth with the callback token
         challenge_response = self.client.post(self.challenge_url, challenge_data)
@@ -126,23 +137,27 @@ class EmailLoginCallbackTokenTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # Token sent to alias
-        callback_token = CallbackToken.objects.filter(user=self.user, is_active=True).first()
-        challenge_data = {'email': self.email, 'token': callback_token}
+        callback_token = CallbackToken.objects.filter(user=self.user,
+                                                      is_active=True).first()
+        challenge_data = {'email': self.email, 'token': callback_token.key}
 
         data = {'email': self.email}
         response = self.client.post(self.url, data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # Second token sent to alias
-        second_callback_token = CallbackToken.objects.filter(user=self.user, is_active=True).first()
-        second_challenge_data = {'email': self.email, 'token': second_callback_token}
+        second_callback_token = CallbackToken.objects.filter(user=self.user,
+                                                             is_active=True).first()
+        second_challenge_data = {'email': self.email,
+                                 'token': second_callback_token.key}
 
         # Try to auth with the old callback token
         challenge_response = self.client.post(self.challenge_url, challenge_data)
         self.assertEqual(challenge_response.status_code, status.HTTP_400_BAD_REQUEST)
 
         # Try to auth with the new callback token
-        second_challenge_response = self.client.post(self.challenge_url, second_challenge_data)
+        second_challenge_response = self.client.post(self.challenge_url,
+                                                     second_challenge_data)
         self.assertEqual(second_challenge_response.status_code, status.HTTP_200_OK)
 
         # Verify Auth Token
@@ -155,8 +170,9 @@ class EmailLoginCallbackTokenTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # Token sent to alias
-        callback_token = CallbackToken.objects.filter(user=self.user, is_active=True).first()
-        challenge_data = {'email': self.email, 'token': callback_token}
+        callback_token = CallbackToken.objects.filter(user=self.user,
+                                                      is_active=True).first()
+        challenge_data = {'email': self.email, 'token': callback_token.key}
 
         # Try to auth with the callback token
         challenge_response = self.client.post(self.challenge_url, challenge_data)
@@ -168,7 +184,8 @@ class EmailLoginCallbackTokenTests(APITestCase):
 
     def tearDown(self):
         api_settings.PASSWORDLESS_AUTH_TYPES = DEFAULTS['PASSWORDLESS_AUTH_TYPES']
-        api_settings.PASSWORDLESS_EMAIL_NOREPLY_ADDRESS = DEFAULTS['PASSWORDLESS_EMAIL_NOREPLY_ADDRESS']
+        api_settings.PASSWORDLESS_EMAIL_NOREPLY_ADDRESS = DEFAULTS[
+            'PASSWORDLESS_EMAIL_NOREPLY_ADDRESS']
         self.user.delete()
 
 
@@ -210,7 +227,8 @@ class MobileSignUpCallbackTokenTests(APITestCase):
         self.assertNotEqual(user, None)
 
         # Verify a token exists for the user
-        self.assertEqual(CallbackToken.objects.filter(user=user, is_active=True).exists(), 1)
+        self.assertEqual(
+            CallbackToken.objects.filter(user=user, is_active=True).exists(), 1)
 
     def test_mobile_signup_disabled(self):
         api_settings.PASSWORDLESS_REGISTER_NEW_USERS = False
@@ -231,13 +249,17 @@ class MobileSignUpCallbackTokenTests(APITestCase):
         self.assertEqual(user, None)
 
         # Verify no token was created for the user
-        self.assertEqual(CallbackToken.objects.filter(user=user, is_active=True).exists(), 0)
+        self.assertEqual(
+            CallbackToken.objects.filter(user=user, is_active=True).exists(), 0)
 
     def tearDown(self):
-        api_settings.PASSWORDLESS_TEST_SUPPRESSION = DEFAULTS['PASSWORDLESS_TEST_SUPPRESSION']
+        api_settings.PASSWORDLESS_TEST_SUPPRESSION = DEFAULTS[
+            'PASSWORDLESS_TEST_SUPPRESSION']
         api_settings.PASSWORDLESS_AUTH_TYPES = DEFAULTS['PASSWORDLESS_AUTH_TYPES']
-        api_settings.PASSWORDLESS_REGISTER_NEW_USERS = DEFAULTS['PASSWORDLESS_REGISTER_NEW_USERS']
-        api_settings.PASSWORDLESS_MOBILE_NOREPLY_NUMBER = DEFAULTS['PASSWORDLESS_MOBILE_NOREPLY_NUMBER']
+        api_settings.PASSWORDLESS_REGISTER_NEW_USERS = DEFAULTS[
+            'PASSWORDLESS_REGISTER_NEW_USERS']
+        api_settings.PASSWORDLESS_MOBILE_NOREPLY_NUMBER = DEFAULTS[
+            'PASSWORDLESS_MOBILE_NOREPLY_NUMBER']
 
 
 def dummy_token_creator(user):
@@ -267,8 +289,9 @@ class OverrideTokenCreationTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # Token sent to alias
-        callback_token = CallbackToken.objects.filter(user=self.user, is_active=True).first()
-        challenge_data = {'email': self.email, 'token': callback_token}
+        callback_token = CallbackToken.objects.filter(user=self.user,
+                                                      is_active=True).first()
+        challenge_data = {'email': self.email, 'token': callback_token.key}
 
         # Try to auth with the callback token
         challenge_response = self.client.post(self.challenge_url, challenge_data)
@@ -280,9 +303,11 @@ class OverrideTokenCreationTests(APITestCase):
         self.assertEqual('dummy', Token.objects.filter(key=auth_token).first().key)
 
     def tearDown(self):
-        api_settings.PASSWORDLESS_AUTH_TOKEN_CREATOR = DEFAULTS['PASSWORDLESS_AUTH_TOKEN_CREATOR']
+        api_settings.PASSWORDLESS_AUTH_TOKEN_CREATOR = DEFAULTS[
+            'PASSWORDLESS_AUTH_TOKEN_CREATOR']
         api_settings.PASSWORDLESS_AUTH_TYPES = DEFAULTS['PASSWORDLESS_AUTH_TYPES']
-        api_settings.PASSWORDLESS_EMAIL_NOREPLY_ADDRESS = DEFAULTS['PASSWORDLESS_EMAIL_NOREPLY_ADDRESS']
+        api_settings.PASSWORDLESS_EMAIL_NOREPLY_ADDRESS = DEFAULTS[
+            'PASSWORDLESS_EMAIL_NOREPLY_ADDRESS']
         self.user.delete()
         super().tearDown()
 
@@ -308,7 +333,8 @@ class MobileLoginCallbackTokenTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # Token sent to alias
-        challenge_data = {'mobile': self.mobile, 'token': '123456'}  # Send an arbitrary token instead
+        challenge_data = {'mobile': self.mobile,
+                          'token': '123456'}  # Send an arbitrary token instead
 
         # Try to auth with the callback token
         challenge_response = self.client.post(self.challenge_url, challenge_data)
@@ -320,7 +346,8 @@ class MobileLoginCallbackTokenTests(APITestCase):
         self.assertEqual(first_response.status_code, status.HTTP_200_OK)
 
         # Token sent to alias
-        first_callback_token = CallbackToken.objects.filter(user=self.user, is_active=True).first()
+        first_callback_token = CallbackToken.objects.filter(user=self.user,
+                                                            is_active=True).first()
         first_challenge_data = {'mobile': self.mobile, 'token': first_callback_token}
 
         data = {'mobile': self.mobile}
@@ -328,15 +355,20 @@ class MobileLoginCallbackTokenTests(APITestCase):
         self.assertEqual(second_response.status_code, status.HTTP_200_OK)
 
         # Second token sent to alias
-        second_callback_token = CallbackToken.objects.filter(user=self.user, is_active=True).first()
-        second_challenge_data = {'mobile': self.mobile, 'token': second_callback_token}
+        second_callback_token = CallbackToken.objects.filter(user=self.user,
+                                                             is_active=True).first()
+        second_challenge_data = {
+            'mobile': self.mobile,
+            'token': second_callback_token.key
+        }
 
         # Try to auth with the old callback token
         challenge_response = self.client.post(self.challenge_url, first_challenge_data)
         self.assertEqual(challenge_response.status_code, status.HTTP_400_BAD_REQUEST)
 
         # Try to auth with the new callback token
-        second_challenge_response = self.client.post(self.challenge_url, second_challenge_data)
+        second_challenge_response = self.client.post(self.challenge_url,
+                                                     second_challenge_data)
         self.assertEqual(second_challenge_response.status_code, status.HTTP_200_OK)
 
         # Verify Auth Token
@@ -349,8 +381,9 @@ class MobileLoginCallbackTokenTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # Token sent to alias
-        callback_token = CallbackToken.objects.filter(user=self.user, is_active=True).first()
-        challenge_data = {'mobile': self.mobile, 'token': callback_token}
+        callback_token = CallbackToken.objects.filter(user=self.user,
+                                                      is_active=True).first()
+        challenge_data = {'mobile': self.mobile, 'token': callback_token.key}
 
         # Try to auth with the callback token
         challenge_response = self.client.post(self.challenge_url, challenge_data)
@@ -361,10 +394,13 @@ class MobileLoginCallbackTokenTests(APITestCase):
         self.assertEqual(auth_token, Token.objects.filter(key=auth_token).first().key)
 
     def tearDown(self):
-        api_settings.PASSWORDLESS_TEST_SUPPRESSION = DEFAULTS['PASSWORDLESS_TEST_SUPPRESSION']
+        api_settings.PASSWORDLESS_TEST_SUPPRESSION = DEFAULTS[
+            'PASSWORDLESS_TEST_SUPPRESSION']
         api_settings.PASSWORDLESS_AUTH_TYPES = DEFAULTS['PASSWORDLESS_AUTH_TYPES']
-        api_settings.PASSWORDLESS_MOBILE_NOREPLY_NUMBER = DEFAULTS['PASSWORDLESS_MOBILE_NOREPLY_NUMBER']
+        api_settings.PASSWORDLESS_MOBILE_NOREPLY_NUMBER = DEFAULTS[
+            'PASSWORDLESS_MOBILE_NOREPLY_NUMBER']
         self.user.delete()
+
 
 class TestModeTests(APITestCase):
 
@@ -400,8 +436,10 @@ class TestModeTests(APITestCase):
         self.assertEqual(auth_token, Token.objects.filter(key=auth_token).first().key)
 
     def tearDown(self):
-        api_settings.PASSWORDLESS_TEST_SUPPRESSION = DEFAULTS['PASSWORDLESS_TEST_SUPPRESSION']
+        api_settings.PASSWORDLESS_TEST_SUPPRESSION = DEFAULTS[
+            'PASSWORDLESS_TEST_SUPPRESSION']
         api_settings.PASSWORDLESS_AUTH_TYPES = DEFAULTS['PASSWORDLESS_AUTH_TYPES']
-        api_settings.PASSWORDLESS_MOBILE_NOREPLY_NUMBER = DEFAULTS['PASSWORDLESS_MOBILE_NOREPLY_NUMBER']
+        api_settings.PASSWORDLESS_MOBILE_NOREPLY_NUMBER = DEFAULTS[
+            'PASSWORDLESS_MOBILE_NOREPLY_NUMBER']
         api_settings.PASSWORDLESS_TEST_MODE = DEFAULTS['PASSWORDLESS_TEST_MODE']
         self.user.delete()

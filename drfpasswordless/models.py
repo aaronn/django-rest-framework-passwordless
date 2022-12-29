@@ -64,7 +64,7 @@ class AbstractBaseCallbackToken(models.Model):
         ordering = ['-id']
 
     def __str__(self):
-        return f'User: {self.user}, key: {self.key}'
+        return f'Key: {self.key}'
 
 
 class CallbackToken(AbstractBaseCallbackToken):
@@ -76,7 +76,7 @@ class CallbackToken(AbstractBaseCallbackToken):
     TOKEN_TYPES = ((TOKEN_TYPE_AUTH, 'Auth'), (TOKEN_TYPE_VERIFY, 'Verify'))
 
     # key = models.CharField(default=generate_numeric_token, max_length=6)
-    key = models.CharField(default=generate_numeric_token)
+    key = models.TextField(default=generate_numeric_token)
     type = models.CharField(max_length=20, choices=TOKEN_TYPES)
 
     def save(self, *args, **kwargs):

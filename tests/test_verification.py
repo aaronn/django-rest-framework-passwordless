@@ -1,6 +1,5 @@
 from rest_framework import status
 from rest_framework.authtoken.models import Token
-from django.utils.translation import gettext_lazy as _
 from rest_framework.test import APITestCase
 from django.contrib.auth import get_user_model
 from django.urls import reverse
@@ -38,7 +37,7 @@ class AliasEmailVerificationTests(APITestCase):
 
         # Verify a token exists for the user, sign in and check verified again
         callback = CallbackToken.objects.filter(user=user, type=CallbackToken.TOKEN_TYPE_AUTH, is_active=True).first()
-        callback_data = {'email': email, 'token': callback}
+        callback_data = {'email': email, 'token': callback.key}
         callback_response = self.client.post(self.callback_url, callback_data)
         self.assertEqual(callback_response.status_code, status.HTTP_200_OK)
 
@@ -114,7 +113,7 @@ class AliasMobileVerificationTests(APITestCase):
 
         # Verify a token exists for the user, sign in and check verified again
         callback = CallbackToken.objects.filter(user=user, type=CallbackToken.TOKEN_TYPE_AUTH, is_active=True).first()
-        callback_data = {'mobile': mobile, 'token': callback}
+        callback_data = {'mobile': mobile, 'token': callback.key}
         callback_response = self.client.post(self.callback_url, callback_data)
         self.assertEqual(callback_response.status_code, status.HTTP_200_OK)
 

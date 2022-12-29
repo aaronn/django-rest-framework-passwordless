@@ -97,7 +97,7 @@ DEFAULTS = {
     # TODO: incorrect codes for the test mode
     'PASSWORDLESS_TEST_CODE_INCORRECT': [],
 
-    # TODO: callback tokens length configurable
+    # Configurable token length.
     'PASSWORDLESS_CALLBACK_TOKEN_LENGTH': 6,
 }
 

@@ -246,7 +246,7 @@ def send_sms_with_callback_token(user, mobile_token, **kwargs):
         return False
     except KeyError:
         logger.debug(
-            "Couldn't send SMS."
+            "Couldn't send SMS. "
             "Did you set your Twilio account tokens "
             "and specify a PASSWORDLESS_MOBILE_NOREPLY_NUMBER?"
         )
