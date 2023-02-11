@@ -52,11 +52,16 @@ def pytest_configure():
         PASSWORD_HASHERS=(
             'django.contrib.auth.hashers.MD5PasswordHasher',
         ),
-        AUTH_USER_MODEL='tests.CustomUser',
     )
 
     try:
         import django
+        from django.core.management import call_command
+
         django.setup()
+
+        if settings.DATABASES['default']['NAME'] == ':memory:':
+            call_command('makemigrations', 'tests')
+            call_command('migrate', interactive=True)
     except AttributeError:
         pass

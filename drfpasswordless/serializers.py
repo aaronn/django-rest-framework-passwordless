@@ -34,6 +34,11 @@ class AbstractBaseAliasAuthenticationSerializer(serializers.Serializer):
         # The alias type, either email or mobile
         raise NotImplementedError
 
+    @property
+    def user_field(self):
+        # The user field, either email or mobile
+        raise NotImplementedError
+
     def validate(self, attrs):
         alias = attrs.get(self.alias_type)
 
@@ -44,15 +49,15 @@ class AbstractBaseAliasAuthenticationSerializer(serializers.Serializer):
             if api_settings.PASSWORDLESS_REGISTER_NEW_USERS is True:
                 # If new aliases should register new users.
                 try:
-                    user = User.objects.get(**{self.alias_type+'__iexact': alias})
+                    user = User.objects.get(**{self.user_field+'__iexact': alias})
                 except User.DoesNotExist:
-                    user = User.objects.create(**{self.alias_type: alias})
+                    user = User.objects.create(**{self.user_field: alias})
                     user.set_unusable_password()
                     user.save()
             else:
                 # If new aliases should not register new users.
                 try:
-                    user = User.objects.get(**{self.alias_type+'__iexact': alias})
+                    user = User.objects.get(**{self.user_field+'__iexact': alias})
                 except User.DoesNotExist:
                     user = None
 
@@ -77,6 +82,10 @@ class EmailAuthSerializer(AbstractBaseAliasAuthenticationSerializer):
     def alias_type(self):
         return 'email'
 
+    @property
+    def user_field(self):
+        return api_settings.PASSWORDLESS_USER_EMAIL_FIELD_NAME
+
     email = serializers.EmailField()
 
 
@@ -84,6 +93,10 @@ class MobileAuthSerializer(AbstractBaseAliasAuthenticationSerializer):
     @property
     def alias_type(self):
         return 'mobile'
+
+    @property
+    def user_field(self):
+        return api_settings.PASSWORDLESS_USER_MOBILE_FIELD_NAME
 
     phone_regex = RegexValidator(regex=r'^\+[1-9]\d{1,14}$',
                                  message="Mobile number must be entered in the format:"
