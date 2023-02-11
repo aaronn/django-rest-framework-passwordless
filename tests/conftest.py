@@ -59,9 +59,5 @@ def pytest_configure():
         from django.core.management import call_command
 
         django.setup()
-
-        if settings.DATABASES['default']['NAME'] == ':memory:':
-            call_command('makemigrations', 'tests')
-            call_command('migrate', interactive=True)
     except AttributeError:
         pass
