@@ -57,7 +57,6 @@ def pytest_configure():
 
     try:
         import django
-        from django.core.management import call_command
 
         django.setup()
     except AttributeError:
