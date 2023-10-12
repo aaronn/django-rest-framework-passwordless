@@ -321,8 +321,10 @@ DEFAULTS = {
     'PASSWORDLESS_SMS_CALLBACK': 'drfpasswordless.utils.send_sms_with_callback_token',
 
     # Token Generation Retry Count
-    'PASSWORDLESS_TOKEN_GENERATION_ATTEMPTS': 3
+    'PASSWORDLESS_TOKEN_GENERATION_ATTEMPTS': 3,
 
+    # The length of the token to send in email or sms, maximum 6
+    'PASSWORDLESS_TOKEN_LENGTH': 6
 
 }
 ```
