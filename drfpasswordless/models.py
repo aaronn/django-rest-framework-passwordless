@@ -65,3 +65,8 @@ class CallbackToken(AbstractBaseCallbackToken):
 
     class Meta(AbstractBaseCallbackToken.Meta):
         verbose_name = 'Callback Token'
+
+    def save(self, force_insert=False, force_update=False, using=None,
+             update_fields=None):
+        self.full_clean()
+        super().save(force_insert, force_update, using, update_fields)

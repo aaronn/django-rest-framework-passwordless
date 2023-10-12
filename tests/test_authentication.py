@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase
@@ -5,7 +6,7 @@ from rest_framework.test import APITestCase
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from drfpasswordless.settings import api_settings, DEFAULTS
-from drfpasswordless.utils import CallbackToken
+from drfpasswordless.utils import CallbackToken, create_callback_token_for_user
 
 User = get_user_model()
 
@@ -24,6 +25,12 @@ class EmailSignUpCallbackTokenTests(APITestCase):
 
         response = self.client.post(self.url, data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_email_callback_token_create(self):
+        email = '1234567890' * 23 + '@example.com'
+        user = User.objects.create(email=email)
+        with self.assertRaises(ValidationError):
+            create_callback_token_for_user(user, "EMAIL")
 
     def test_email_signup_success(self):
         email = 'aaron@example.com'
