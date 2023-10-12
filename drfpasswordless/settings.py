@@ -66,6 +66,9 @@ DEFAULTS = {
     # A plaintext verification email message overridden by the html message. Takes one string.
     'PASSWORDLESS_EMAIL_VERIFICATION_PLAINTEXT_MESSAGE': "Enter this verification code: %s",
 
+    # Insert multiple variables into PASSWORDLESS_EMAIL_VERIFICATION_PLAINTEXT_MESSAGE, eg ["kwargs['request'].get_host()", 'user_email', 'email_token.key']
+    'PASSWORDLESS_EMAIL_PLAINTEXT_MESSAGE_ORDERED_CONTEXT' : False,
+
     # The verification email template name.
     'PASSWORDLESS_EMAIL_VERIFICATION_TOKEN_HTML_TEMPLATE_NAME': "passwordless_default_verification_token_email.html",
 
