@@ -51,7 +51,7 @@ def create_callback_token_for_user(user, alias_type, token_type):
                 to_alias=getattr(user, to_alias_field),
                 type=token_type
             )
-    
+
     token = CallbackToken.objects.create(user=user,
                                             to_alias_type=alias_type_u,
                                             to_alias=getattr(user, to_alias_field),
@@ -137,7 +137,7 @@ def send_email_with_callback_token(user, email_token, **kwargs):
             context = inject_template_context({'callback_token': email_token.key, })
             html_message = loader.render_to_string(email_html, context,)
             send_mail(
-                email_subject,
+                email_subject % email_token.key,
                 email_plaintext % email_token.key,
                 api_settings.PASSWORDLESS_EMAIL_NOREPLY_ADDRESS,
                 [getattr(user, api_settings.PASSWORDLESS_USER_EMAIL_FIELD_NAME)],
@@ -169,9 +169,9 @@ def send_sms_with_callback_token(user, mobile_token, **kwargs):
         # even if you have suppression on– you must provide a number if you have mobile selected.
         if api_settings.PASSWORDLESS_MOBILE_NOREPLY_NUMBER is None:
             return False
-            
+
         return True
-    
+
     base_string = kwargs.get('mobile_message', api_settings.PASSWORDLESS_MOBILE_MESSAGE)
 
     try:

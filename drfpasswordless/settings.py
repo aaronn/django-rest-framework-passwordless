@@ -37,7 +37,7 @@ DEFAULTS = {
     'PASSWORDLESS_EMAIL_NOREPLY_ADDRESS': None,
 
     # The email subject
-    'PASSWORDLESS_EMAIL_SUBJECT': "Your Login Token",
+    'PASSWORDLESS_EMAIL_SUBJECT': "Your temporary login token is %s",
 
     # A plaintext email message overridden by the html message. Takes one string.
     'PASSWORDLESS_EMAIL_PLAINTEXT_MESSAGE': "Enter this token to sign in: %s",
